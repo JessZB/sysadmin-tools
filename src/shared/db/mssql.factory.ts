@@ -1,10 +1,11 @@
 import sql from 'mssql';
 import { Terminal } from '../interfaces/terminal.interface';
+import { decrypt } from '../utils/crypto.util';
 
 export const getSqlServerConnection = async (terminal: Terminal) => {
     const config: sql.config = {
         user: terminal.db_user,
-        password: terminal.db_pass,
+        password: decrypt(terminal.db_pass),
         server: terminal.ip_address,
         database: 'msdb', // Siempre msdb para ver jobs
         options: {
