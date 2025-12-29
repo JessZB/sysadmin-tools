@@ -3,7 +3,6 @@ import { getSqlServerConnection } from '../../shared/db/mssql.factory';
 import { Terminal } from '../../shared/interfaces/terminal.interface';
 import { RowDataPacket } from 'mysql2';
 import sql from 'mssql';
-import { getBranches } from '../branches/branches.service';
 
 // 1. Obtener lista simple de cajas para el sidebar
 export const getActiveTerminals = async (branchId?: number) => {

@@ -1,47 +1,54 @@
+import bcrypt from 'bcryptjs';
 import { mainDbPool } from '../../shared/db/main.db';
 import { User } from '../../shared/interfaces/user.interface';
-import { ResultSetHeader, RowDataPacket } from 'mysql2';
-import bcrypt from 'bcryptjs';
 
-// Obtener todos (sin devolver el password hash por seguridad)
-export const getAllUsers = async (): Promise<User[]> => {
-    const [rows] = await mainDbPool.query<RowDataPacket[]>('SELECT id, branch_id, username, role, created_at FROM sys_users');
-    return rows as User[];
+import { RowDataPacket, ResultSetHeader } from 'mysql2';
+// 1. GET ALL (Ahora con JOIN a sucursales)
+export const getAllUsers = async () => {
+    const query = `
+        SELECT 
+            u.id, u.username, u.role, u.branch_id, u.created_at, u.is_active,
+            b.name as branch_name 
+        FROM sys_users u
+        LEFT JOIN sys_branches b ON u.branch_id = b.id
+        ORDER BY u.id DESC
+    `;
+    const [rows] = await mainDbPool.query<RowDataPacket[]>(query);
+    return rows; // Devuelve usuarios con el nombre de su sucursal
 };
 
-// Crear Usuario
-export const createUser = async (userData: User, rawPassword: string) => {
-    // 1. Verificar si existe
-    const [existing] = await mainDbPool.query<RowDataPacket[]>('SELECT id FROM sys_users WHERE username = ?', [userData.username]);
-    if (existing.length > 0) throw new Error('El nombre de usuario ya existe');
+// 2. CREATE (Con Branch y Auditoría)
+export const createUser = async (user: User, pass: string, creatorId: number) => {
+    const hash = await bcrypt.hash(pass, 10);
 
-    // 2. Hash del password
-    const hash = await bcrypt.hash(rawPassword, 10);
+    // Asumimos que si no viene branch_id, es la Matriz (1)
+    const branchId = user.branch_id || 1;
 
-    // 3. Insertar
-    const [result] = await mainDbPool.query<ResultSetHeader>(
-        'INSERT INTO sys_users (branch_id, username, password_hash, role) VALUES (?, ?, ?, ?)',
-        [userData.branch_id, userData.username, hash, userData.role]
+    await mainDbPool.query<ResultSetHeader>(
+        `INSERT INTO sys_users (username, password_hash, role, branch_id, created_by, is_active) 
+         VALUES (?, ?, ?, ?, ?, 1)`,
+        [user.username, hash, user.role, branchId, creatorId]
     );
-    return result.insertId;
 };
 
-// Actualizar Usuario
-export const updateUser = async (id: number, userData: User, newPassword?: string) => {
-    // Si envían password nuevo, lo hasheamos. Si no, solo actualizamos rol/nombre/branch.
-    let query = 'UPDATE sys_users SET branch_id = ?, username = ?, role = ? WHERE id = ?';
-    let params: any[] = [userData.branch_id, userData.username, userData.role, id];
+// 3. UPDATE (Con Branch y Auditoría)
+export const updateUser = async (id: number, user: User, pass: string | undefined, updaterId: number) => {
+    let query = 'UPDATE sys_users SET username=?, role=?, branch_id=?, updated_by=?';
+    const params: any[] = [user.username, user.role, user.branch_id, updaterId];
 
-    if (newPassword && newPassword.trim() !== '') {
-        const hash = await bcrypt.hash(newPassword, 10);
-        query = 'UPDATE sys_users SET branch_id = ?, username = ?, role = ?, password_hash = ? WHERE id = ?';
-        params = [userData.branch_id, userData.username, userData.role, hash, id];
+    if (pass && pass.trim() !== '') {
+        const hash = await bcrypt.hash(pass, 10);
+        query += ', password_hash=?';
+        params.push(hash);
     }
+
+    query += ' WHERE id=?';
+    params.push(id);
 
     await mainDbPool.query(query, params);
 };
 
-// Eliminar Usuario
+// 4. DELETE (Soft delete o físico, aquí mantenemos físico por ahora)
 export const deleteUser = async (id: number) => {
     await mainDbPool.query('DELETE FROM sys_users WHERE id = ?', [id]);
 };

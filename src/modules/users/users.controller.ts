@@ -1,67 +1,61 @@
 import { Request, Response } from 'express';
 import * as userService from './users.service';
+import { getAllBranches } from '../branches/branches.service';
 
 export const renderUserList = async (req: Request, res: Response) => {
     try {
-        console.log('1. Entrando a renderUserList'); // <--- LOG 1
+        // Obtenemos sucursales para pintarlas en el modal
+        const branches = await getAllBranches();
 
-        const users = await userService.getAllUsers();
-        console.log('2. Usuarios obtenidos de BD:', users.length); // <--- LOG 2
-
-        // Verificamos que user y usersData existan
-        console.log('3. Intentando renderizar vista users/list');
-
+        // La tabla carga datos por AJAX, así que aquí no hace falta traer usuarios, solo la estructura
         res.render('users/list', {
             page: 'users',
             user: res.locals.user,
-            usersData: users,
+            branches: branches, // <--- ENVIAMOS LAS SUCURSALES A LA VISTA
             script: 'users.client.js'
         });
-
     } catch (error) {
-        console.error('ERROR CRÍTICO EN USUARIOS:', error); // <--- LOG DE ERROR
-        res.status(500).send('Error cargando usuarios: ' + error);
+        // Manejo de error
     }
 };
 
-// API: Obtener lista de usuarios en formato JSON para la tabla
+// 2. GET DATA JSON (Usado por la tabla)
 export const getUsersData = async (req: Request, res: Response) => {
     try {
         const users = await userService.getAllUsers();
-        // Bootstrap Table espera un Array directo [{},{}]
         res.json(users);
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
 };
 
+// 3. CREATE
 export const create = async (req: Request, res: Response) => {
     try {
-        // 1. VALIDACIÓN DE ROL: Solo admin puede crear
         const currentUser = res.locals.user;
-        if (currentUser.role !== 'admin') {
-            return res.status(403).json({ success: false, error: 'No tienes permisos para crear usuarios.' });
-        }
+        // Solo admin crea
+        if (currentUser.role !== 'admin') return res.status(403).json({ error: 'Sin permisos' });
 
         const { username, password, role, branch_id } = req.body;
-        await userService.createUser({ username, role, branch_id }, password);
+
+        // Pasamos currentUser.id como creador
+        await userService.createUser({ username, role, branch_id }, password, currentUser.id);
         res.json({ success: true });
     } catch (error: any) {
         res.status(400).json({ success: false, error: error.message });
     }
 };
 
+// 4. UPDATE
 export const update = async (req: Request, res: Response) => {
     try {
-        // 1. VALIDACIÓN DE ROL: Solo admin puede editar
         const currentUser = res.locals.user;
-        if (currentUser.role !== 'admin') {
-            return res.status(403).json({ success: false, error: 'No tienes permisos para editar usuarios.' });
-        }
+        if (currentUser.role !== 'admin') return res.status(403).json({ error: 'Sin permisos' });
 
         const { id } = req.params;
         const { username, password, role, branch_id } = req.body;
-        await userService.updateUser(Number(id), { username, role, branch_id }, password);
+
+        await userService.updateUser(Number(id), { username, role, branch_id }, password, currentUser.id);
         res.json({ success: true });
     } catch (error: any) {
         res.status(400).json({ success: false, error: error.message });

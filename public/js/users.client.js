@@ -20,13 +20,12 @@ function actionFormatter(value, row, index) {
     // row contiene el objeto usuario completo (id, username, role...)
     
     // Botón Editar
-    let botones = `
+  let botones = `
         <button class="btn btn-sm btn-outline-primary me-1" 
-            onclick="abrirModalEditar('${row.id}', '${row.username}', '${row.role}')">
+            onclick="abrirModalEditar('${row.id}', '${row.username}', '${row.role}', '${row.branch_id}')">
             <i class="bi bi-pencil"></i>
         </button>
     `;
-
     // Botón Eliminar (Validación visual contra el usuario actual)
     // Usamos la variable global currentUserId definida en el EJS
     if (row.id !== currentUserId) {
@@ -57,51 +56,62 @@ const modal = new bootstrap.Modal(modalEl);
 
 // 1. Abrir Modal para CREAR
 function abrirModalCrear() {
-    document.getElementById('modalTitulo').innerText = 'Nuevo Usuario';
-    document.getElementById('userId').value = ''; // ID vacío = Crear
-    document.getElementById('formUsuario').reset();
-    document.getElementById('passHelp').innerText = 'Requerido.';
-    document.getElementById('password').required = true;
+    document.getElementById('modalTitle').innerText = 'Nuevo Usuario';
+    document.getElementById('userId').value = '';
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+    
+    document.getElementById('role').value = 'viewer';
+    document.getElementById('branchId').value = "1"; // Default a Matriz o el primero
+    
+    document.getElementById('passHelp').innerText = 'Requerido para nuevos usuarios';
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalUsuario'));
     modal.show();
 }
 
 // 2. Abrir Modal para EDITAR
-function abrirModalEditar(id, username, role) {
-    document.getElementById('modalTitulo').innerText = 'Editar Usuario';
+// 2. ABRIR EDITAR (Recibe branchId)
+function abrirModalEditar(id, username, role, branchId) {
+    document.getElementById('modalTitle').innerText = 'Editar Usuario';
     document.getElementById('userId').value = id;
     document.getElementById('username').value = username;
-    document.getElementById('role').value = role;
     document.getElementById('password').value = ''; // Limpiar pass
-    document.getElementById('passHelp').innerText = 'Dejar vacío para mantener la actual.';
-    document.getElementById('password').required = false;
+    
+    document.getElementById('role').value = role;
+    document.getElementById('branchId').value = branchId; // Seleccionar sucursal actual
+    
+    document.getElementById('passHelp').innerText = 'Dejar en blanco para mantener la actual';
+
+    const modal = new bootstrap.Modal(document.getElementById('modalUsuario'));
     modal.show();
 }
 
 async function guardarUsuario() {
-    const id = document.getElementById('userId').value;
+   const id = document.getElementById('userId').value;
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     const role = document.getElementById('role').value;
+    const branch_id = document.getElementById('branchId').value; // <--- NUEVO
 
     if (!username) return Swal.fire('Error', 'El usuario es obligatorio', 'warning');
-    if (!id && !password) return Swal.fire('Error', 'La contraseña es obligatoria para nuevos usuarios', 'warning');
+    if (!id && !password) return Swal.fire('Error', 'Contraseña obligatoria', 'warning');
 
-  const url = id ? `/users/${id}` : '/users';
+    const url = id ? `/users/${id}` : '/users';
     const method = id ? 'PUT' : 'POST';
 
     try {
-        // 1. Bloqueamos pantalla mientras procesa (Esto lo dejamos modal por seguridad)
-        Swal.fire({
-            title: 'Guardando...',
-            text: 'Por favor espere',
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading()
-        });
+        Swal.fire({ title: 'Guardando...', didOpen: () => Swal.showLoading() });
 
         const response = await fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password, role })
+            body: JSON.stringify({ 
+                username, 
+                password, 
+                role, 
+                branch_id: Number(branch_id) // Enviamos el ID numérico
+            })
         });
 
         const result = await response.json();
@@ -109,21 +119,12 @@ async function guardarUsuario() {
         // Cerramos el loading inmediatamente
         Swal.close(); 
 
-        if (result.success) {
-            // 2. OCULTAR MODAL Y REFRESCAR
-            const modalEl = document.getElementById('modalUsuario');
-            const modal = bootstrap.Modal.getInstance(modalEl);
-            modal.hide();
-
-            // 3. MOSTRAR TOAST DE ÉXITO (NUEVO)
-            showSuccessToast('Usuario guardado correctamente');
-
-            // 4. Recargar tabla
+       if (result.success) {
+            showSuccessToast('Usuario guardado');
+            bootstrap.Modal.getInstance(document.getElementById('modalUsuario')).hide();
             $('#tablaUsuarios').bootstrapTable('refresh');
-            
         } else {
-            // 5. MOSTRAR TOAST DE ERROR (NUEVO)
-            showErrorToast(result.error || 'Error desconocido');
+            showErrorToast(result.error);
         }
     } catch (error) {
         Swal.close();
@@ -153,7 +154,7 @@ async function eliminarUsuario(id) {
         const response = await fetch(`/users/${id}`, { method: 'DELETE' });
         const result = await response.json();
         
-         if (result.success) {
+        if (result.success) {
             // USAMOS TOAST AQUÍ
             showSuccessToast('El usuario ha sido eliminado');
             

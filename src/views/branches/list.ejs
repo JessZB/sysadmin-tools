@@ -1,0 +1,78 @@
+<%- include('../layout/header') %>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Gestión de Sucursales</h2>
+        <button class="btn btn-primary" onclick="abrirModalCrear()">
+            <i class="bi bi-building"></i> Nueva Sucursal
+        </button>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <table id="tablaBranches" data-toggle="table" data-url="/branches/data" data-search="true"
+                data-pagination="true" data-page-list="[5, 10, 25, 50]" data-show-refresh="true"
+                data-show-columns="true" data-show-toggle="true" data-icons-prefix="bi" data-icons="icons"
+                class="table table-hover table-bordered">
+
+                <thead class="table-light">
+                    <tr>
+                        <th data-field="id" data-sortable="true">ID</th>
+                        <th data-field="name" data-sortable="true" data-sort-name="name" data-sort-order="asc">Nombre
+                        </th>
+                        <th data-field="code" data-sortable="true">Código</th>
+                        <th data-field="address" data-sortable="true">Dirección</th>
+                        <th data-field="is_active" data-sortable="true" data-formatter="statusFormatter">Estado</th>
+                        <th data-field="creator_name" data-sortable="true">Creado por</th>
+                        <th data-field="operate" data-formatter="actionFormatter" class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal para Crear/Editar -->
+    <div class="modal fade" id="modalBranch" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Sucursal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="branchId">
+
+                    <div class="mb-3">
+                        <label class="form-label">Nombre de la Sucursal</label>
+                        <input type="text" class="form-control" id="name" required placeholder="Ej: Casa Matriz">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Código</label>
+                        <input type="text" class="form-control" id="code" required placeholder="Ej: MTZ-001">
+                        <div class="form-text">Código único de identificación (Ej: SUC-01, MTZ-001)</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Dirección</label>
+                        <textarea class="form-control" id="address" rows="2"
+                            placeholder="Dirección completa de la sucursal"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Estado</label>
+                        <select class="form-select" id="is_active">
+                            <option value="1">Activa</option>
+                            <option value="0">Inactiva</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarBranch()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../layout/footer') %>

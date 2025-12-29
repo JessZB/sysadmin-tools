@@ -23,9 +23,11 @@
                     <tr>
                         <th data-field="id" data-sortable="true">ID</th>
                         <th data-field="username" data-sortable="true">Usuario</th>
+
+                        <th data-field="branch_name" data-sortable="true">Sucursal</th>
+
                         <th data-field="role" data-sortable="true" data-formatter="roleFormatter">Rol</th>
-                        <th data-field="created_at" data-sortable="true" data-formatter="dateFormatter">Fecha Creación
-                        </th>
+                        <th data-field="created_at" data-formatter="dateFormatter">Creado</th>
                         <th data-field="operate" data-formatter="actionFormatter" class="text-end">Acciones</th>
                     </tr>
                 </thead>
@@ -33,37 +35,48 @@
         </div>
     </div>
 
+
     <div class="modal fade" id="modalUsuario" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitulo">Usuario</h5>
+                    <h5 class="modal-title" id="modalTitle">Usuario</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="formUsuario">
-                        <input type="hidden" id="userId">
-                        <div class="mb-3">
-                            <label class="form-label">Nombre de Usuario</label>
-                            <input type="text" class="form-control" id="username" required>
-                        </div>
+                    <input type="hidden" id="userId">
 
-                        <div class="mb-3">
-                            <label class="form-label">Contraseña</label>
-                            <input type="password" class="form-control" id="password"
-                                placeholder="Dejar vacío para no cambiar">
-                            <div class="form-text" id="passHelp">Requerido para nuevos usuarios.</div>
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nombre de Usuario</label>
+                        <input type="text" class="form-control" id="username" required>
+                    </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Rol</label>
-                            <select class="form-select" id="role">
-                                <option value="admin">Administrador</option>
-                                <option value="analista">Analista</option>
-                                <option value="viewer">Visualizador</option>
-                            </select>
-                        </div>
-                    </form>
+                    <div class="mb-3">
+                        <label class="form-label">Sucursal Asignada</label>
+                        <select class="form-select" id="branchId">
+                            <% branches.forEach(function(branch) { %>
+                                <option value="<%= branch.id %>">
+                                    <%= branch.name %>
+                                </option>
+                                <% }); %>
+                        </select>
+                        <div class="form-text small">El usuario solo verá datos de esta sucursal.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Rol</label>
+                        <select class="form-select" id="role">
+                            <option value="admin">Administrador</option>
+                            <option value="analista">Analista</option>
+                            <option value="viewer">Visualizador</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="password" placeholder="••••••">
+                        <div class="form-text" id="passHelp"></div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>

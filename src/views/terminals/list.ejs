@@ -19,6 +19,7 @@
                     <tr>
                         <th data-field="name" data-sortable="true" data-sort-name="name" data-sort-order="desc">Nombre
                         </th>
+                        <th data-field="branch_name" data-sortable="true">Sucursal</th>
                         <th data-field="is_server" data-sortable="true" data-formatter="typeFormatter">Tipo</th>
                         <th data-field="ip_address" data-sortable="true">Dirección IP</th>
                         <th data-field="db_user" data-sortable="true">Usuario BD</th>
@@ -40,6 +41,17 @@
                 <div class="modal-body">
                     <form id="formTerminal">
                         <input type="hidden" id="terminalId">
+
+                        <div class="mb-3">
+                            <label class="form-label">Sucursal</label>
+                            <select class="form-select" id="branchId" required>
+                                <% branches.forEach(function(branch) { %>
+                                    <option value="<%= branch.id %>">
+                                        <%= branch.name %>
+                                    </option>
+                                    <% }); %>
+                            </select>
+                        </div>
                         <div class="mb-3">
                             <label class="form-label">Nombre de la Terminal</label>
                             <input type="text" class="form-control" id="name" required
@@ -51,6 +63,14 @@
                             <select class="form-select" id="type">
                                 <option value="0">Caja</option>
                                 <option value="1">Servidor</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Estado</label>
+                            <select class="form-select" id="is_active">
+                                <option value="1">Activa</option>
+                                <option value="0">Inactiva</option>
                             </select>
                         </div>
 

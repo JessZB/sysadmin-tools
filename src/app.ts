@@ -8,6 +8,7 @@ import * as authController from './modules/auth/auth.controller';
 import usersRoutes from './modules/users/users.routes';
 import terminalsRoutes from './modules/terminals/terminals.routes';
 import dashboardRoutes from './modules/dashboard/dashboard.routes';
+import branchesRoutes from './modules/branches/brances.routes';
 import { requireAuth } from './shared/middlewares/auth.middleware';
 import { notFoundHandler } from './shared/middlewares/not-found.middleware';
 
@@ -46,6 +47,7 @@ app.get('/logout', authController.logout);
 // 2. Rutas Protegidas (VISTAS)
 app.use('/terminals', requireAuth, terminalsRoutes);
 app.use('/dashboard', requireAuth, dashboardRoutes);
+app.use('/branches', requireAuth, branchesRoutes);
 
 // 3. Rutas Protegidas (API)
 app.use('/users', requireAuth, usersRoutes);

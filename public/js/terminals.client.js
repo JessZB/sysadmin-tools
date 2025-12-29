@@ -19,12 +19,13 @@ function typeFormatter(value, row, index) {
 // Formateador para Botones de Acción
 function actionFormatter(value, row, index) {
     // Botón Editar
-    // Nota: row.is_server puede ser 1/0 o true/false. Lo convertimos a int para pasarlo.
     const isServer = (row.is_server === 1 || row.is_server === true) ? 1 : 0;
+    const isActive = (row.is_active === 1 || row.is_active === true) ? 1 : 0;
+    const branchId = row.branch_id || 1;
     
     let botones = `
         <button class="btn btn-sm btn-outline-primary me-1" 
-            onclick="abrirModalEditar('${row.id}', '${row.name}', '${row.ip_address}', '${row.db_user}', ${isServer})">
+            onclick="abrirModalEditar('${row.id}', '${row.name}', '${row.ip_address}', '${row.db_user}', ${isServer}, ${isActive}, ${branchId})">
             <i class="bi bi-pencil"></i>
         </button>
     `;
@@ -69,6 +70,8 @@ function abrirModalCrear() {
     
     // Resetear campos específicos
     document.getElementById('type').value = "0";
+    document.getElementById('is_active').value = "1"; // Activa por defecto
+    document.getElementById('branchId').value = document.getElementById('branchId').options[0].value; // Primera sucursal
     document.getElementById('divForceBlank').style.display = 'none';
     document.getElementById('forceBlankPassword').checked = false;
     document.getElementById('db_pass').disabled = false;
@@ -80,7 +83,7 @@ function abrirModalCrear() {
 }
 
 // 2. Abrir Modal para EDITAR
-function abrirModalEditar(id, name, ip_address, db_user, is_server) {
+function abrirModalEditar(id, name, ip_address, db_user, is_server, is_active, branch_id) {
     document.getElementById('modalTitulo').innerText = 'Editar Terminal';
     document.getElementById('terminalId').value = id;
     document.getElementById('name').value = name;
@@ -89,6 +92,12 @@ function abrirModalEditar(id, name, ip_address, db_user, is_server) {
     
     // Setear tipo
     document.getElementById('type').value = is_server ? "1" : "0";
+    
+    // Setear estado
+    document.getElementById('is_active').value = is_active ? "1" : "0";
+    
+    // Setear sucursal
+    document.getElementById('branchId').value = branch_id || 1;
     
     // Configurar contraseña
     document.getElementById('db_pass').value = ''; // Limpiar contraseña
@@ -111,6 +120,8 @@ async function guardarTerminal() {
     const db_pass = document.getElementById('db_pass').value;
     const typeVal = document.getElementById('type').value;
     const is_server = typeVal === "1";
+    const is_active = Number(document.getElementById('is_active').value);
+    const branch_id = Number(document.getElementById('branchId').value);
     const forceBlankPassword = document.getElementById('forceBlankPassword').checked;
 
     // Validación básica
@@ -127,6 +138,8 @@ async function guardarTerminal() {
         db_user, 
         db_pass, 
         is_server,
+        is_active,
+        branch_id,
         forceBlankPassword 
     };
 

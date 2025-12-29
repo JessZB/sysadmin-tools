@@ -112,7 +112,22 @@ async function cargarSelectorSucursales() {
 // Evento onchange del Select
 function cambiarSucursal() {
     const selector = document.getElementById('branchSelector');
-    currentBranchFilter = selector.value; // Guardamos el ID (o vacío para todas)
+    const value = selector.value;
+    
+    // Si es vacío (no seleccionado), no hacemos nada
+    if (value === '') {
+        currentBranchFilter = '';
+        // No recargamos, dejamos el estado actual
+        return;
+    }
+    
+    // Si es 'all', mostramos todas las sucursales (sin filtro)
+    if (value === 'all') {
+        currentBranchFilter = ''; // Sin filtro = todas
+    } else {
+        // Es un ID de sucursal específico
+        currentBranchFilter = value;
+    }
     
     // Forzamos recarga inmediata
     forzarRefrescoTotal(); 
