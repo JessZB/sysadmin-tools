@@ -114,12 +114,7 @@ function cambiarSucursal() {
     const selector = document.getElementById('branchSelector');
     const value = selector.value;
     
-    // Si es vacío (no seleccionado), no hacemos nada
-    if (value === '') {
-        currentBranchFilter = '';
-        // No recargamos, dejamos el estado actual
-        return;
-    }
+   
     
     // Si es 'all', mostramos todas las sucursales (sin filtro)
     if (value === 'all') {
@@ -128,9 +123,17 @@ function cambiarSucursal() {
         // Es un ID de sucursal específico
         currentBranchFilter = value;
     }
-    
-    // Forzamos recarga inmediata
-    forzarRefrescoTotal(); 
+
+    // Si es vacío (no seleccionado), no hacemos nada
+    if (!value) {
+        currentBranchFilter = '';
+        // No recargamos, dejamos el estado actual
+        return;
+    }else{
+         // Forzamos recarga inmediata
+        forzarRefrescoTotal(); 
+    }
+   
 }
 
 
@@ -326,7 +329,7 @@ function renderizarFilasMatriz(id, jobs, serverTime) {
         if (!tbody) return;
         tbody.innerHTML = '';
         
-        jobs.forEach(job => {
+        jobs.sort((a, b) => a.JobName.localeCompare(b.JobName)).forEach(job => {
             const row = crearFilaJob(job, serverTime, '', isServer);
             tbody.appendChild(row);
         });
@@ -345,7 +348,7 @@ function renderizarFilasMatriz(id, jobs, serverTime) {
     existingRows.forEach(row => row.remove());
 
     const newRows = [];
-    jobs.forEach((job, index) => {
+    jobs.sort((a, b) => a.JobName.localeCompare(b.JobName)).forEach((job, index) => {
         const terminalCell = index === 0 
             ? `<td rowspan="${jobs.length}" class="align-middle fw-bold text-center bg-light">${terminalName}</td>`
             : '';
@@ -502,7 +505,7 @@ async function llenarModalConFetch(id) {
             const tbody = document.getElementById('jobsTableBody');
             tbody.innerHTML = '';
             
-            jobs.forEach(job => {
+            jobs.sort((a, b) => a.JobName.localeCompare(b.JobName)).forEach(job => {
                 let badgeClass = 'bg-secondary';
                 let icon = '';
                 if (job.LastOutcome === 'Exitoso') { badgeClass = 'bg-success'; icon = '<i class="fa-solid fa-check"></i>'; }

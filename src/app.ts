@@ -11,6 +11,7 @@ import terminalsRoutes from './modules/terminals/terminals.routes';
 import dashboardRoutes from './modules/dashboard/dashboard.routes';
 import branchesRoutes from './modules/branches/brances.routes';
 import auditRoutes from './modules/audit/audit.routes';
+import barcodeRoutes from './modules/barcode/barcode.routes';
 import { notFoundHandler } from './shared/middlewares/not-found.middleware';
 import { requireAuth } from './shared/middlewares/auth.middleware';
 import { allowRoles } from './shared/middlewares/role.middleware';
@@ -69,6 +70,9 @@ app.use('/users', requireAuth, allowRoles(['admin']), usersRoutes);
 
 // Auditoría: Admin y Analista
 app.use('/audit', requireAuth, allowRoles(['admin', 'analista']), auditRoutes);
+
+// Códigos de Barra: Admin y Analista
+app.use('/barcode', requireAuth, allowRoles(['admin', 'analista']), barcodeRoutes);
 
 // Manejo de Rutas No Encontradas
 app.use(notFoundHandler);

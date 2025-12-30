@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Generador de código de barra Dibal</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+            color: #1a1a1a;
+            margin: 5px 0;
+        }
+
+        h2 {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #444;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .button-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        #generate-button {
+            background-color: #007bff;
+            color: white;
+            grid-column: span 2;
+        }
+
+        #download-button {
+            background-color: #28a745;
+            color: white;
+        }
+
+        #view-records-button {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .barcode-container {
+            text-align: center;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px dashed #ccc;
+        }
+
+        #barcode {
+            max-width: 100%;
+        }
+
+        .record-list {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.9em;
+        }
+
+        .record-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .record-list li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Generador Dibal</h1>
+        <h2>IT Forum Ciudad Bolivar</h2>
+
+        <label for="plu">PLU (4 dígitos):</label>
+        <input type="text" id="plu" maxlength="4" placeholder="Ej: 0123" value="0001">
+
+        <label for="weight">Peso (kg):</label>
+        <input type="number" id="weight" step="0.001" placeholder="Ej: 1.500">
+
+        <div class="button-container">
+            <button id="generate-button">GENERAR CÓDIGO</button>
+            <button id="download-button">DESCARGAR PNG</button>
+            <button id="view-records-button">VER HISTORIAL</button>
+        </div>
+
+        <div class="barcode-container">
+            <canvas id="barcode"></canvas>
+            <p id="barcode-text" style="font-weight: bold; margin-top: 10px;"></p>
+            <p id="date-time" style="font-size: 0.8em; color: #888;"></p>
+        </div>
+
+        <div class="record-list">
+            <ul id="record-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        const pluInput = document.getElementById('plu');
+        const weightInput = document.getElementById('weight');
+        const barcodeCanvas = document.getElementById('barcode');
+        const barcodeText = document.getElementById('barcode-text');
+        const dateTimeText = document.getElementById('date-time');
+        const recordList = document.getElementById('record-list');
+        const generateButton = document.getElementById('generate-button');
+        const downloadButton = document.getElementById('download-button');
+        const viewRecordsButton = document.getElementById('view-records-button');
+
+        let records = [];
+
+        generateButton.addEventListener('click', () => {
+            const plu = pluInput.value.padStart(4, '0');
+            const weight = parseFloat(weightInput.value);
+
+            // Validación mejorada
+            if (plu.length !== 4 || isNaN(weight) || weight < 0 || weight >= 100) {
+                alert('Error: PLU debe ser de 4 dígitos y el peso entre 0 y 99.999 kg.');
+                return;
+            }
+
+            const barcodeValue = generateEAN13Barcode(plu, weight);
+            displayBarcode(barcodeValue);
+            addRecord(barcodeValue, weight);
+        });
+
+        function generateEAN13Barcode(plu, weight) {
+            // 1. Prefijo de balanza (22 suele ser estándar para productos pesados)
+            const prefix = "22";
+
+            // 2. PLU de 5 dígitos (Dibal suele usar 5, si usas 4 le agregamos un 0)
+            const pluPadded = plu.padStart(5, '0');
+
+            // 3. Peso en gramos (5 dígitos): 1.500kg -> 01500
+            const weightInGrams = Math.round(weight * 1000);
+            const weightStr = weightInGrams.toString().padStart(5, '0');
+
+            // Unir: 22 + 00123 + 01500 = 12 dígitos
+            let barcodeBase = prefix + pluPadded + weightStr;
+
+            // Calcular el 13avo dígito
+            const checkDigit = calculateEAN13CheckDigit(barcodeBase);
+            return barcodeBase + checkDigit;
+        }
+
+        function calculateEAN13CheckDigit(code) {
+            let sum = 0;
+            for (let i = 0; i < 12; i++) {
+                // Posiciones pares (0, 2...) peso 1, impares peso 3 (basado en índice 0)
+                sum += parseInt(code[i]) * (i % 2 === 0 ? 1 : 3);
+            }
+            const mod = sum % 10;
+            return mod === 0 ? 0 : 10 - mod;
+        }
+
+        function displayBarcode(barcodeValue) {
+            JsBarcode(barcodeCanvas, barcodeValue, {
+                format: 'EAN13',
+                displayValue: true,
+                fontSize: 18,
+                background: "#f9f9f9"
+            });
+
+            const now = new Date();
+            barcodeText.textContent = 'EAN-13: ' + barcodeValue;
+            dateTimeText.textContent = 'Generado: ' + now.toLocaleString();
+        }
+
+        // --- Funciones de Utilidad ---
+
+        function addRecord(barcodeValue, weight) {
+            records.unshift({
+                barcode: barcodeValue,
+                dateTime: new Date().toLocaleString(),
+                weight: weight.toFixed(3)
+            });
+            if (records.length > 10) records.pop();
+            displayRecords();
+        }
+
+        function displayRecords() {
+            recordList.innerHTML = '<h3>Últimos registros</h3>';
+            records.forEach(record => {
+                const li = document.createElement('li');
+                li.textContent = `📦 ${record.weight}kg - [${record.barcode}] - ${record.dateTime}`;
+                recordList.appendChild(li);
+            });
+        }
+
+        downloadButton.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.href = barcodeCanvas.toDataURL('image/png');
+            link.download = `barcode_${pluInput.value}.png`;
+            link.click();
+        });
+
+        viewRecordsButton.addEventListener('click', displayRecords);
+    </script>
+</body>
+
+</html>
