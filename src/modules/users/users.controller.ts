@@ -8,10 +8,13 @@ export const renderUserList = async (req: Request, res: Response) => {
         // Obtenemos sucursales para pintarlas en el modal
         const branches = await getAllBranches();
 
+        const systemModules = await userService.getSystemModules();
+
         // La tabla carga datos por AJAX, así que aquí no hace falta traer usuarios, solo la estructura
         res.render('users/list', {
             page: 'users',
             user: res.locals.user,
+            systemModules,
             branches: branches, // <--- ENVIAMOS LAS SUCURSALES A LA VISTA
             script: 'users.client.js'
         });
@@ -34,27 +37,31 @@ export const getUsersData = async (req: Request, res: Response) => {
 export const create = async (req: Request, res: Response) => {
     try {
         const currentUser = res.locals.user;
-        // Solo admin crea
-        if (currentUser.role !== 'admin') return res.status(403).json({ error: 'Sin permisos' });
+        const { username, password, role, branch_id, modules } = req.body;
 
-        const { username, password, role, branch_id } = req.body;
-
-        // Pasamos currentUser.id como creador
-        await userService.createUser({ username, role, branch_id }, password, currentUser.id);
-
-        // Auditoría
-        auditService.logAction(
+        // 1. Llamamos al servicio y recibimos el ID nuevo
+        const newUserId = await userService.createUser(
+            { username, role, branch_id },
+            password,
             currentUser.id,
-            currentUser.branch_id,
-            'CREATE',
-            'USER',
-            null,
-            `Usuario creado: ${username} (${role})`,
-            req.ip
+            modules
+        );
+
+
+        auditService.logAction(
+            currentUser.id,          // Quién lo hizo (Admin logueado)
+            currentUser.branch_id,   // Desde qué sucursal
+            'CREATE',                // Acción
+            'USER',                  // Entidad
+            newUserId,               // ID del usuario creado
+            `Creó usuario: ${username} (Rol: ${role})`, // Detalle legible
+            req.ip                   // IP de origen
         );
 
         res.json({ success: true });
     } catch (error: any) {
+        // Error handling mejorado (ej: duplicados)
+        console.error(error);
         res.status(400).json({ success: false, error: error.message });
     }
 };

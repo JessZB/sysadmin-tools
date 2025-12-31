@@ -60,15 +60,21 @@ function abrirModalCrear() {
     document.getElementById('userId').value = '';
     document.getElementById('username').value = '';
     document.getElementById('password').value = '';
+
+    // NUEVO: Resetear switches (Dashboard activo por defecto)
+    document.querySelectorAll('.module-check').forEach(chk => chk.checked = false);
+    document.getElementById('mod_dashboard').checked = true; // Default
     
-    document.getElementById('role').value = 'viewer';
+    document.getElementById('role').value = 'analista';
     document.getElementById('branchId').value = "1"; // Default a Matriz o el primero
+    toggleAdminNote()
     
     document.getElementById('passHelp').innerText = 'Requerido para nuevos usuarios';
     
     const modal = new bootstrap.Modal(document.getElementById('modalUsuario'));
     modal.show();
 }
+
 
 // 2. Abrir Modal para EDITAR
 // 2. ABRIR EDITAR (Recibe branchId)
@@ -83,8 +89,38 @@ function abrirModalEditar(id, username, role, branchId) {
     
     document.getElementById('passHelp').innerText = 'Dejar en blanco para mantener la actual';
 
+    // NUEVO: Marcar switches según los datos
+    document.querySelectorAll('.module-check').forEach(chk => chk.checked = false);
+    
+    if (modulesStr && modulesStr !== 'null') {
+        const modulesArray = modulesStr.split(',');
+        modulesArray.forEach(code => {
+            const chk = document.querySelector(`.module-check[value="${code}"]`);
+            if (chk) chk.checked = true;
+        });
+    }
+
+    toggleAdminNote();
+
     const modal = new bootstrap.Modal(document.getElementById('modalUsuario'));
     modal.show();
+}
+
+// Agrega un listener al select de rol para mostrar nota informativa
+document.getElementById('role').addEventListener('change', toggleAdminNote);
+
+function toggleAdminNote() {
+    const role = document.getElementById('role').value;
+    const note = document.getElementById('adminNote');
+    const inputs = document.querySelectorAll('.module-check');
+
+    if (role === 'admin') {
+        if(note) note.style.display = 'block';
+        // Opcional: Bloquear checkboxes o marcarlos todos visualmente
+        // inputs.forEach(i => i.checked = true); 
+    } else {
+        if(note) note.style.display = 'none';
+    }
 }
 
 async function guardarUsuario() {
@@ -97,20 +133,25 @@ async function guardarUsuario() {
     if (!username) return Swal.fire('Error', 'El usuario es obligatorio', 'warning');
     if (!id && !password) return Swal.fire('Error', 'Contraseña obligatoria', 'warning');
 
+    // NUEVO: Obtener módulos marcados
+    const selectedModules = [];
+    document.querySelectorAll('.module-check:checked').forEach(chk => {
+        selectedModules.push(chk.value);
+    });
+
     const url = id ? `/users/${id}` : '/users';
     const method = id ? 'PUT' : 'POST';
 
     try {
-        Swal.fire({ title: 'Guardando...', didOpen: () => Swal.showLoading() });
-
         const response = await fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 username, 
-                password, 
-                role, 
-                branch_id: Number(branch_id) // Enviamos el ID numérico
+                password: document.getElementById('password').value, 
+                role: document.getElementById('role').value, 
+                branch_id: document.getElementById('branchId').value,
+                modules: selectedModules // <--- ENVIAMOS EL ARRAY
             })
         });
 

@@ -243,62 +243,70 @@
         <!-- Menu Grid -->
         <div class="menu-grid">
             <!-- Dashboard -->
-            <a href="/dashboard" class="menu-card">
-                <div class="menu-icon">
-                    <i class="fa-solid fa-chart-line"></i>
-                </div>
-                <h3 class="menu-title">Monitor Jobs</h3>
-                <p class="menu-description">Monitoreo de trabajos y terminales POS</p>
-            </a>
-
-            <!-- Terminales -->
-            <a href="/terminals" class="menu-card">
-                <div class="menu-icon">
-                    <i class="fa-solid fa-desktop"></i>
-                </div>
-                <h3 class="menu-title">Terminales</h3>
-                <p class="menu-description">Gestión de terminales POS</p>
-            </a>
-
-            <!-- Sucursales (Solo Admin) -->
-            <% if (user.role==='admin' ) { %>
-                <a href="/branches" class="menu-card">
+            <% if (user.modules && user.modules.includes('dashboard')) { %>
+                <a href="/dashboard" class="menu-card">
                     <div class="menu-icon">
-                        <i class="fa-solid fa-building"></i>
+                        <i class="fa-solid fa-chart-line"></i>
                     </div>
-                    <h3 class="menu-title">Sucursales</h3>
-                    <p class="menu-description">Administrar sucursales</p>
+                    <h3 class="menu-title">Monitor Jobs</h3>
+                    <p class="menu-description">Monitoreo de trabajos y terminales POS</p>
                 </a>
                 <% } %>
 
-                    <!-- Usuarios (Solo Admin) -->
-                    <% if (user.role==='admin' ) { %>
-                        <a href="/users" class="menu-card">
+                    <!-- Terminales -->
+                    <% if (user.modules && user.modules.includes('terminals')) { %>
+                        <a href="/terminals" class="menu-card">
                             <div class="menu-icon">
-                                <i class="fa-solid fa-users"></i>
+                                <i class="fa-solid fa-desktop"></i>
                             </div>
-                            <h3 class="menu-title">Usuarios</h3>
-                            <p class="menu-description">Gestión de usuarios del sistema</p>
+                            <h3 class="menu-title">Terminales</h3>
+                            <p class="menu-description">Gestión de terminales POS</p>
                         </a>
                         <% } %>
 
-                            <!-- Códigos de Barra -->
-                            <a href="/barcode" class="menu-card">
-                                <div class="menu-icon">
-                                    <i class="fa-solid fa-barcode"></i>
-                                </div>
-                                <h3 class="menu-title">Códigos de Barra</h3>
-                                <p class="menu-description">Generador PLU Dibal</p>
-                            </a>
+                            <!-- Sucursales -->
+                            <% if (user.modules && user.modules.includes('branches')) { %>
+                                <a href="/branches" class="menu-card">
+                                    <div class="menu-icon">
+                                        <i class="fa-solid fa-building"></i>
+                                    </div>
+                                    <h3 class="menu-title">Sucursales</h3>
+                                    <p class="menu-description">Administrar sucursales</p>
+                                </a>
+                                <% } %>
 
-                            <!-- Auditoría -->
-                            <a href="/audit" class="menu-card accent">
-                                <div class="menu-icon">
-                                    <i class="fa-solid fa-clock-rotate-left"></i>
-                                </div>
-                                <h3 class="menu-title">Auditoría</h3>
-                                <p class="menu-description">Registro de actividades</p>
-                            </a>
+                                    <!-- Usuarios -->
+                                    <% if (user.modules && user.modules.includes('users')) { %>
+                                        <a href="/users" class="menu-card">
+                                            <div class="menu-icon">
+                                                <i class="fa-solid fa-users"></i>
+                                            </div>
+                                            <h3 class="menu-title">Usuarios</h3>
+                                            <p class="menu-description">Gestión de usuarios del sistema</p>
+                                        </a>
+                                        <% } %>
+
+                                            <!-- Códigos de Barra -->
+                                            <% if (user.modules && user.modules.includes('barcode')) { %>
+                                                <a href="/barcode" class="menu-card">
+                                                    <div class="menu-icon">
+                                                        <i class="fa-solid fa-barcode"></i>
+                                                    </div>
+                                                    <h3 class="menu-title">Códigos de Barra</h3>
+                                                    <p class="menu-description">Generador PLU Dibal</p>
+                                                </a>
+                                                <% } %>
+
+                                                    <!-- Auditoría -->
+                                                    <% if (user.modules && user.modules.includes('audit')) { %>
+                                                        <a href="/audit" class="menu-card accent">
+                                                            <div class="menu-icon">
+                                                                <i class="fa-solid fa-clock-rotate-left"></i>
+                                                            </div>
+                                                            <h3 class="menu-title">Auditoría</h3>
+                                                            <p class="menu-description">Registro de actividades</p>
+                                                        </a>
+                                                        <% } %>
         </div>
 
         <!-- Logout Button -->

@@ -15,6 +15,7 @@ import barcodeRoutes from './modules/barcode/barcode.routes';
 import { notFoundHandler } from './shared/middlewares/not-found.middleware';
 import { requireAuth } from './shared/middlewares/auth.middleware';
 import { allowRoles } from './shared/middlewares/role.middleware';
+import { requireModule } from './shared/middlewares/permission.middleware';
 
 
 
@@ -56,23 +57,23 @@ app.get('/logout', authController.logout);
 // Home/Menu Principal: Admin y Analista
 app.use('/home', requireAuth, allowRoles(['admin', 'analista']), homeRoutes);
 
-// Terminales: Admin y Analista
-app.use('/terminals', requireAuth, allowRoles(['admin', 'analista']), terminalsRoutes);
+// Dashboard: Todos suelen tener acceso, pero lo protegemos igual
+app.use('/dashboard', requireAuth, requireModule('dashboard'), dashboardRoutes);
 
-// Dashboard: Admin y Analista
-app.use('/dashboard', requireAuth, allowRoles(['admin', 'analista']), dashboardRoutes);
+// Terminales
+app.use('/terminals', requireAuth, requireModule('terminals'), terminalsRoutes);
 
-// Sucursales: SOLO Admin
-app.use('/branches', requireAuth, allowRoles(['admin']), branchesRoutes);
+// Usuarios (Típicamente solo Admin, pero si un día quieres un "Gestor de Usuarios", solo le das el módulo)
+app.use('/users', requireAuth, requireModule('users'), usersRoutes);
 
-// Usuarios: SOLO Admin
-app.use('/users', requireAuth, allowRoles(['admin']), usersRoutes);
+// Sucursales
+app.use('/branches', requireAuth, requireModule('branches'), branchesRoutes);
 
-// Auditoría: Admin y Analista
-app.use('/audit', requireAuth, allowRoles(['admin', 'analista']), auditRoutes);
+// Auditoría
+app.use('/audit', requireAuth, requireModule('audit'), auditRoutes);
 
-// Códigos de Barra: Admin y Analista
-app.use('/barcode', requireAuth, allowRoles(['admin', 'analista']), barcodeRoutes);
+// Barcode
+app.use('/barcode', requireAuth, requireModule('barcode'), barcodeRoutes);
 
 // Manejo de Rutas No Encontradas
 app.use(notFoundHandler);

@@ -63,13 +63,29 @@
                         <div class="form-text small">El usuario solo verá datos de esta sucursal.</div>
                     </div>
 
+
                     <div class="mb-3">
                         <label class="form-label">Rol</label>
                         <select class="form-select" id="role">
                             <option value="admin">Administrador</option>
                             <option value="analista">Analista</option>
-                            <option value="viewer">Visualizador</option>
+
                         </select>
+                    </div>
+
+                    <div class="row g-3">
+                        <% systemModules.forEach(function(mod) { %>
+                            <div class="col-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input module-check" type="checkbox" value="<%= mod.code %>"
+                                        id="mod_<%= mod.code %>">
+                                    <label class="form-check-label" for="mod_<%= mod.code %>">
+                                        <i class="fa-solid <%= mod.icon || 'fa-circle' %> text-muted me-1"></i>
+                                        <%= mod.name %>
+                                    </label>
+                                </div>
+                            </div>
+                            <% }); %>
                     </div>
 
                     <div class="mb-3">
