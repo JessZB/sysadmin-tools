@@ -14,8 +14,8 @@ export const renderUserList = async (req: Request, res: Response) => {
         res.render('users/list', {
             page: 'users',
             user: res.locals.user,
-            systemModules,
             branches: branches, // <--- ENVIAMOS LAS SUCURSALES A LA VISTA
+            systemModules,
             script: 'users.client.js'
         });
     } catch (error) {
@@ -37,61 +37,49 @@ export const getUsersData = async (req: Request, res: Response) => {
 export const create = async (req: Request, res: Response) => {
     try {
         const currentUser = res.locals.user;
-        const { username, password, role, branch_id, modules } = req.body;
+        const { username, password, role, branch_id } = req.body; // Sin modules
 
-        // 1. Llamamos al servicio y recibimos el ID nuevo
-        const newUserId = await userService.createUser(
-            { username, role, branch_id },
-            password,
-            currentUser.id,
-            modules
-        );
+        const newId = await userService.createUser({ username, role, branch_id }, password, currentUser.id);
 
-
-        auditService.logAction(
-            currentUser.id,          // Quién lo hizo (Admin logueado)
-            currentUser.branch_id,   // Desde qué sucursal
-            'CREATE',                // Acción
-            'USER',                  // Entidad
-            newUserId,               // ID del usuario creado
-            `Creó usuario: ${username} (Rol: ${role})`, // Detalle legible
-            req.ip                   // IP de origen
-        );
-
+        auditService.logAction(currentUser.id, currentUser.branch_id, 'CREATE', 'USER', newId, `Creó usuario: ${username}`, req.ip);
         res.json({ success: true });
-    } catch (error: any) {
-        // Error handling mejorado (ej: duplicados)
-        console.error(error);
-        res.status(400).json({ success: false, error: error.message });
-    }
+    } catch (e: any) { res.status(400).json({ error: e.message }); }
 };
 
 // 4. UPDATE
 export const update = async (req: Request, res: Response) => {
     try {
         const currentUser = res.locals.user;
-        if (currentUser.role !== 'admin') return res.status(403).json({ error: 'Sin permisos' });
-
         const { id } = req.params;
-        const { username, password, role, branch_id } = req.body;
+        const { username, password, role, branch_id } = req.body; // Sin modules
 
         await userService.updateUser(Number(id), { username, role, branch_id }, password, currentUser.id);
 
-        // Auditoría
+        auditService.logAction(currentUser.id, currentUser.branch_id, 'UPDATE', 'USER', Number(id), `Actualizó usuario: ${username}`, req.ip);
+        res.json({ success: true });
+    } catch (e: any) { res.status(400).json({ error: e.message }); }
+};
+
+export const updateModules = async (req: Request, res: Response) => {
+    try {
+        const currentUser = res.locals.user;
+        const { id } = req.params;
+        const { modules, username } = req.body; // Recibimos array de módulos y username (para log)
+
+        await userService.updateUserModules(Number(id), modules);
+
         auditService.logAction(
             currentUser.id,
             currentUser.branch_id,
             'UPDATE',
             'USER',
             Number(id),
-            `Usuario actualizado: ${username} (${role})`,
+            `Actualizó permisos de: ${username}`,
             req.ip
         );
 
         res.json({ success: true });
-    } catch (error: any) {
-        res.status(400).json({ success: false, error: error.message });
-    }
+    } catch (e: any) { res.status(400).json({ error: e.message }); }
 };
 
 export const remove = async (req: Request, res: Response) => {

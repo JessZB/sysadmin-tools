@@ -10,11 +10,11 @@ export const getAllUsers = async () => {
         SELECT 
             u.id, u.username, u.role, u.branch_id, u.created_at, u.is_active,
             b.name as branch_name,
-            GROUP_CONCAT(um.module_code) as modules_str -- <--- NUEVO CAMPO
+            GROUP_CONCAT(um.module_code) as modules_str
         FROM sys_users u
         LEFT JOIN sys_branches b ON u.branch_id = b.id
         LEFT JOIN sys_user_modules um ON u.id = um.user_id
-        GROUP BY u.id -- Agrupar obligatoriamente
+        GROUP BY u.id
         ORDER BY u.id DESC
     `;
     const [rows] = await mainDbPool.query<RowDataPacket[]>(query);
@@ -27,44 +27,20 @@ export const getSystemModules = async () => {
     return rows;
 };
 
-// 2. CREATE (Con Branch y Auditoría)
-export const createUser = async (user: User, pass: string, creatorId: number, modules: string[] = []): Promise<number> => {
-    const conn = await mainDbPool.getConnection();
-    try {
-        await conn.beginTransaction();
+// 1. CREATE (LIMPIO: Solo crea usuario)
+export const createUser = async (user: User, pass: string, creatorId: number) => {
+    const hash = await bcrypt.hash(pass, 10);
+    const branchId = user.branch_id || 1;
 
-        // 1. Crear Usuario
-        const hash = await bcrypt.hash(pass, 10);
-        // Si no viene branch_id, asignamos 1 (Matriz) por defecto
-        const branchId = user.branch_id || 1;
-
-        const [res] = await conn.query<ResultSetHeader>(
-            `INSERT INTO sys_users (username, password_hash, role, branch_id, created_by, is_active) 
-             VALUES (?, ?, ?, ?, ?, 1)`,
-            [user.username, hash, user.role, branchId, creatorId]
-        );
-        const newUserId = res.insertId;
-
-        // 2. Asignar Módulos (Si corresponde)
-        // Nota: Aunque el admin tiene acceso total por código, es buena práctica guardarlos si se envían
-        if (modules && modules.length > 0) {
-            const values = modules.map(code => [newUserId, code]);
-            await conn.query('INSERT INTO sys_user_modules (user_id, module_code) VALUES ?', [values]);
-        }
-
-        await conn.commit();
-
-        return newUserId; // <--- IMPORTANTE: Retornamos el ID para la auditoría
-
-    } catch (e) {
-        await conn.rollback();
-        throw e;
-    } finally {
-        conn.release();
-    }
+    const [res] = await mainDbPool.query<ResultSetHeader>(
+        `INSERT INTO sys_users (username, password_hash, role, branch_id, created_by, is_active) 
+         VALUES (?, ?, ?, ?, ?, 1)`,
+        [user.username, hash, user.role, branchId, creatorId]
+    );
+    return res.insertId;
 };
 
-// 3. UPDATE (Con Branch y Auditoría)
+// 2. UPDATE (LIMPIO: Solo actualiza datos básicos)
 export const updateUser = async (id: number, user: User, pass: string | undefined, updaterId: number) => {
     let query = 'UPDATE sys_users SET username=?, role=?, branch_id=?, updated_by=?';
     const params: any[] = [user.username, user.role, user.branch_id, updaterId];
@@ -74,13 +50,35 @@ export const updateUser = async (id: number, user: User, pass: string | undefine
         query += ', password_hash=?';
         params.push(hash);
     }
-
     query += ' WHERE id=?';
     params.push(id);
 
     await mainDbPool.query(query, params);
 };
 
+// 3. UPDATE MODULES (NUEVO: Solo actualiza permisos)
+export const updateUserModules = async (userId: number, modules: string[]) => {
+    const conn = await mainDbPool.getConnection();
+    try {
+        await conn.beginTransaction();
+
+        // Borrar permisos anteriores
+        await conn.query('DELETE FROM sys_user_modules WHERE user_id = ?', [userId]);
+
+        // Insertar nuevos (si hay)
+        if (modules && modules.length > 0) {
+            const values = modules.map(code => [userId, code]);
+            await conn.query('INSERT INTO sys_user_modules (user_id, module_code) VALUES ?', [values]);
+        }
+
+        await conn.commit();
+    } catch (e) {
+        await conn.rollback();
+        throw e;
+    } finally {
+        conn.release();
+    }
+};
 // 4. DELETE (Soft delete o físico, aquí mantenemos físico por ahora)
 export const deleteUser = async (id: number) => {
     await mainDbPool.query('DELETE FROM sys_users WHERE id = ?', [id]);

@@ -17,33 +17,34 @@ function dateFormatter(value) {
 
 // Formateador para Botones de Acción
 function actionFormatter(value, row, index) {
-    // row contiene el objeto usuario completo (id, username, role...)
-    
-    // Botón Editar
-  let botones = `
-        <button class="btn btn-sm btn-outline-cerulean me-1" 
-            onclick="abrirModalEditar('${row.id}', '${row.username}', '${row.role}', '${row.branch_id}')">
-            <i class="bi bi-pencil"></i>
-        </button>
+    const modulesSafe = row.modules_str ? row.modules_str : '';
+
+    let botones = `
+        <div class="d-flex justify-content-end gap-1">
+            <button class="btn btn-sm btn-outline-cerulean" 
+                title="Editar Datos"
+                onclick="abrirModalEditar('${row.id}', '${row.username}', '${row.role}', '${row.branch_id}')">
+                <i class="bi bi-pencil"></i>
+            </button>
+
+            <button class="btn btn-sm btn-outline-dark" 
+                title="Gestionar Permisos"
+                onclick="abrirModalPermisos('${row.id}', '${row.username}', '${modulesSafe}')">
+                <i class="fa-solid fa-user-lock"></i>
+            </button>
     `;
-    // Botón Eliminar (Validación visual contra el usuario actual)
-    // Usamos la variable global currentUserId definida en el EJS
+
+    // Botón Eliminar
     if (row.id !== currentUserId) {
         botones += `
-            <button class="btn btn-sm btn-outline-punch" 
-                onclick="eliminarUsuario('${row.id}')">
-                <i class="bi bi-trash"></i>
-            </button>
-        `;
-    } else {
-        botones += `
-            <button class="btn btn-sm btn-frosted" disabled title="No puedes eliminarte a ti mismo">
+            <button class="btn btn-sm btn-outline-punch" onclick="eliminarUsuario('${row.id}')">
                 <i class="bi bi-trash"></i>
             </button>
         `;
     }
 
-    return '<div class="text-end">' + botones + '</div>';
+    botones += `</div>`;
+    return botones;
 }
 
 // Hacer globales las funciones para que Bootstrap Table las encuentre en el HTML
@@ -61,24 +62,65 @@ function abrirModalCrear() {
     document.getElementById('username').value = '';
     document.getElementById('password').value = '';
 
-    // NUEVO: Resetear switches (Dashboard activo por defecto)
-    document.querySelectorAll('.module-check').forEach(chk => chk.checked = false);
-    document.getElementById('mod_dashboard').checked = true; // Default
-    
-    document.getElementById('role').value = 'analista';
-    document.getElementById('branchId').value = "1"; // Default a Matriz o el primero
-    toggleAdminNote()
-    
     document.getElementById('passHelp').innerText = 'Requerido para nuevos usuarios';
     
     const modal = new bootstrap.Modal(document.getElementById('modalUsuario'));
     modal.show();
 }
 
+function abrirModalPermisos(id, username, modulesStr) {
+    document.getElementById('permUserId').value = id;
+    document.getElementById('permUserName').value = username;
+    document.getElementById('permUserDisplay').innerText = username;
+
+    // 1. Resetear todos los switches
+    document.querySelectorAll('.module-check').forEach(chk => chk.checked = false);
+
+    // 2. Marcar los que tiene asignados
+    if (modulesStr && modulesStr !== 'null' && modulesStr !== '') {
+        const modulesArray = modulesStr.split(',');
+        modulesArray.forEach(code => {
+            const chk = document.querySelector(`.module-check[value="${code}"]`);
+            if (chk) chk.checked = true;
+        });
+    }
+
+    new bootstrap.Modal(document.getElementById('modalPermisos')).show();
+}
+
+async function guardarPermisos() {
+    const id = document.getElementById('permUserId').value;
+    const username = document.getElementById('permUserName').value;
+    
+    // Obtener seleccionados
+    const selectedModules = [];
+    document.querySelectorAll('.module-check:checked').forEach(chk => {
+        selectedModules.push(chk.value);
+    });
+
+    try {
+        const response = await fetch(`/users/${id}/modules`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ modules: selectedModules, username: username })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showSuccessToast('Permisos actualizados');
+            bootstrap.Modal.getInstance(document.getElementById('modalPermisos')).hide();
+            $('#tablaUsuarios').bootstrapTable('refresh'); // Para actualizar el string de módulos en la tabla
+        } else {
+            showErrorToast(result.error);
+        }
+    } catch (e) {
+        showErrorToast('Error de conexión');
+    }
+}
 
 // 2. Abrir Modal para EDITAR
-// 2. ABRIR EDITAR (Recibe branchId)
-function abrirModalEditar(id, username, role, branchId) {
+function abrirModalEditar(id, username, role, branchId, modulesStr) {
     document.getElementById('modalTitle').innerText = 'Editar Usuario';
     document.getElementById('userId').value = id;
     document.getElementById('username').value = username;
@@ -88,19 +130,6 @@ function abrirModalEditar(id, username, role, branchId) {
     document.getElementById('branchId').value = branchId; // Seleccionar sucursal actual
     
     document.getElementById('passHelp').innerText = 'Dejar en blanco para mantener la actual';
-
-    // NUEVO: Marcar switches según los datos
-    document.querySelectorAll('.module-check').forEach(chk => chk.checked = false);
-    
-    if (modulesStr && modulesStr !== 'null') {
-        const modulesArray = modulesStr.split(',');
-        modulesArray.forEach(code => {
-            const chk = document.querySelector(`.module-check[value="${code}"]`);
-            if (chk) chk.checked = true;
-        });
-    }
-
-    toggleAdminNote();
 
     const modal = new bootstrap.Modal(document.getElementById('modalUsuario'));
     modal.show();
@@ -128,12 +157,11 @@ async function guardarUsuario() {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     const role = document.getElementById('role').value;
-    const branch_id = document.getElementById('branchId').value; // <--- NUEVO
+    const branch_id = document.getElementById('branchId').value;
 
     if (!username) return Swal.fire('Error', 'El usuario es obligatorio', 'warning');
     if (!id && !password) return Swal.fire('Error', 'Contraseña obligatoria', 'warning');
 
-    // NUEVO: Obtener módulos marcados
     const selectedModules = [];
     document.querySelectorAll('.module-check:checked').forEach(chk => {
         selectedModules.push(chk.value);
@@ -148,9 +176,9 @@ async function guardarUsuario() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 username, 
-                password: document.getElementById('password').value, 
-                role: document.getElementById('role').value, 
-                branch_id: document.getElementById('branchId').value,
+                password, 
+                role, 
+                branch_id,
                 modules: selectedModules // <--- ENVIAMOS EL ARRAY
             })
         });

@@ -15,4 +15,6 @@ router.get('/data', userController.getUsersData);
 router.put('/:id', userController.update);
 router.delete('/:id', userController.remove);
 
+router.put('/:id/modules', userController.updateModules);
+
 export default router;

@@ -72,31 +72,88 @@
 
                         </select>
                     </div>
-
-                    <div class="row g-3">
-                        <% systemModules.forEach(function(mod) { %>
-                            <div class="col-6">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input module-check" type="checkbox" value="<%= mod.code %>"
-                                        id="mod_<%= mod.code %>">
-                                    <label class="form-check-label" for="mod_<%= mod.code %>">
-                                        <i class="fa-solid <%= mod.icon || 'fa-circle' %> text-muted me-1"></i>
-                                        <%= mod.name %>
-                                    </label>
-                                </div>
-                            </div>
-                            <% }); %>
-                    </div>
-
                     <div class="mb-3">
                         <label class="form-label">Contraseña</label>
                         <input type="password" class="form-control" id="password" placeholder="••••••">
                         <div class="form-text" id="passHelp"></div>
                     </div>
+
+
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-frosted" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-cerulean" onclick="guardarUsuario()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalUsuario" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="userId">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarUsuario()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalPermisos" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <div>
+                        <h5 class="modal-title fw-bold">Asignar Permisos</h5>
+                        <small class="text-muted" id="permUserDisplay">-</small>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="permUserId">
+                    <input type="hidden" id="permUserName">
+
+                    <div class="alert alert-info small py-2 mb-3">
+                        <i class="fa-solid fa-circle-info me-1"></i> Seleccione los módulos a los que este usuario
+                        tendrá acceso.
+                    </div>
+
+                    <div class="row g-3">
+                        <% systemModules.forEach(function(mod) { %>
+                            <div class="col-6">
+                                <div class="card h-100 shadow-sm border-0 bg-light permission-card">
+                                    <div class="card-body p-2 d-flex align-items-center">
+                                        <div class="form-check form-switch w-100">
+                                            <input class="form-check-input module-check" type="checkbox"
+                                                value="<%= mod.code %>" id="mod_<%= mod.code %>">
+                                            <label class="form-check-label w-100 stretched-link"
+                                                for="mod_<%= mod.code %>" style="cursor: pointer;">
+                                                <i
+                                                    class="fa-solid <%= mod.icon || 'fa-circle' %> text-secondary me-2"></i>
+                                                <span class="fw-semibold">
+                                                    <%= mod.name %>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarPermisos()">
+                        <i class="fa-solid fa-save me-1"></i> Guardar Permisos
+                    </button>
                 </div>
             </div>
         </div>
