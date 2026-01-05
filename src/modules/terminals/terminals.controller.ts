@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as terminalService from './terminals.service';
+import * as currencyService from './currency.service';
 import { getAllBranches } from '../branches/branches.service';
 import * as auditService from '../audit/audit.service';
 
@@ -94,4 +95,54 @@ export const remove = async (req: Request, res: Response) => {
 
         res.json({ success: true });
     } catch (e: any) { res.status(400).json({ success: false, error: e.message }); }
+};
+
+// Get Currency Rates
+export const getCurrencyRates = async (req: Request, res: Response) => {
+    try {
+        const terminalId = Number(req.params.terminalId);
+
+        // Obtener información de la terminal
+        const terminals = await terminalService.getAllTerminals();
+        const terminal = terminals.find(t => t.id === terminalId);
+
+        if (!terminal) {
+            return res.status(404).json({ error: 'Terminal no encontrada' });
+        }
+
+        // Obtener tasas de cambio según el tipo de terminal
+        const currencies = await currencyService.getCurrencyRates(terminal);
+
+        res.json(currencies);
+    } catch (e: any) {
+        console.error('Error fetching currency rates:', e);
+        res.status(500).json({ error: 'No se pudieron obtener las tasas de cambio' });
+    }
+};
+
+// Clear Currency Cache
+export const clearCache = async (req: Request, res: Response) => {
+    try {
+        const terminalId = req.params.terminalId ? Number(req.params.terminalId) : undefined;
+        currencyService.clearCurrencyCache(terminalId);
+
+        res.json({
+            success: true,
+            message: terminalId
+                ? `Caché limpiado para terminal ${terminalId}`
+                : 'Caché completamente limpiado'
+        });
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
+};
+
+// Get Cache Statistics
+export const getCacheStats = async (req: Request, res: Response) => {
+    try {
+        const stats = currencyService.getCacheStats();
+        res.json(stats);
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
 };

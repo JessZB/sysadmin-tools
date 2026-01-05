@@ -16,6 +16,7 @@ import { notFoundHandler } from './shared/middlewares/not-found.middleware';
 import { requireAuth } from './shared/middlewares/auth.middleware';
 import { allowRoles } from './shared/middlewares/role.middleware';
 import { requireModule } from './shared/middlewares/permission.middleware';
+import { cleanExpiredCache } from './modules/terminals/currency.service';
 
 
 
@@ -88,4 +89,11 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
     console.log(`🚀 Servidor TS corriendo en puerto ${PORT}`);
     console.log(`🌐 URL del Servidor: http://localhost:${PORT}`);
+
+    // Iniciar limpieza automática del caché de tasas de cambio cada 15 minutos
+    setInterval(() => {
+        cleanExpiredCache();
+    }, 15 * 60 * 1000); // 15 minutos
+
+    console.log('🧹 Limpieza automática de caché iniciada (cada 15 minutos)');
 });

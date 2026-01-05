@@ -29,7 +29,30 @@ export const updateBranch = async (id: number, data: Partial<Branch>, updatedBy:
 };
 
 export const deleteBranch = async (id: number) => {
-    // Validación de seguridad: No borrar si tiene usuarios o terminales asociados
-    // (Esto es opcional pero recomendado para integridad referencial)
+    // Validación 1: Verificar si tiene terminales asociadas
+    const [terminals] = await mainDbPool.query<RowDataPacket[]>(
+        'SELECT COUNT(*) as count FROM pos_terminals WHERE branch_id = ?',
+        [id]
+    );
+
+    const terminalCount = terminals[0].count;
+
+    if (terminalCount > 0) {
+        throw new Error(`No se puede eliminar la sucursal porque tiene ${terminalCount} terminal(es) asociada(s). Primero reasigne o elimine las terminales.`);
+    }
+
+    // Validación 2: Verificar si tiene usuarios asociados
+    const [users] = await mainDbPool.query<RowDataPacket[]>(
+        'SELECT COUNT(*) as count FROM sys_users WHERE branch_id = ?',
+        [id]
+    );
+
+    const userCount = users[0].count;
+
+    if (userCount > 0) {
+        throw new Error(`No se puede eliminar la sucursal porque tiene ${userCount} usuario(s) asociado(s). Primero reasigne o elimine los usuarios.`);
+    }
+
+    // Si pasa las validaciones, proceder con la eliminación
     await mainDbPool.query('DELETE FROM sys_branches WHERE id = ?', [id]);
 };

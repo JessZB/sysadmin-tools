@@ -219,6 +219,11 @@ function crearTarjetaServidorHTML(term) {
             </div>
         </div>
     `;
+    
+    // Cargar tasas de cambio para esta terminal servidor
+    const cardElement = col.querySelector('.pos-card');
+    loadCurrencyBadges(term.id, cardElement);
+    
     return col;
 }
 
@@ -265,6 +270,11 @@ function crearTarjetaHTML(term) {
             </div>
         </div>
     `;
+    
+    // Cargar tasas de cambio para esta terminal
+    const cardElement = col.querySelector('.pos-card');
+    loadCurrencyBadges(term.id, cardElement);
+    
     return col;
 }
 
@@ -554,6 +564,9 @@ async function llenarModalConFetch(id) {
                     </tr>
                 `;
             });
+            
+            // Cargar tasas de cambio para mostrar en el modal
+            loadCurrencyDetails(id);
         }
     } catch (e) { console.error(e); }
 }
@@ -777,3 +790,104 @@ window.verHistorialJob = async (jobName) => {
         tbody.innerHTML = '<tr><td colspan="4" class="text-danger text-center">Error obteniendo historial</td></tr>';
     }
 };
+
+/* =========================================
+   CURRENCY RATES - TASAS DE CAMBIO
+   ========================================= */
+
+/**
+ * Carga y muestra los badges de tasas de cambio en una card de terminal
+ */
+async function loadCurrencyBadges(terminalId, cardElement) {
+    try {
+        const response = await fetch(`/terminals/currencies/${terminalId}`);
+        const currencies = await response.json();
+        
+        // Mapeo de iconos y colores por código de moneda
+        const currencyConfig = {
+            '0000000003': { icon: 'bi-currency-euro', color: 'bg-primary', label: 'EUR' },
+            '0000000002': { icon: 'bi-currency-dollar', color: 'bg-success', label: 'USD' },
+            'TFSM': { icon: 'bi-credit-card', color: 'bg-dark', label: 'T.Forum' },
+            'CXC': { icon: 'bi-receipt', color: 'bg-warning text-dark', label: 'CxC' }
+        };
+        
+        const badgesHTML = currencies.map(curr => {
+            const config = currencyConfig[curr.c_codmoneda] || { icon: 'bi-cash', color: 'bg-secondary', label: curr.c_codmoneda };
+            return `
+                <span class="badge ${config.color}">
+                    <i class="bi ${config.icon}"></i> ${config.label}: ${curr.n_factor.toFixed(2)}
+                </span>
+            `;
+        }).join('');
+        
+        // Buscar o crear el contenedor de badges
+        let badgesContainer = cardElement.querySelector('.currency-badges');
+        if (!badgesContainer) {
+            badgesContainer = document.createElement('div');
+            badgesContainer.className = 'currency-badges';
+            cardElement.appendChild(badgesContainer);
+        }
+        
+        badgesContainer.innerHTML = badgesHTML;
+    } catch (error) {
+        console.error('Error loading currencies:', error);
+        // Mostrar mensaje de error discreto
+        let badgesContainer = cardElement.querySelector('.currency-badges');
+        if (!badgesContainer) {
+            badgesContainer = document.createElement('div');
+            badgesContainer.className = 'currency-badges';
+            cardElement.appendChild(badgesContainer);
+        }
+        badgesContainer.innerHTML = '<span class="badge bg-secondary"><i class="bi bi-exclamation-triangle"></i> N/D</span>';
+    }
+}
+
+/**
+ * Carga y muestra la tabla de tasas de cambio en el modal de detalles
+ */
+async function loadCurrencyDetails(terminalId) {
+    try {
+        const response = await fetch(`/terminals/currencies/${terminalId}`);
+        const currencies = await response.json();
+        
+        // Buscar o crear la sección de tasas en el modal
+        let currencySection = document.getElementById('currencySection');
+        if (!currencySection) {
+            // Crear la sección si no existe
+            const modalBody = document.querySelector('#detailsModal .modal-body');
+            currencySection = document.createElement('div');
+            currencySection.id = 'currencySection';
+            currencySection.className = 'mt-4';
+            currencySection.innerHTML = `
+                <h6 class="border-bottom pb-2 mb-3">
+                    <i class="bi bi-currency-exchange me-2"></i>Tasas de Cambio
+                </h6>
+                <table class="table table-sm table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Código</th>
+                            <th>Moneda</th>
+                            <th class="text-end">Factor</th>
+                            <th>Símbolo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="currencyTableBody"></tbody>
+                </table>
+            `;
+            modalBody.appendChild(currencySection);
+        }
+        
+        const tbody = document.getElementById('currencyTableBody');
+        tbody.innerHTML = currencies.map(curr => `
+            <tr>
+                <td><code>${curr.c_codmoneda}</code></td>
+                <td>${curr.c_descripcion}</td>
+                <td class="text-end fw-bold">${curr.n_factor.toFixed(2)}</td>
+                <td>${curr.c_simbolo}</td>
+            </tr>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error loading currency details:', error);
+    }
+}
