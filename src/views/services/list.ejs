@@ -123,7 +123,7 @@
             background: var(--card-bg);
             border-radius: var(--border-radius);
             padding: 1.5rem;
-            padding-top: 1.8rem;
+            padding-top: 2.5rem;
             /* Extra space for status line */
             box-shadow: var(--shadow-sm);
             transition: var(--transition);
@@ -421,6 +421,87 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* =========================================
+           BOOTSTRAP TABS CUSTOMIZATION
+           ========================================= */
+        .nav-tabs {
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 2rem;
+        }
+
+        .nav-tabs .nav-link {
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+            background: transparent;
+        }
+
+        .nav-tabs .nav-link:hover {
+            border-bottom-color: rgba(69, 123, 157, 0.3);
+            color: var(--cerulean);
+            background: transparent;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--cerulean);
+            border-bottom-color: var(--cerulean);
+            background-color: transparent;
+        }
+
+        .nav-tabs .nav-link i {
+            margin-right: 0.5rem;
+        }
+
+        /* Category Badges (para vista "Todos") */
+        .category-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            z-index: 2;
+        }
+
+        .category-servicios {
+            background-color: #457b9d;
+            color: white;
+        }
+
+        .category-terminales {
+            background-color: #6c2e7d;
+            color: white;
+        }
+
+        .category-balanzas {
+            background-color: #f57c00;
+            color: white;
+        }
+
+        .category-otros {
+            background-color: #718096;
+            color: white;
+        }
+
+        /* Branch Selector */
+        .branch-selector {
+            background: white;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .branch-selector label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
     </style>
 
     <!-- Header -->
@@ -459,10 +540,93 @@
         </div>
     </section>
 
-    <!-- Services Grid -->
-    <section class="services-grid" id="servicesGrid">
-        <!-- Las tarjetas se cargarán dinámicamente aquí -->
-    </section>
+    <!-- Category Tabs (Bootstrap Native) -->
+    <ul class="nav nav-tabs" id="categoryTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="todos-tab" data-bs-toggle="tab" data-bs-target="#todos-pane"
+                data-category="todos" type="button" role="tab" aria-controls="todos-pane" aria-selected="true">
+                <i class="bi bi-grid-3x3-gap"></i> Todos
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="servicios-tab" data-bs-toggle="tab" data-bs-target="#servicios-pane"
+                data-category="servicios" type="button" role="tab" aria-controls="servicios-pane" aria-selected="false">
+                <i class="bi bi-hdd-network"></i> Servicios
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="terminales-tab" data-bs-toggle="tab" data-bs-target="#terminales-pane"
+                data-category="terminales" type="button" role="tab" aria-controls="terminales-pane"
+                aria-selected="false">
+                <i class="bi bi-pc-display"></i> Terminales
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="balanzas-tab" data-bs-toggle="tab" data-bs-target="#balanzas-pane"
+                data-category="balanzas" type="button" role="tab" aria-controls="balanzas-pane" aria-selected="false">
+                <i class="bi bi-speedometer2"></i> Balanzas
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="otros-tab" data-bs-toggle="tab" data-bs-target="#otros-pane"
+                data-category="otros" type="button" role="tab" aria-controls="otros-pane" aria-selected="false">
+                <i class="bi bi-gear"></i> Otros
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="categoryTabContent">
+        <!-- Todos Tab -->
+        <div class="tab-pane fade show active" id="todos-pane" role="tabpanel" aria-labelledby="todos-tab">
+            <section class="services-grid" id="servicesGrid-todos">
+                <!-- Las tarjetas se cargarán dinámicamente aquí -->
+            </section>
+        </div>
+
+        <!-- Servicios Tab -->
+        <div class="tab-pane fade" id="servicios-pane" role="tabpanel" aria-labelledby="servicios-tab">
+            <section class="services-grid" id="servicesGrid-servicios">
+                <!-- Las tarjetas se cargarán dinámicamente aquí -->
+            </section>
+        </div>
+
+        <!-- Terminales Tab -->
+        <div class="tab-pane fade" id="terminales-pane" role="tabpanel" aria-labelledby="terminales-tab">
+            <!-- Branch Selector (solo admin) -->
+            <div class="branch-selector mb-3" id="branchSelector" style="display: none;">
+                <label class="form-label">Sucursal:</label>
+                <select class="form-select" id="branchSelect">
+                    <!-- Se carga dinámicamente -->
+                </select>
+            </div>
+            <section class="services-grid" id="servicesGrid-terminales">
+                <!-- Las tarjetas se cargarán dinámicamente aquí -->
+            </section>
+        </div>
+
+        <!-- Balanzas Tab -->
+        <div class="tab-pane fade" id="balanzas-pane" role="tabpanel" aria-labelledby="balanzas-tab">
+            <section class="services-grid" id="servicesGrid-balanzas">
+                <!-- Las tarjetas se cargarán dinámicamente aquí -->
+            </section>
+        </div>
+
+        <!-- Otros Tab -->
+        <div class="tab-pane fade" id="otros-pane" role="tabpanel" aria-labelledby="otros-tab">
+            <section class="services-grid" id="servicesGrid-otros">
+                <!-- Las tarjetas se cargarán dinámicamente aquí -->
+            </section>
+        </div>
+    </div>
+
+    <!-- Pasar datos del usuario al JavaScript -->
+    <script>
+        window.currentUser = {
+            role: '<%= user.role %>',
+            branch_id: Number("<%= user.branch_id || 'null' %>")
+        };
+    </script>
 
     <!-- Modal Crear/Editar Servicio -->
     <div class="modal fade" id="modalServicio" tabindex="-1">
@@ -496,6 +660,19 @@
                                 <option value="ip">Dirección IP</option>
                                 <option value="url">URL/Dominio</option>
                             </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Categoría <span class="text-danger">*</span></label>
+                            <select class="form-select" id="categoria" required>
+                                <option value="servicios">Servicios</option>
+                                <option value="balanzas">Balanzas</option>
+                                <option value="otros">Otros</option>
+                            </select>
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle"></i>
+                                La categoría "Terminales" se gestiona automáticamente desde el módulo de Terminales
+                            </small>
                         </div>
 
                         <div class="mb-3">

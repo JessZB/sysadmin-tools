@@ -116,3 +116,53 @@ export const getHistory = async (req: Request, res: Response) => {
         res.status(500).json({ error: e.message });
     }
 };
+
+/**
+ * Obtiene servicios filtrados por categoría
+ */
+export const getByCategory = async (req: Request, res: Response) => {
+    try {
+        const { category } = req.params;
+        const currentUser = res.locals.user;
+
+        let branchId: number | undefined;
+
+        // Si es categoría terminales
+        if (category === 'terminales') {
+            // Si es admin y se especifica branch_id en query
+            if (currentUser.role === 'admin' && req.query.branch_id) {
+                branchId = parseInt(req.query.branch_id as string);
+            } else {
+                // Usuario regular: usar su sucursal
+                branchId = currentUser.branch_id;
+            }
+
+            // Sincronizar terminales antes de devolver
+            if (branchId) {
+                await servicesService.syncTerminalsAsServices(branchId, currentUser.id);
+            }
+        }
+
+        const services = await servicesService.getServicesByCategory(category, branchId);
+        res.json(services);
+    } catch (e: any) {
+        console.error('Error getting services by category:', e);
+        res.status(500).json({ error: e.message });
+    }
+};
+
+/**
+ * Obtiene la lista de sucursales (solo admin)
+ */
+export const getBranches = async (req: Request, res: Response) => {
+    try {
+        const { mainDbPool } = await import('../../shared/db/main.db');
+        const [branches] = await mainDbPool.query(
+            'SELECT id, name FROM sys_branches WHERE is_active = 1 ORDER BY name'
+        );
+        res.json(branches);
+    } catch (e: any) {
+        console.error('Error getting branches:', e);
+        res.status(500).json({ error: e.message });
+    }
+};

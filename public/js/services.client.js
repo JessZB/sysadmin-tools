@@ -1,60 +1,153 @@
 /* =========================================
-   SERVICES MONITORING - CLIENT SIDE (ASYNC UPDATES)
+   SERVICES MONITORING - CLIENT SIDE (BOOTSTRAP TABS)
    ========================================= */
 
 let modalServicio;
 let modalHistorial;
-let servicesData = [];
-let pingInProgress = new Set(); // Track which services are being pinged
+let currentCategory = 'todos';
+let currentBranchId = null;
+let userRole = null;
+let userBranchId = null;
+let servicesDataByCategory = {
+    todos: [],
+    servicios: [],
+    terminales: [],
+    balanzas: [],
+    otros: []
+};
+let pingInProgress = new Set();
 
 document.addEventListener('DOMContentLoaded', function() {
     modalServicio = new bootstrap.Modal(document.getElementById('modalServicio'));
     modalHistorial = new bootstrap.Modal(document.getElementById('modalHistorial'));
     
-    // Cargar servicios al inicio
-    loadServices();
+    // Obtener datos del usuario
+    userRole = window.currentUser?.role || 'analista';
+    userBranchId = window.currentUser?.branch_id;
     
-    // Actualizar cada 30 segundos
-    setInterval(loadServices, 30000);
+    // Event listener para cambio de tabs (Bootstrap)
+    const tabElements = document.querySelectorAll('button[data-bs-toggle="tab"]');
+    tabElements.forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function (event) {
+            const category = event.target.getAttribute('data-category');
+            onTabChange(category);
+        });
+    });
+    
+    // Event listener para cambio de sucursal
+    const branchSelect = document.getElementById('branchSelect');
+    if (branchSelect) {
+        branchSelect.addEventListener('change', function() {
+            currentBranchId = parseInt(this.value);
+            loadServicesByCategory('terminales');
+        });
+    }
+    
+    // Cargar categoría inicial
+    loadServicesByCategory('todos');
 });
+
+/* =========================================
+   TAB CHANGE HANDLER
+   ========================================= */
+
+function onTabChange(category) {
+    currentCategory = category;
+    
+    // Mostrar/ocultar selector de sucursales
+    const branchSelector = document.getElementById('branchSelector');
+    if (category === 'terminales' && userRole === 'admin') {
+        branchSelector.style.display = 'block';
+        if (!currentBranchId) {
+            loadBranches();
+        }
+    } else {
+        branchSelector.style.display = 'none';
+    }
+    
+    // Controlar botón "Nuevo Servicio"
+    const newServiceBtn = document.querySelector('[onclick="abrirModalCrear()"]');
+    if (category === 'terminales') {
+        newServiceBtn.disabled = true;
+        newServiceBtn.title = 'Las terminales se gestionan desde el módulo de Terminales';
+    } else if (category === 'todos') {
+        newServiceBtn.disabled = true;
+        newServiceBtn.title = 'Selecciona una categoría específica para crear un servicio';
+    } else {
+        newServiceBtn.disabled = false;
+        newServiceBtn.title = '';
+    }
+    
+    // Cargar servicios si no están cargados
+    if (servicesDataByCategory[category].length === 0) {
+        loadServicesByCategory(category);
+    }
+}
 
 /* =========================================
    LOAD AND RENDER SERVICES
    ========================================= */
 
-async function loadServices() {
+async function loadServicesByCategory(category) {
     try {
-        const response = await fetch('/services/data');
-        servicesData = await response.json();
+        let url;
         
-        renderServicesGrid(servicesData);
-        updateStats(servicesData);
+        if (category === 'todos') {
+            url = '/services/data';
+        } else {
+            url = `/services/category/${category}`;
+            
+            if (category === 'terminales' && currentBranchId) {
+                url += `?branch_id=${currentBranchId}`;
+            }
+        }
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        servicesDataByCategory[category] = data;
+        renderServicesGrid(category, data);
+        
+        // Actualizar stats solo si es "todos"
+        if (category === 'todos') {
+            updateStats(data);
+        }
     } catch (error) {
         console.error('Error loading services:', error);
         showErrorToast('Error al cargar servicios');
     }
 }
 
-function renderServicesGrid(services) {
-    const grid = document.getElementById('servicesGrid');
+function renderServicesGrid(category, services) {
+    const grid = document.getElementById(`servicesGrid-${category}`);
     
     if (services.length === 0) {
-        grid.innerHTML = `
-            <div class="col-12 text-center py-5">
-                <i class="fa-solid fa-inbox fa-3x text-muted mb-3"></i>
-                <p class="text-muted">No hay servicios registrados. Crea uno para comenzar.</p>
-            </div>
-        `;
+        showEmptyMessage(grid, category);
         return;
     }
     
-    const cards = services.map(service => createServiceCard(service)).join('');
-    const addCard = createAddServiceCard();
+    const cards = services.map(service => createServiceCard(service, category)).join('');
+    const addCard = (category !== 'todos' && category !== 'terminales') ? createAddServiceCard(category) : '';
     
     grid.innerHTML = cards + addCard;
 }
 
-function createServiceCard(service) {
+function showEmptyMessage(grid, category) {
+    let message = 'No hay servicios registrados en esta categoría.';
+    
+    if (category === 'terminales') {
+        message = 'No hay terminales registradas para esta sucursal.';
+    }
+    
+    grid.innerHTML = `
+        <div class="col-12 text-center py-5">
+            <i class="fa-solid fa-inbox fa-3x text-muted mb-3"></i>
+            <p class="text-muted">${message}</p>
+        </div>
+    `;
+}
+
+function createServiceCard(service, viewCategory) {
     const status = getServiceStatus(service);
     const latency = service.last_response_time || 0;
     const lastChecked = service.last_checked_at 
@@ -75,10 +168,22 @@ function createServiceCard(service) {
         </div>
     ` : '';
     
+    const isTerminal = service.category === 'terminales';
+    const disableEdit = isTerminal ? 'disabled title="Editar desde módulo Terminales"' : '';
+    const disableDelete = isTerminal ? 'disabled title="Eliminar desde módulo Terminales"' : '';
+    
+    // Badge de categoría solo en vista "Todos"
+    const categoryBadge = viewCategory === 'todos' ? `
+        <span class="category-badge category-${service.category}">
+            ${getCategoryLabel(service.category)}
+        </span>
+    ` : '';
+    
     return `
         <article class="service-card ${status.class}" id="service-card-${service.id}">
             <div class="card-status-line"></div>
             ${loadingOverlay}
+            ${categoryBadge}
             
             <div class="card-header">
                 <div class="service-info">
@@ -113,10 +218,10 @@ function createServiceCard(service) {
                 <button class="action-btn-small" onclick="verHistorial(${service.id}, '${escapeHtml(service.name)}')" title="Historial">
                     <i class="bi bi-clock-history"></i>
                 </button>
-                <button class="action-btn-small" onclick="abrirModalEditar(${service.id})" title="Editar">
+                <button class="action-btn-small" onclick="abrirModalEditar(${service.id})" title="Editar" ${disableEdit}>
                     <i class="bi bi-pencil"></i>
                 </button>
-                <button class="action-btn-small btn-delete" onclick="eliminarServicio(${service.id}, '${escapeHtml(service.name)}')" title="Eliminar">
+                <button class="action-btn-small btn-delete" onclick="eliminarServicio(${service.id}, '${escapeHtml(service.name)}')" title="Eliminar" ${disableDelete}>
                     <i class="bi bi-trash"></i>
                 </button>
             </div>
@@ -124,7 +229,7 @@ function createServiceCard(service) {
     `;
 }
 
-function createAddServiceCard() {
+function createAddServiceCard(category) {
     return `
         <article class="service-card add-service-card" onclick="abrirModalCrear()">
             <div class="add-content">
@@ -133,6 +238,16 @@ function createAddServiceCard() {
             </div>
         </article>
     `;
+}
+
+function getCategoryLabel(category) {
+    const labels = {
+        'servicios': 'Servicio',
+        'terminales': 'Terminal',
+        'balanzas': 'Balanza',
+        'otros': 'Otro'
+    };
+    return labels[category] || category;
 }
 
 function getServiceStatus(service) {
@@ -181,21 +296,47 @@ function updateStats(services) {
 }
 
 /* =========================================
+   BRANCHES (ADMIN)
+   ========================================= */
+
+async function loadBranches() {
+    try {
+        const response = await fetch('/services/branches');
+        const branches = await response.json();
+        
+        const select = document.getElementById('branchSelect');
+        select.innerHTML = branches.map(b => 
+            `<option value="${b.id}" ${b.id === userBranchId ? 'selected' : ''}>${b.name}</option>`
+        ).join('');
+        
+        currentBranchId = parseInt(select.value);
+    } catch (error) {
+        console.error('Error loading branches:', error);
+    }
+}
+
+/* =========================================
    UPDATE SINGLE CARD
    ========================================= */
 
 function updateSingleCard(serviceId) {
-    const service = servicesData.find(s => s.id === serviceId);
-    if (!service) return;
-    
-    const cardElement = document.getElementById(`service-card-${serviceId}`);
-    if (!cardElement) return;
-    
-    const newCard = createServiceCard(service);
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = newCard;
-    
-    cardElement.replaceWith(tempDiv.firstElementChild);
+    // Buscar el servicio en todas las categorías y actualizar en cada grid donde aparezca
+    for (const [category, services] of Object.entries(servicesDataByCategory)) {
+        const service = services.find(s => s.id === serviceId);
+        if (service) {
+            // Buscar la card en el grid de esta categoría
+            const grid = document.getElementById(`servicesGrid-${category}`);
+            if (grid) {
+                const cardElement = grid.querySelector(`#service-card-${serviceId}`);
+                if (cardElement) {
+                    const newCard = createServiceCard(service, category);
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = newCard;
+                    cardElement.replaceWith(tempDiv.firstElementChild);
+                }
+            }
+        }
+    }
 }
 
 function showLoadingState(serviceId) {
@@ -222,7 +363,12 @@ function abrirModalCrear() {
 
 async function abrirModalEditar(id) {
     try {
-        const servicio = servicesData.find(s => s.id === id);
+        // Buscar servicio en todas las categorías
+        let servicio = null;
+        for (const services of Object.values(servicesDataByCategory)) {
+            servicio = services.find(s => s.id === id);
+            if (servicio) break;
+        }
         
         if (!servicio) {
             showErrorToast('Servicio no encontrado');
@@ -234,6 +380,7 @@ async function abrirModalEditar(id) {
         document.getElementById('nombre').value = servicio.name;
         document.getElementById('host').value = servicio.host;
         document.getElementById('tipo').value = servicio.type;
+        document.getElementById('categoria').value = servicio.category || 'servicios';
         document.getElementById('descripcion').value = servicio.description || '';
         document.getElementById('activo').checked = servicio.is_active === 1;
         
@@ -250,12 +397,13 @@ async function guardarServicio() {
         name: document.getElementById('nombre').value,
         host: document.getElementById('host').value,
         type: document.getElementById('tipo').value,
+        category: document.getElementById('categoria').value,
         description: document.getElementById('descripcion').value,
         is_active: document.getElementById('activo').checked ? 1 : 0
     };
     
     if (!data.name || !data.host) {
-        showWarningToast('Complete los campos requeridos');
+        showInfoToast('Complete los campos requeridos');
         return;
     }
     
@@ -274,7 +422,10 @@ async function guardarServicio() {
         if (result.success) {
             showSuccessToast(id ? 'Servicio actualizado' : 'Servicio creado');
             modalServicio.hide();
-            loadServices();
+            
+            // Recargar categorías afectadas
+            loadServicesByCategory('todos');
+            loadServicesByCategory(data.category);
         } else {
             showErrorToast(result.error || 'Error al guardar');
         }
@@ -304,7 +455,9 @@ async function eliminarServicio(id, nombre) {
         
         if (data.success) {
             showSuccessToast('Servicio eliminado');
-            loadServices();
+            // Recargar todas las categorías
+            loadServicesByCategory('todos');
+            loadServicesByCategory(currentCategory);
         } else {
             showErrorToast(data.error || 'Error al eliminar');
         }
@@ -320,7 +473,7 @@ async function eliminarServicio(id, nombre) {
 
 async function pingServiceAsync(id) {
     if (pingInProgress.has(id)) {
-        showWarningToast('Ya se está ejecutando un ping a este servicio');
+        showInfoToast('Ya se está ejecutando un ping a este servicio');
         return;
     }
     
@@ -331,17 +484,23 @@ async function pingServiceAsync(id) {
         const data = await response.json();
         
         if (data.success) {
-            // Actualizar datos del servicio
-            const serviceIndex = servicesData.findIndex(s => s.id === id);
-            if (serviceIndex !== -1) {
-                const result = data.result;
-                servicesData[serviceIndex].last_status = result.alive ? 1 : 0;
-                servicesData[serviceIndex].last_response_time = result.avg;
-                servicesData[serviceIndex].last_checked_at = new Date().toISOString();
+            // Actualizar datos del servicio en todas las categorías
+            for (const [category, services] of Object.entries(servicesDataByCategory)) {
+                const serviceIndex = services.findIndex(s => s.id === id);
+                if (serviceIndex !== -1) {
+                    const result = data.result;
+                    servicesDataByCategory[category][serviceIndex].last_status = result.alive ? 1 : 0;
+                    servicesDataByCategory[category][serviceIndex].last_response_time = result.avg;
+                    servicesDataByCategory[category][serviceIndex].last_checked_at = new Date().toISOString();
+                }
             }
             
             hideLoadingState(id);
-            updateStats(servicesData);
+            
+            // Actualizar stats si estamos en "todos"
+            if (currentCategory === 'todos') {
+                updateStats(servicesDataByCategory.todos);
+            }
             
             if (data.result.alive) {
                 showSuccessToast(`Ping exitoso: ${data.result.avg}ms`);
@@ -373,7 +532,7 @@ async function pingAll() {
     
     if (!result.isConfirmed) return;
     
-    const serviceIds = servicesData.map(s => s.id);
+    const serviceIds = servicesDataByCategory.todos.map(s => s.id);
     
     showInfoToast(`Ejecutando ping a ${serviceIds.length} servicio(s)...`);
     
@@ -459,48 +618,4 @@ function escapeHtml(text) {
         "'": '&#039;'
     };
     return text.replace(/[&<>"']/g, m => map[m]);
-}
-
-/* =========================================
-   TOAST NOTIFICATIONS
-   ========================================= */
-
-function showSuccessToast(message) {
-    Toastify({
-        text: message,
-        duration: 3000,
-        gravity: "top",
-        position: "right",
-        backgroundColor: "#2e7d32",
-    }).showToast();
-}
-
-function showErrorToast(message) {
-    Toastify({
-        text: message,
-        duration: 4000,
-        gravity: "top",
-        position: "right",
-        backgroundColor: "#e63946",
-    }).showToast();
-}
-
-function showWarningToast(message) {
-    Toastify({
-        text: message,
-        duration: 3000,
-        gravity: "top",
-        position: "right",
-        backgroundColor: "#f57c00",
-    }).showToast();
-}
-
-function showInfoToast(message) {
-    Toastify({
-        text: message,
-        duration: 2000,
-        gravity: "top",
-        position: "right",
-        backgroundColor: "#0dcaf0",
-    }).showToast();
 }

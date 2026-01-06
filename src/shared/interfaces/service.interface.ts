@@ -1,14 +1,24 @@
+export type ServiceCategory = 'servicios' | 'terminales' | 'balanzas' | 'otros';
+
 export interface Service {
     id?: number;
     name: string;
     host: string;
     type: 'ip' | 'url';
+    category: ServiceCategory;
+    terminal_id?: number;
     description?: string;
     is_active?: boolean;
     created_by?: number;
     updated_by?: number;
     created_at?: Date;
     updated_at?: Date;
+
+    // Campos adicionales para vista
+    branch_name?: string;
+    last_status?: number;
+    last_response_time?: number;
+    last_checked_at?: Date;
 }
 
 export interface ServiceCheck {

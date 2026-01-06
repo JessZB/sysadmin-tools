@@ -8,6 +8,9 @@ router.get('/', controller.renderList);
 
 // API endpoints
 router.get('/data', controller.getListJson);
+router.get('/category/:category', controller.getByCategory);
+router.get('/branches', controller.getBranches);
+router.get('/history/:id', controller.getHistory);
 router.post('/', controller.create);
 router.put('/:id', controller.update);
 router.delete('/:id', controller.remove);
@@ -15,8 +18,5 @@ router.delete('/:id', controller.remove);
 // Ping endpoints
 router.post('/ping/:id', controller.pingSingle);
 router.post('/ping-batch', controller.pingBatch);
-
-// Historial
-router.get('/history/:id', controller.getHistory);
 
 export default router;
