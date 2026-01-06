@@ -12,6 +12,7 @@ import dashboardRoutes from './modules/dashboard/dashboard.routes';
 import branchesRoutes from './modules/branches/brances.routes';
 import auditRoutes from './modules/audit/audit.routes';
 import barcodeRoutes from './modules/barcode/barcode.routes';
+import servicesRoutes from './modules/services/services.routes';
 import { notFoundHandler } from './shared/middlewares/not-found.middleware';
 import { requireAuth } from './shared/middlewares/auth.middleware';
 import { allowRoles } from './shared/middlewares/role.middleware';
@@ -75,6 +76,9 @@ app.use('/audit', requireAuth, requireModule('audit'), auditRoutes);
 
 // Barcode
 app.use('/barcode', requireAuth, requireModule('barcode'), barcodeRoutes);
+
+// Monitoreo de Servicios
+app.use('/services', requireAuth, requireModule('services'), servicesRoutes);
 
 // Manejo de Rutas No Encontradas
 app.use(notFoundHandler);

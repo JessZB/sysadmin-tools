@@ -97,16 +97,30 @@
                                                     </a>
                                                     <% } %>
 
-                                                        <!-- Auditoría -->
-                                                        <% if (user.modules && user.modules.includes('audit')) { %>
-                                                            <a href="/audit" class="menu-card accent">
+                                                        <!-- Monitoreo de Servicios -->
+                                                        <% if (user.modules && user.modules.includes('services')) { %>
+                                                            <a href="/services" class="menu-card">
                                                                 <div class="menu-icon">
-                                                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                                                    <i class="fa-solid fa-heartbeat"></i>
                                                                 </div>
-                                                                <h4 class="menu-title">Auditoría</h4>
-                                                                <p class="menu-description">Registro de actividades</p>
+                                                                <h4 class="menu-title">Monitoreo Servicios</h4>
+                                                                <p class="menu-description">Verificar disponibilidad</p>
                                                             </a>
                                                             <% } %>
+
+                                                                <!-- Auditoría -->
+                                                                <% if (user.modules && user.modules.includes('audit')) {
+                                                                    %>
+                                                                    <a href="/audit" class="menu-card accent">
+                                                                        <div class="menu-icon">
+                                                                            <i
+                                                                                class="fa-solid fa-clock-rotate-left"></i>
+                                                                        </div>
+                                                                        <h4 class="menu-title">Auditoría</h4>
+                                                                        <p class="menu-description">Registro de
+                                                                            actividades</p>
+                                                                    </a>
+                                                                    <% } %>
             </div>
 
             <!-- Logout Button -->

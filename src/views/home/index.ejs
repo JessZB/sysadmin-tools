@@ -297,16 +297,29 @@
                                                 </a>
                                                 <% } %>
 
-                                                    <!-- Auditoría -->
-                                                    <% if (user.modules && user.modules.includes('audit')) { %>
-                                                        <a href="/audit" class="menu-card accent">
+                                                    <!-- Monitoreo de Servicios -->
+                                                    <% if (user.modules && user.modules.includes('services')) { %>
+                                                        <a href="/services" class="menu-card">
                                                             <div class="menu-icon">
-                                                                <i class="fa-solid fa-clock-rotate-left"></i>
+                                                                <i class="fa-solid fa-heartbeat"></i>
                                                             </div>
-                                                            <h3 class="menu-title">Auditoría</h3>
-                                                            <p class="menu-description">Registro de actividades</p>
+                                                            <h3 class="menu-title">Monitoreo Servicios</h3>
+                                                            <p class="menu-description">Verificar disponibilidad
+                                                                mediante ping</p>
                                                         </a>
                                                         <% } %>
+
+                                                            <!-- Auditoría -->
+                                                            <% if (user.modules && user.modules.includes('audit')) { %>
+                                                                <a href="/audit" class="menu-card accent">
+                                                                    <div class="menu-icon">
+                                                                        <i class="fa-solid fa-clock-rotate-left"></i>
+                                                                    </div>
+                                                                    <h3 class="menu-title">Auditoría</h3>
+                                                                    <p class="menu-description">Registro de actividades
+                                                                    </p>
+                                                                </a>
+                                                                <% } %>
         </div>
 
         <!-- Logout Button -->

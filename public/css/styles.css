@@ -1,0 +1,47 @@
+/* =========================================
+   VARIABLES CSS GLOBALES
+   ========================================= */
+
+:root {
+    /* Colores principales del proyecto */
+    --cerulean: #457b9d;
+    --cerulean-light: #a8dadc;
+    --cerulean-dark: #1d3557;
+    --bg-light: #f1faee;
+    
+    /* Colores de estado */
+    --success-color: #2e7d32;
+    --success-light: #d1fae5;
+    --warning-color: #f57c00;
+    --warning-light: #fefcbf;
+    --danger-color: #e63946;
+    --danger-light: #fed7d7;
+    
+    /* Colores de fondo y texto */
+    --card-bg: #ffffff;
+    --text-primary: #2d3748;
+    --text-secondary: #718096;
+    
+    /* Estilos generales */
+    --border-radius: 12px;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --transition: all 0.3s ease;
+}
+
+/* =========================================
+   UTILIDADES GLOBALES
+   ========================================= */
+
+.bg-cerulean {
+    background-color: var(--cerulean) !important;
+}
+
+.text-cerulean {
+    color: var(--cerulean) !important;
+}
+
+.card-header-cerulean {
+    background: linear-gradient(135deg, var(--cerulean) 0%, var(--cerulean-dark) 100%);
+    color: white;
+}
