@@ -48,8 +48,13 @@ export const login = async (req: Request, res: Response) => {
         // 5. Responder al Frontend
         return res.json({ success: true, redirectUrl: '/home' });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error en login controller:', error);
+
+        if (error.message === 'NO_MODULES_ASSIGNED') {
+            return res.status(403).json({ success: false, error: 'No tienes módulos asignados. Contacta al administrador.' });
+        }
+
         return res.status(500).json({ success: false, error: 'Error interno del servidor' });
     }
 };

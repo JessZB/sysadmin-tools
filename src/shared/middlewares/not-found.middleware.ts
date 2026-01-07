@@ -10,5 +10,5 @@ export const notFoundHandler = (req: Request, res: Response, next: NextFunction)
     }
 
     // Si es una navegación normal, renderizamos la vista
-    res.status(404).render('404');
+    res.status(404).render('error/404');
 };

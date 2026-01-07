@@ -38,6 +38,10 @@ export const login = async (username: string, pass: string): Promise<{ token: st
         allowedModules = userMods.map(m => m.module_code);
     }
 
+    if (allowedModules.length === 0) {
+        throw new Error('NO_MODULES_ASSIGNED');
+    }
+
     // 4. Payload
     const payload = {
         id: user.id,

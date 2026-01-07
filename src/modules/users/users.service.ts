@@ -83,3 +83,17 @@ export const updateUserModules = async (userId: number, modules: string[]) => {
 export const deleteUser = async (id: number) => {
     await mainDbPool.query('DELETE FROM sys_users WHERE id = ?', [id]);
 };
+
+// NUEVO: Obtener módulos de un usuario específico (para validación en tiempo real)
+export const getUserModules = async (userId: number, role: string): Promise<string[]> => {
+    if (role === 'admin') {
+        const [allMods] = await mainDbPool.query<RowDataPacket[]>('SELECT code FROM sys_modules');
+        return allMods.map(m => m.code);
+    } else {
+        const [userMods] = await mainDbPool.query<RowDataPacket[]>(
+            'SELECT module_code FROM sys_user_modules WHERE user_id = ?',
+            [userId]
+        );
+        return userMods.map(m => m.module_code);
+    }
+};
