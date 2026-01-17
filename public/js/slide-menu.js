@@ -2,18 +2,21 @@
 // SLIDE MENU - MENÚ DESLIZANTE
 // ============================================
 
+(function() {
+const d = document;
+
 class SlideMenu {
     constructor() {
-        this.overlay = document.getElementById('slideMenuOverlay');
-        this.menu = document.getElementById('slideMenu');
+        this.overlay = d.getElementById('slideMenuOverlay');
+        this.menu = d.getElementById('slideMenu');
         this.isOpen = false;
         this.init();
     }
 
     init() {
         // Event listeners para botones de abrir/cerrar
-        const openButtons = document.querySelectorAll('[data-slide-menu-open]');
-        const closeButtons = document.querySelectorAll('[data-slide-menu-close]');
+        const openButtons = d.querySelectorAll('[data-slide-menu-open]');
+        const closeButtons = d.querySelectorAll('[data-slide-menu-close]');
 
         openButtons.forEach(btn => {
             btn.addEventListener('click', () => this.open());
@@ -33,7 +36,7 @@ class SlideMenu {
         }
 
         // Cerrar con tecla ESC
-        document.addEventListener('keydown', (e) => {
+        d.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.isOpen) {
                 this.close();
             }
@@ -48,7 +51,7 @@ class SlideMenu {
 
         this.overlay.classList.add('active');
         this.menu.classList.add('active');
-        document.body.style.overflow = 'hidden';
+        d.body.style.overflow = 'hidden';
         this.isOpen = true;
 
         // Animación de entrada de las cards
@@ -60,7 +63,7 @@ class SlideMenu {
 
         this.overlay.classList.remove('active');
         this.menu.classList.remove('active');
-        document.body.style.overflow = '';
+        d.body.style.overflow = '';
         this.isOpen = false;
     }
 
@@ -89,9 +92,10 @@ class SlideMenu {
 }
 
 // Inicializar el menú cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
+d.addEventListener('DOMContentLoaded', () => {
     window.slideMenu = new SlideMenu();
 });
 
 // Hacer la clase global para acceso externo si es necesario
 window.SlideMenu = SlideMenu;
+})();

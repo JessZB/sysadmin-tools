@@ -1,8 +1,9 @@
 const API_URL = 'http://localhost:4000/api/pos-jobs'; // Tu Backend
 let terminalActualId = null;
+const d = document;
 
 // 1. Cargar lista de cajas al iniciar
-document.addEventListener('DOMContentLoaded', async () => {
+d.addEventListener('DOMContentLoaded', async () => {
     try {
         const response = await fetch(`${API_URL}/terminals`);
         const result = await response.json();
@@ -10,6 +11,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (result.success) {
             renderizarCajas(result.data);
         }
+
+        // Event Delegation for Jobs Table
+        const tablaJobs = d.getElementById('tabla-jobs');
+        if (tablaJobs) {
+            tablaJobs.addEventListener('click', (e) => {
+                const btn = e.target.closest('button');
+                if (!btn) return;
+
+                if (btn.classList.contains('btn-execute')) {
+                    const jobName = btn.dataset.job;
+                    ejecutarJob(jobName);
+                }
+            });
+        }
+
     } catch (error) {
         console.error('Error cargando cajas:', error);
         alert('Error conectando con el servidor Backend');
@@ -18,11 +34,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // 2. Renderizar la lista lateral
 function renderizarCajas(cajas) {
-    const contenedor = document.getElementById('lista-cajas');
+    const contenedor = d.getElementById('lista-cajas');
     contenedor.innerHTML = '';
 
     cajas.forEach(caja => {
-        const item = document.createElement('button');
+        const item = d.createElement('button');
         item.className = 'list-group-item list-group-item-action cursor-pointer';
         item.innerHTML = `
             <div class="d-flex w-100 justify-content-between">
@@ -31,7 +47,7 @@ function renderizarCajas(cajas) {
             <small class="text-muted">${caja.ip_address}</small>
         `;
         
-        item.onclick = () => seleccionarCaja(caja, item);
+        item.addEventListener('click', () => seleccionarCaja(caja, item));
         contenedor.appendChild(item);
     });
 }
@@ -39,13 +55,13 @@ function renderizarCajas(cajas) {
 // 3. Seleccionar caja y cargar jobs
 function seleccionarCaja(caja, elementoHtml) {
     // Manejo visual de "activo"
-    document.querySelectorAll('.list-group-item').forEach(el => el.classList.remove('active'));
+    d.querySelectorAll('.list-group-item').forEach(el => el.classList.remove('active'));
     elementoHtml.classList.add('active');
 
     // Actualizar estado global
     terminalActualId = caja.id;
-    document.getElementById('titulo-detalle').innerText = `Jobs en: ${caja.name}`;
-    document.getElementById('btn-refresh').classList.remove('d-none'); // Mostrar botón refrescar
+    d.getElementById('titulo-detalle').innerText = `Jobs en: ${caja.name}`;
+    d.getElementById('btn-refresh').classList.remove('d-none'); // Mostrar botón refrescar
 
     cargarJobsActuales();
 }
@@ -54,7 +70,7 @@ function seleccionarCaja(caja, elementoHtml) {
 async function cargarJobsActuales() {
     if (!terminalActualId) return;
 
-    const tbody = document.getElementById('tabla-jobs');
+    const tbody = d.getElementById('tabla-jobs');
     tbody.innerHTML = '<tr><td colspan="5" class="text-center">Cargando datos de SQL Server... <div class="spinner-border spinner-border-sm"></div></td></tr>';
 
     try {
@@ -69,7 +85,7 @@ async function cargarJobsActuales() {
 
 // 5. Renderizar la tabla de jobs
 function renderizarTablaJobs(jobs) {
-    const tbody = document.getElementById('tabla-jobs');
+    const tbody = d.getElementById('tabla-jobs');
     tbody.innerHTML = '';
 
     jobs.forEach(job => {
@@ -97,15 +113,15 @@ function renderizarTablaJobs(jobs) {
                 break;
         }
 
-        const tr = document.createElement('tr');
+        const tr = d.createElement('tr');
         tr.innerHTML = `
             <td><span class="badge ${badgeClass}">${icon} ${job.LastStatus}</span></td>
             <td class="fw-bold">${job.JobName}</td>
             <td>${job.LastRunDate ? new Date(job.LastRunDate).toLocaleString() : '-'}</td>
             <td class="small text-muted text-truncate" style="max-width: 200px;">${job.LastMessage || ''}</td>
             <td>
-                <button class="btn btn-sm btn-outline-dark" 
-                    onclick="ejecutarJob('${job.JobName}')" ${btnDisabled}>
+                <button class="btn btn-sm btn-outline-dark btn-execute" 
+                    data-job="${job.JobName}" ${btnDisabled}>
                     <i class="bi bi-play-fill"></i> Ejecutar
                 </button>
             </td>

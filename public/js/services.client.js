@@ -2,6 +2,7 @@
    SERVICES MONITORING - CLIENT SIDE (BOOTSTRAP TABS)
    ========================================= */
 
+const d = document;
 let modalServicio;
 let modalHistorial;
 let currentCategory = 'todos';
@@ -17,16 +18,67 @@ let servicesDataByCategory = {
 };
 let pingInProgress = new Set();
 
-document.addEventListener('DOMContentLoaded', function() {
-    modalServicio = new bootstrap.Modal(document.getElementById('modalServicio'));
-    modalHistorial = new bootstrap.Modal(document.getElementById('modalHistorial'));
+d.addEventListener('DOMContentLoaded', function() {
+    modalServicio = new bootstrap.Modal(d.getElementById('modalServicio'));
+    modalHistorial = new bootstrap.Modal(d.getElementById('modalHistorial'));
     
     // Obtener datos del usuario
     userRole = window.currentUser?.role || 'analista';
     userBranchId = window.currentUser?.branch_id;
     
+    // --- EVENT LISTENERS ---
+
+    // 1. Botón Ping Todos
+    const btnPingAll = d.getElementById('btnPingAll');
+    if (btnPingAll) {
+        btnPingAll.addEventListener('click', pingAll);
+    }
+
+    // 2. Botón Nuevo Servicio
+    const btnNewService = d.getElementById('btnNewService');
+    if (btnNewService) {
+        btnNewService.addEventListener('click', abrirModalCrear);
+    }
+
+    // 3. Botón Guardar Servicio
+    const btnSaveService = d.getElementById('btnSaveService');
+    if (btnSaveService) {
+        btnSaveService.addEventListener('click', guardarServicio);
+    }
+
+    // 4. Delegación de eventos para las tarjetas de servicio (Grid)
+    const tabContent = d.getElementById('categoryTabContent');
+    if (tabContent) {
+        tabContent.addEventListener('click', (e) => {
+            // Manejar click en "Añadir Servicio" card
+            const addCard = e.target.closest('.add-service-card');
+            if (addCard) {
+                abrirModalCrear();
+                return;
+            }
+
+            // Manejar botones de acción
+            const btn = e.target.closest('button');
+            if (!btn) return;
+
+            if (btn.classList.contains('btn-ping')) {
+                const id = btn.dataset.id;
+                pingServiceAsync(Number(id));
+            } else if (btn.classList.contains('btn-history')) {
+                const { id, name } = btn.dataset;
+                verHistorial(Number(id), name);
+            } else if (btn.classList.contains('btn-edit')) {
+                const id = btn.dataset.id;
+                abrirModalEditar(Number(id));
+            } else if (btn.classList.contains('btn-delete')) {
+                const { id, name } = btn.dataset;
+                eliminarServicio(Number(id), name);
+            }
+        });
+    }
+    
     // Event listener para cambio de tabs (Bootstrap)
-    const tabElements = document.querySelectorAll('button[data-bs-toggle="tab"]');
+    const tabElements = d.querySelectorAll('button[data-bs-toggle="tab"]');
     tabElements.forEach(tab => {
         tab.addEventListener('shown.bs.tab', function (event) {
             const category = event.target.getAttribute('data-category');
@@ -35,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Event listener para cambio de sucursal
-    const branchSelect = document.getElementById('branchSelect');
+    const branchSelect = d.getElementById('branchSelect');
     if (branchSelect) {
         branchSelect.addEventListener('change', function() {
             currentBranchId = parseInt(this.value);
@@ -55,7 +107,7 @@ function onTabChange(category) {
     currentCategory = category;
     
     // Mostrar/ocultar selector de sucursales
-    const branchSelector = document.getElementById('branchSelector');
+    const branchSelector = d.getElementById('branchSelector');
     if (category === 'terminales' && userRole === 'admin') {
         branchSelector.style.display = 'block';
         if (!currentBranchId) {
@@ -66,16 +118,18 @@ function onTabChange(category) {
     }
     
     // Controlar botón "Nuevo Servicio"
-    const newServiceBtn = document.querySelector('[onclick="abrirModalCrear()"]');
-    if (category === 'terminales') {
-        newServiceBtn.disabled = true;
-        newServiceBtn.title = 'Las terminales se gestionan desde el módulo de Terminales';
-    } else if (category === 'todos') {
-        newServiceBtn.disabled = true;
-        newServiceBtn.title = 'Selecciona una categoría específica para crear un servicio';
-    } else {
-        newServiceBtn.disabled = false;
-        newServiceBtn.title = '';
+    const newServiceBtn = d.getElementById('btnNewService');
+    if (newServiceBtn) {
+        if (category === 'terminales') {
+            newServiceBtn.disabled = true;
+            newServiceBtn.title = 'Las terminales se gestionan desde el módulo de Terminales';
+        } else if (category === 'todos') {
+            newServiceBtn.disabled = true;
+            newServiceBtn.title = 'Selecciona una categoría específica para crear un servicio';
+        } else {
+            newServiceBtn.disabled = false;
+            newServiceBtn.title = '';
+        }
     }
     
     // Cargar servicios si no están cargados
@@ -119,7 +173,7 @@ async function loadServicesByCategory(category) {
 }
 
 function renderServicesGrid(category, services) {
-    const grid = document.getElementById(`servicesGrid-${category}`);
+    const grid = d.getElementById(`servicesGrid-${category}`);
     
     if (services.length === 0) {
         showEmptyMessage(grid, category);
@@ -212,16 +266,16 @@ function createServiceCard(service, viewCategory) {
             </div>
             
             <div class="card-actions">
-                <button class="action-btn-small btn-ping" onclick="pingServiceAsync(${service.id})" title="Ping" ${isLoading ? 'disabled' : ''}>
+                <button class="action-btn-small btn-ping" data-id="${service.id}" title="Ping" ${isLoading ? 'disabled' : ''}>
                     <i class="bi bi-broadcast"></i> Ping
                 </button>
-                <button class="action-btn-small" onclick="verHistorial(${service.id}, '${escapeHtml(service.name)}')" title="Historial">
+                <button class="action-btn-small btn-history" data-id="${service.id}" data-name="${escapeHtml(service.name)}" title="Historial">
                     <i class="bi bi-clock-history"></i>
                 </button>
-                <button class="action-btn-small" onclick="abrirModalEditar(${service.id})" title="Editar" ${disableEdit}>
+                <button class="action-btn-small btn-edit" data-id="${service.id}" title="Editar" ${disableEdit}>
                     <i class="bi bi-pencil"></i>
                 </button>
-                <button class="action-btn-small btn-delete" onclick="eliminarServicio(${service.id}, '${escapeHtml(service.name)}')" title="Eliminar" ${disableDelete}>
+                <button class="action-btn-small btn-delete" data-id="${service.id}" data-name="${escapeHtml(service.name)}" title="Eliminar" ${disableDelete}>
                     <i class="bi bi-trash"></i>
                 </button>
             </div>
@@ -231,7 +285,7 @@ function createServiceCard(service, viewCategory) {
 
 function createAddServiceCard(category) {
     return `
-        <article class="service-card add-service-card" onclick="abrirModalCrear()">
+        <article class="service-card add-service-card">
             <div class="add-content">
                 <i class="bi bi-plus-circle"></i>
                 <p>Añadir Servicio</p>
@@ -289,10 +343,10 @@ function updateStats(services) {
     const offline = services.filter(s => s.last_status === 0).length;
     const unknown = services.filter(s => !s.last_checked_at).length;
     
-    document.getElementById('statTotal').textContent = total;
-    document.getElementById('statOnline').textContent = online;
-    document.getElementById('statOffline').textContent = offline;
-    document.getElementById('statUnknown').textContent = unknown;
+    d.getElementById('statTotal').textContent = total;
+    d.getElementById('statOnline').textContent = online;
+    d.getElementById('statOffline').textContent = offline;
+    d.getElementById('statUnknown').textContent = unknown;
 }
 
 /* =========================================
@@ -304,7 +358,7 @@ async function loadBranches() {
         const response = await fetch('/services/branches');
         const branches = await response.json();
         
-        const select = document.getElementById('branchSelect');
+        const select = d.getElementById('branchSelect');
         select.innerHTML = branches.map(b => 
             `<option value="${b.id}" ${b.id === userBranchId ? 'selected' : ''}>${b.name}</option>`
         ).join('');
@@ -325,12 +379,12 @@ function updateSingleCard(serviceId) {
         const service = services.find(s => s.id === serviceId);
         if (service) {
             // Buscar la card en el grid de esta categoría
-            const grid = document.getElementById(`servicesGrid-${category}`);
+            const grid = d.getElementById(`servicesGrid-${category}`);
             if (grid) {
                 const cardElement = grid.querySelector(`#service-card-${serviceId}`);
                 if (cardElement) {
                     const newCard = createServiceCard(service, category);
-                    const tempDiv = document.createElement('div');
+                    const tempDiv = d.createElement('div');
                     tempDiv.innerHTML = newCard;
                     cardElement.replaceWith(tempDiv.firstElementChild);
                 }
@@ -354,10 +408,10 @@ function hideLoadingState(serviceId) {
    ========================================= */
 
 function abrirModalCrear() {
-    document.getElementById('modalTitulo').textContent = 'Nuevo Servicio';
-    document.getElementById('formServicio').reset();
-    document.getElementById('servicioId').value = '';
-    document.getElementById('activo').checked = true;
+    d.getElementById('modalTitulo').textContent = 'Nuevo Servicio';
+    d.getElementById('formServicio').reset();
+    d.getElementById('servicioId').value = '';
+    d.getElementById('activo').checked = true;
     modalServicio.show();
 }
 
@@ -375,14 +429,14 @@ async function abrirModalEditar(id) {
             return;
         }
         
-        document.getElementById('modalTitulo').textContent = 'Editar Servicio';
-        document.getElementById('servicioId').value = servicio.id;
-        document.getElementById('nombre').value = servicio.name;
-        document.getElementById('host').value = servicio.host;
-        document.getElementById('tipo').value = servicio.type;
-        document.getElementById('categoria').value = servicio.category || 'servicios';
-        document.getElementById('descripcion').value = servicio.description || '';
-        document.getElementById('activo').checked = servicio.is_active === 1;
+        d.getElementById('modalTitulo').textContent = 'Editar Servicio';
+        d.getElementById('servicioId').value = servicio.id;
+        d.getElementById('nombre').value = servicio.name;
+        d.getElementById('host').value = servicio.host;
+        d.getElementById('tipo').value = servicio.type;
+        d.getElementById('categoria').value = servicio.category || 'servicios';
+        d.getElementById('descripcion').value = servicio.description || '';
+        d.getElementById('activo').checked = servicio.is_active === 1;
         
         modalServicio.show();
     } catch (error) {
@@ -392,14 +446,14 @@ async function abrirModalEditar(id) {
 }
 
 async function guardarServicio() {
-    const id = document.getElementById('servicioId').value;
+    const id = d.getElementById('servicioId').value;
     const data = {
-        name: document.getElementById('nombre').value,
-        host: document.getElementById('host').value,
-        type: document.getElementById('tipo').value,
-        category: document.getElementById('categoria').value,
-        description: document.getElementById('descripcion').value,
-        is_active: document.getElementById('activo').checked ? 1 : 0
+        name: d.getElementById('nombre').value,
+        host: d.getElementById('host').value,
+        type: d.getElementById('tipo').value,
+        category: d.getElementById('categoria').value,
+        description: d.getElementById('descripcion').value,
+        is_active: d.getElementById('activo').checked ? 1 : 0
     };
     
     if (!data.name || !data.host) {
@@ -552,8 +606,8 @@ async function pingAll() {
    ========================================= */
 
 async function verHistorial(id, nombre) {
-    document.getElementById('historialNombre').textContent = `Servicio: ${nombre}`;
-    document.getElementById('historialBody').innerHTML = '<tr><td colspan="5" class="text-center">Cargando...</td></tr>';
+    d.getElementById('historialNombre').textContent = `Servicio: ${nombre}`;
+    d.getElementById('historialBody').innerHTML = '<tr><td colspan="5" class="text-center">Cargando...</td></tr>';
     
     modalHistorial.show();
     
@@ -562,7 +616,7 @@ async function verHistorial(id, nombre) {
         const history = await response.json();
         
         if (history.length === 0) {
-            document.getElementById('historialBody').innerHTML = 
+            d.getElementById('historialBody').innerHTML = 
                 '<tr><td colspan="5" class="text-center text-muted">Sin verificaciones registradas</td></tr>';
             return;
         }
@@ -597,10 +651,10 @@ async function verHistorial(id, nombre) {
             `;
         }).join('');
         
-        document.getElementById('historialBody').innerHTML = html;
+        d.getElementById('historialBody').innerHTML = html;
     } catch (error) {
         console.error('Error:', error);
-        document.getElementById('historialBody').innerHTML = 
+        d.getElementById('historialBody').innerHTML = 
             '<tr><td colspan="5" class="text-center text-danger">Error al cargar historial</td></tr>';
     }
 }
@@ -610,6 +664,7 @@ async function verHistorial(id, nombre) {
    ========================================= */
 
 function escapeHtml(text) {
+    if (!text) return '';
     const map = {
         '&': '&amp;',
         '<': '&lt;',
@@ -617,5 +672,5 @@ function escapeHtml(text) {
         '"': '&quot;',
         "'": '&#039;'
     };
-    return text.replace(/[&<>"']/g, m => map[m]);
+    return text.toString().replace(/[&<>"']/g, m => map[m]);
 }

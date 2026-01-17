@@ -2,6 +2,8 @@
 // AUDIT CLIENT - GESTIÓN DE AUDITORÍA
 // ============================================
 
+const d = document;
+
 // Configuración de iconos para Bootstrap Table
 window.icons = {
     refresh: 'bi-arrow-clockwise',
@@ -82,11 +84,11 @@ function getActionIcon(action) {
 // ============================================
 // INICIALIZACIÓN
 // ============================================
-document.addEventListener('DOMContentLoaded', function () {
+d.addEventListener('DOMContentLoaded', function () {
     // Inicializar tabs de Bootstrap
-    var triggerTabList = [].slice.call(document.querySelectorAll('#auditTabs button'));
+    const triggerTabList = [].slice.call(d.querySelectorAll('#auditTabs button'));
     triggerTabList.forEach(function (triggerEl) {
-        var tabTrigger = new bootstrap.Tab(triggerEl);
+        const tabTrigger = new bootstrap.Tab(triggerEl);
         triggerEl.addEventListener('click', function (event) {
             event.preventDefault();
             tabTrigger.show();

@@ -1,15 +1,17 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.getElementById('loginForm');
-    const errorAlert = document.getElementById('loginError');
-    const btnLogin = document.getElementById('btnLogin');
+const d = document;
+
+d.addEventListener('DOMContentLoaded', () => {
+    const loginForm = d.getElementById('loginForm');
+    const errorAlert = d.getElementById('loginError');
+    const btnLogin = d.getElementById('btnLogin');
 
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             // 1. UI: Bloquear botón y limpiar errores
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+            const username = d.getElementById('username').value;
+            const password = d.getElementById('password').value;
             
             btnLogin.disabled = true;
             btnLogin.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Verificando...';

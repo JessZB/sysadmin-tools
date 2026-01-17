@@ -1,33 +1,93 @@
+(function() {
+    const d = document;
 let refreshInterval;
 let timeLeft = 300; // 5 minutos en segundos
 let isPaused = false;
 let isCoolingDown = false;
 let currentBranchFilter = ''; // Variable global para el filtro
 let currentTerminalIdForModal = null;
-const detailsModal = new bootstrap.Modal(document.getElementById('detailsModal'));
+let detailsModal;
+let historyModal;
 
 // Almacén temporal de datos
 let globalTerminalsCache = []; 
 
-document.addEventListener('DOMContentLoaded', () => {
+d.addEventListener('DOMContentLoaded', () => {
+    detailsModal = new bootstrap.Modal(d.getElementById('detailsModal'));
+    historyModal = new bootstrap.Modal(d.getElementById('historyModal'));
+
     // 1. Intentar cargar lista de sucursales (Si el elemento existe, es porque soy admin)
-    const selector = document.getElementById('branchSelector');
+    const selector = d.getElementById('branchSelector');
     if (selector) {
         cargarSelectorSucursales();
+        selector.addEventListener('change', cambiarSucursal);
     }
+
+    // 2. Event Listeners Estáticos
+    const timerBadge = d.getElementById('countdownTimer');
+    if (timerBadge) {
+        timerBadge.addEventListener('click', toggleTimer);
+    }
+
+    const btnRefresh = d.getElementById('btnGlobalRefresh');
+    if (btnRefresh) {
+        btnRefresh.addEventListener('click', forzarRefrescoTotal);
+    }
+
+    const modalEl = d.getElementById('detailsModal');
+    if (modalEl) {
+        modalEl.addEventListener('show.bs.modal', () => { isPaused = true; });
+        modalEl.addEventListener('hidden.bs.modal', () => { isPaused = false; });
+    }
+
+    // 3. Delegación de Eventos (Grid y Matriz)
+    const dashboardContent = d.getElementById('dashboardContent');
+    if (dashboardContent) {
+        dashboardContent.addEventListener('click', (e) => {
+            const btnDetails = e.target.closest('.view-details-btn');
+            if (btnDetails) {
+                const { id, name, ip } = btnDetails.dataset;
+                abrirModalDetalle(Number(id), name, ip, true);
+                return;
+            }
+
+            const btnRefreshSingle = e.target.closest('.btn-refresh-single');
+            if (btnRefreshSingle) {
+                const id = btnRefreshSingle.dataset.id;
+                consultarCajaIndividual(Number(id));
+            }
+        });
+    }
+
+    // 4. Delegación de Eventos (Modal Detalles)
+    const jobsTableBody = d.getElementById('jobsTableBody');
+    if (jobsTableBody) {
+        jobsTableBody.addEventListener('click', (e) => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+
+            if (btn.classList.contains('btn-execute')) {
+                const jobName = btn.dataset.job;
+                ejecutarJobDesdeModal(jobName);
+            } else if (btn.classList.contains('btn-stop')) {
+                const jobName = btn.dataset.job;
+                detenerJobDesdeModal(jobName);
+            } else if (btn.classList.contains('btn-history')) {
+                const jobName = btn.dataset.job;
+                verHistorialJob(jobName);
+            }
+        });
+    }
+
     iniciarTemporizador();
     cargarDatos(); 
-
-    const modalEl = document.getElementById('detailsModal');
-    modalEl.addEventListener('show.bs.modal', () => { isPaused = true; });
-    modalEl.addEventListener('hidden.bs.modal', () => { isPaused = false; });
 });
 
 /* =========================================
    LÓGICA DEL TEMPORIZADOR
    ========================================= */
 function iniciarTemporizador() {
-    const timerBadge = document.getElementById('countdownTimer');
+    const timerBadge = d.getElementById('countdownTimer');
     
     clearInterval(refreshInterval);
     refreshInterval = setInterval(() => {
@@ -55,7 +115,7 @@ function forzarRefrescoTotal() {
 }
 
 function iniciarCooldownBoton() {
-    const btn = document.getElementById('btnGlobalRefresh');
+    const btn = d.getElementById('btnGlobalRefresh');
     if (!btn) return;
 
     isCoolingDown = true;
@@ -87,7 +147,7 @@ function iniciarCooldownBoton() {
 
 function toggleTimer() {
     isPaused = !isPaused;
-    const badge = document.getElementById('countdownTimer');
+    const badge = d.getElementById('countdownTimer');
     badge.style.opacity = isPaused ? '0.5' : '1';
     badge.title = isPaused ? "PAUSADO" : "Click para pausar";
 }
@@ -98,9 +158,9 @@ async function cargarSelectorSucursales() {
         const res = await fetch('/dashboard/api/branches'); // Nueva ruta creada en paso 4
         const result = await res.json();
         if (result.success) {
-            const selector = document.getElementById('branchSelector');
+            const selector = d.getElementById('branchSelector');
             result.data.forEach(b => {
-                const opt = document.createElement('option');
+                const opt = d.createElement('option');
                 opt.value = b.id;
                 opt.textContent = b.name;
                 selector.appendChild(opt);
@@ -111,10 +171,8 @@ async function cargarSelectorSucursales() {
 
 // Evento onchange del Select
 function cambiarSucursal() {
-    const selector = document.getElementById('branchSelector');
+    const selector = d.getElementById('branchSelector');
     const value = selector.value;
-    
-   
     
     // Si es 'all', mostramos todas las sucursales (sin filtro)
     if (value === 'all') {
@@ -133,7 +191,6 @@ function cambiarSucursal() {
          // Forzamos recarga inmediata
         forzarRefrescoTotal(); 
     }
-   
 }
 
 
@@ -141,10 +198,10 @@ function cambiarSucursal() {
    CARGA DE DATOS (Centralizada)
    ========================================= */
 async function cargarDatos() {
-    const serverGrid = document.getElementById('server-grid');
-    const posGrid = document.getElementById('pos-grid');
-    const serverMatrix = document.getElementById('server-matrix');
-    const posMatrix = document.getElementById('matrix-grid');
+    const serverGrid = d.getElementById('server-grid');
+    const posGrid = d.getElementById('pos-grid');
+    const serverMatrix = d.getElementById('server-matrix');
+    const posMatrix = d.getElementById('matrix-grid');
     
     if(globalTerminalsCache.length === 0) {
         posGrid.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border text-primary"></div></div>';
@@ -192,7 +249,7 @@ async function cargarDatos() {
 }
 
 function crearTarjetaServidorHTML(term) {
-    const col = document.createElement('div');
+    const col = d.createElement('div');
     col.className = 'col-12 col-md-6 col-lg-4'; 
     col.innerHTML = `
         <div class="pos-card status-loading server-card" id="card-${term.id}">
@@ -212,7 +269,10 @@ function crearTarjetaServidorHTML(term) {
                 </div>
                 <i class="fa-solid fa-server server-icon-large text-white opacity-10"></i>
                 <div class="hover-overlay" style="border-radius: 10px;">
-                    <button class="view-details-btn shadow" onclick="abrirModalDetalle(${term.id}, '${term.name}', '${term.ip_address}', true)">
+                    <button class="view-details-btn shadow" 
+                        data-id="${term.id}" 
+                        data-name="${term.name}" 
+                        data-ip="${term.ip_address}">
                         <i class="fa-solid fa-eye me-1"></i> Gestionar Jobs
                     </button>
                 </div>
@@ -256,7 +316,7 @@ async function consultarCajaIndividual(id) {
    TAB 1: TARJETAS GRID
    ========================================= */
 function crearTarjetaHTML(term) {
-    const col = document.createElement('div');
+    const col = d.createElement('div');
     col.className = 'col-12 col-sm-6 col-md-2';
     col.innerHTML = `
         <div class="pos-card status-loading" id="card-${term.id}">
@@ -264,7 +324,10 @@ function crearTarjetaHTML(term) {
             <h5 class="m-0 fw-bold">${term.name}</h5>
             <small class="d-block opacity-75">${term.ip_address}</small>
             <div class="hover-overlay">
-                <button class="view-details-btn shadow" onclick="abrirModalDetalle(${term.id}, '${term.name}', '${term.ip_address}', true)">
+                <button class="view-details-btn shadow" 
+                    data-id="${term.id}" 
+                    data-name="${term.name}" 
+                    data-ip="${term.ip_address}">
                     <i class="fa-solid fa-eye me-1"></i> Ver Detalles
                 </button>
             </div>
@@ -279,8 +342,8 @@ function crearTarjetaHTML(term) {
 }
 
 function actualizarTarjetaVisual(id, status) {
-    const card = document.getElementById(`card-${id}`);
-    const iconContainer = document.getElementById(`icon-${id}`);
+    const card = d.getElementById(`card-${id}`);
+    const iconContainer = d.getElementById(`icon-${id}`);
     if(!card) return;
 
     card.className = `pos-card status-${status}`;
@@ -294,13 +357,13 @@ function actualizarTarjetaVisual(id, status) {
    TAB 2: MATRIZ DETALLADA
    ========================================= */
 function crearTablaMatrizHTML(term, colClass = 'col-12 col-md-6', cardClass = '') {
-    const col = document.createElement('div');
+    const col = d.createElement('div');
     col.className = colClass;
     col.innerHTML = `
         <div class="card shadow-none border-0 h-100 ${cardClass}">
             <div class="card-header d-flex justify-content-between align-items-center bg-light">
                 <strong>${term.name}</strong>
-                <button class="btn btn-sm btn-link text-decoration-none" onclick="consultarCajaIndividual(${term.id})">
+                <button class="btn btn-sm btn-link text-decoration-none btn-refresh-single" data-id="${term.id}">
                     <i class="fa-solid fa-rotate-right"></i>
                 </button>
             </div>
@@ -335,7 +398,7 @@ function renderizarFilasMatriz(id, jobs, serverTime) {
     
     // Lógica para SERVIDOR (Matriz individual)
     if (isServer) {
-        const tbody = document.getElementById(`matrix-tbody-${id}`);
+        const tbody = d.getElementById(`matrix-tbody-${id}`);
         if (!tbody) return;
         tbody.innerHTML = '';
         
@@ -347,7 +410,7 @@ function renderizarFilasMatriz(id, jobs, serverTime) {
     }
     
     // Lógica para TERMINALES (Matriz compartida)
-    const matrixGrid = document.getElementById('matrix-grid');
+    const matrixGrid = d.getElementById('matrix-grid');
     if(!matrixGrid) return;
     
     const terminalName = terminal.name;
@@ -434,7 +497,7 @@ function crearFilaJob(job, serverTime, terminalCellHTML = '', isServer = false) 
         ? '<i class="fa-solid fa-calendar-xmark text-danger me-1" title="Ejecutado en día distinto al actual"></i>' 
         : '';
 
-    const row = document.createElement('tr');
+    const row = d.createElement('tr');
     row.className = `mini-job-row small align-middle ${rowClass}`;
     row.innerHTML = `
         ${terminalCellHTML}
@@ -461,8 +524,8 @@ function crearFilaJob(job, serverTime, terminalCellHTML = '', isServer = false) 
 }
 
 function marcarCargaVisual(id) {
-    const card = document.getElementById(`card-${id}`);
-    const iconContainer = document.getElementById(`icon-${id}`);
+    const card = d.getElementById(`card-${id}`);
+    const iconContainer = d.getElementById(`icon-${id}`);
     
     if (card && iconContainer) {
         card.classList.remove('status-success', 'status-warning', 'status-error');
@@ -470,7 +533,7 @@ function marcarCargaVisual(id) {
         iconContainer.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-secondary"></i>';
     }
 
-    const tbody = document.getElementById(`matrix-tbody-${id}`);
+    const tbody = d.getElementById(`matrix-tbody-${id}`);
     if (tbody) {
         tbody.innerHTML = `<tr><td colspan="6" class="text-center py-3 text-muted"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr>`;
     }
@@ -481,13 +544,13 @@ function marcarCargaVisual(id) {
    ========================================= */
 async function abrirModalDetalle(id, name, ip, forceRefresh = false) {
     currentTerminalIdForModal = id;
-    const modalHeader = document.getElementById('modalHeader');
+    const modalHeader = d.getElementById('modalHeader');
     detailsModal.show();
     modalHeader.className = 'modal-header header-loading';
-    document.getElementById('modalTitle').innerText = name;
-    document.getElementById('modalIp').innerText = ip;
-    document.getElementById('modalId').innerText = `ID: ${id}`;
-    document.getElementById('jobsTableBody').innerHTML = '<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-primary"></div><br>Actualizando datos en tiempo real...</td></tr>';
+    d.getElementById('modalTitle').innerText = name;
+    d.getElementById('modalIp').innerText = ip;
+    d.getElementById('modalId').innerText = `ID: ${id}`;
+    d.getElementById('jobsTableBody').innerHTML = '<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-primary"></div><br>Actualizando datos en tiempo real...</td></tr>';
 
     if (forceRefresh) {
         consultarCajaIndividual(id).then(() => llenarModalConFetch(id));
@@ -509,10 +572,10 @@ async function llenarModalConFetch(id) {
             const terminal = globalTerminalsCache.find(t => t.id === id);
             const isServer = terminal ? (terminal.is_server === 1) : false;
             
-            const header = document.getElementById('modalHeader');
+            const header = d.getElementById('modalHeader');
             header.className = `modal-header header-${status}`;
             
-            const tbody = document.getElementById('jobsTableBody');
+            const tbody = d.getElementById('jobsTableBody');
             tbody.innerHTML = '';
             
             jobs.sort((a, b) => a.JobName.localeCompare(b.JobName)).forEach(job => {
@@ -538,12 +601,12 @@ async function llenarModalConFetch(id) {
 
                 let actionButtons = '';
                 const btnPlayDisabled = job.ExecutionStatus === 'Running' ? 'disabled' : '';
-                actionButtons += `<button class="btn btn-sm btn-outline-success me-1" ${btnPlayDisabled} title="Ejecutar" onclick="ejecutarJobDesdeModal('${job.JobName}')"><i class="fa-solid fa-play"></i></button>`;
+                actionButtons += `<button class="btn btn-sm btn-outline-success me-1 btn-execute" ${btnPlayDisabled} title="Ejecutar" data-job="${job.JobName}"><i class="fa-solid fa-play"></i></button>`;
                 
                 if (job.ExecutionStatus === 'Running') {
-                    actionButtons += `<button class="btn btn-sm btn-outline-danger me-1" title="Detener forzosamente" onclick="detenerJobDesdeModal('${job.JobName}')"><i class="fa-solid fa-stop"></i></button>`;
+                    actionButtons += `<button class="btn btn-sm btn-outline-danger me-1 btn-stop" title="Detener forzosamente" data-job="${job.JobName}"><i class="fa-solid fa-stop"></i></button>`;
                 }
-                actionButtons += `<button class="btn btn-sm btn-outline-primary" title="Ver Historial" onclick="verHistorialJob('${job.JobName}')"><i class="fa-solid fa-clock-rotate-left"></i></button>`;
+                actionButtons += `<button class="btn btn-sm btn-outline-primary btn-history" title="Ver Historial" data-job="${job.JobName}"><i class="fa-solid fa-clock-rotate-left"></i></button>`;
 
                 tbody.innerHTML += `
                     <tr style="${rowStyle}">
@@ -589,7 +652,7 @@ function esFechaAntigua(jobDateStr, serverTimeStr, isServer = false) {
 
 function marcarErrorVisual(id) {
     actualizarTarjetaVisual(id, 'error');
-    const tbody = document.getElementById(`matrix-tbody-${id}`);
+    const tbody = d.getElementById(`matrix-tbody-${id}`);
     if(tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-danger text-center"><small>Error de conexión</small></td></tr>';
 }
 
@@ -629,7 +692,7 @@ function calcularDuracion(startDateStr, serverDateStr, executionStatus, lastDura
 /* =========================================
    ACCIÓN: EJECUTAR JOB DESDE EL MODAL
    ========================================= */
-window.ejecutarJobDesdeModal = async (jobName) => {
+async function ejecutarJobDesdeModal(jobName) {
     // Validación de seguridad
     if (!currentTerminalIdForModal) {
         showErrorToast('No se ha identificado la terminal actual.');
@@ -670,7 +733,7 @@ window.ejecutarJobDesdeModal = async (jobName) => {
             // Esperamos 2 segundos para dar tiempo a SQL Server Agent de poner el job en "Running"
             // y luego refrescamos tanto el modal como la tarjeta de fondo.
             
-            const btnRefresh = document.getElementById('modalTitle'); // Usamos el título como referencia visual
+            const btnRefresh = d.getElementById('modalTitle'); // Usamos el título como referencia visual
             if(btnRefresh) btnRefresh.innerHTML += ' <span class="spinner-border spinner-border-sm"></span>';
 
             setTimeout(() => {
@@ -689,12 +752,12 @@ window.ejecutarJobDesdeModal = async (jobName) => {
         console.error(error);
         showErrorToast('Error de comunicación con el servidor');
     }
-};
+}
 
 /* =========================================
    ACCIÓN: DETENER JOB
    ========================================= */
-window.detenerJobDesdeModal = async (jobName) => {
+async function detenerJobDesdeModal(jobName) {
     const confirm = await Swal.fire({
         title: '¿Detener Job?',
         html: `Vas a forzar la detención de: <strong>${jobName}</strong>.<br><span class="text-danger small">Esto puede dejar procesos inconclusos.</span>`,
@@ -731,21 +794,19 @@ window.detenerJobDesdeModal = async (jobName) => {
     } catch (error) {
         showErrorToast('Error de comunicación');
     }
-};
+}
 
 /* =========================================
    ACCIÓN: VER HISTORIAL
    ========================================= */
-const historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
-
-window.verHistorialJob = async (jobName) => {
+async function verHistorialJob(jobName) {
     // 1. Abrir modal
     historyModal.show();
     
     // UI Inicial
-    document.getElementById('historyJobTitle').innerText = jobName;
-    document.getElementById('historyTerminalName').innerText = `ID Terminal: ${currentTerminalIdForModal}`;
-    const tbody = document.getElementById('historyTableBody');
+    d.getElementById('historyJobTitle').innerText = jobName;
+    d.getElementById('historyTerminalName').innerText = `ID Terminal: ${currentTerminalIdForModal}`;
+    const tbody = d.getElementById('historyTableBody');
     tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4"><div class="spinner-border text-primary"></div></td></tr>';
 
     try {
@@ -789,7 +850,7 @@ window.verHistorialJob = async (jobName) => {
     } catch (error) {
         tbody.innerHTML = '<tr><td colspan="4" class="text-danger text-center">Error obteniendo historial</td></tr>';
     }
-};
+}
 
 /* =========================================
    CURRENCY RATES - TASAS DE CAMBIO
@@ -823,7 +884,7 @@ async function loadCurrencyBadges(terminalId, cardElement) {
         // Buscar o crear el contenedor de badges
         let badgesContainer = cardElement.querySelector('.currency-badges');
         if (!badgesContainer) {
-            badgesContainer = document.createElement('div');
+            badgesContainer = d.createElement('div');
             badgesContainer.className = 'currency-badges';
             cardElement.appendChild(badgesContainer);
         }
@@ -834,7 +895,7 @@ async function loadCurrencyBadges(terminalId, cardElement) {
         // Mostrar mensaje de error discreto
         let badgesContainer = cardElement.querySelector('.currency-badges');
         if (!badgesContainer) {
-            badgesContainer = document.createElement('div');
+            badgesContainer = d.createElement('div');
             badgesContainer.className = 'currency-badges';
             cardElement.appendChild(badgesContainer);
         }
@@ -843,51 +904,46 @@ async function loadCurrencyBadges(terminalId, cardElement) {
 }
 
 /**
- * Carga y muestra la tabla de tasas de cambio en el modal de detalles
+ * Formatea un valor de tasa de cambio a 2 decimales
  */
+function formatCurrencyRate(value) {
+    const val = parseFloat(value);
+    return isNaN(val) ? '0.00' : val.toFixed(2);
+}
+
 async function loadCurrencyDetails(terminalId) {
     try {
         const response = await fetch(`/terminals/currencies/${terminalId}`);
-        const currencies = await response.json();
+        const rates = await response.json();
         
-        // Buscar o crear la sección de tasas en el modal
-        let currencySection = document.getElementById('currencySection');
-        if (!currencySection) {
-            // Crear la sección si no existe
-            const modalBody = document.querySelector('#detailsModal .modal-body');
-            currencySection = document.createElement('div');
-            currencySection.id = 'currencySection';
-            currencySection.className = 'mt-4';
-            currencySection.innerHTML = `
-                <h6 class="border-bottom pb-2 mb-3">
-                    <i class="bi bi-currency-exchange me-2"></i>Tasas de Cambio
-                </h6>
-                <table class="table table-sm table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Código</th>
-                            <th>Moneda</th>
-                            <th class="text-end">Factor</th>
-                            <th>Símbolo</th>
-                        </tr>
-                    </thead>
-                    <tbody id="currencyTableBody"></tbody>
-                </table>
-            `;
-            modalBody.appendChild(currencySection);
+        if (!rates || rates.length === 0) return;
+        
+        const modalBody = d.querySelector('#detailsModal .modal-body');
+        let detailsContainer = d.getElementById('currencyDetailsContainer');
+        
+        if (!detailsContainer) {
+            detailsContainer = d.createElement('div');
+            detailsContainer.id = 'currencyDetailsContainer';
+            detailsContainer.className = 'mt-3 pt-3 border-top';
+            modalBody.appendChild(detailsContainer);
         }
         
-        const tbody = document.getElementById('currencyTableBody');
-        tbody.innerHTML = currencies.map(curr => `
-            <tr>
-                <td><code>${curr.c_codmoneda}</code></td>
-                <td>${curr.c_descripcion}</td>
-                <td class="text-end fw-bold">${curr.n_factor.toFixed(2)}</td>
-                <td>${curr.c_simbolo}</td>
-            </tr>
-        `).join('');
+        let html = '<h6 class="mb-2"><i class="fa-solid fa-money-bill-transfer me-2"></i>Tasas de Cambio</h6><div class="d-flex gap-3 flex-wrap">';
+        
+        rates.forEach(rate => {
+            html += `
+                <div class="border rounded p-2 bg-light">
+                    <div class="fw-bold small text-muted">${rate.c_descripcion} (${rate.c_codmoneda})</div>
+                    <div class="fs-5 fw-bold text-dark">${rate.c_simbolo || ''} ${formatCurrencyRate(rate.n_factor)}</div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        detailsContainer.innerHTML = html;
         
     } catch (error) {
         console.error('Error loading currency details:', error);
     }
 }
+})();
