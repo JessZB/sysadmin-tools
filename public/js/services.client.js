@@ -219,7 +219,11 @@ function toggleCategoryPingUI(category, isPinging) {
     }
     
     if (cancelBtn) {
-        cancelBtn.style.display = isPinging ? 'inline-flex' : 'none';
+        if (isPinging) {
+            cancelBtn.classList.remove('d-none');
+        } else {
+            cancelBtn.classList.add('d-none');
+        }
     }
 }
 
