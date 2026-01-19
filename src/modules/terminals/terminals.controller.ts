@@ -7,7 +7,7 @@ import * as auditService from '../audit/audit.service';
 // Vista HTML
 export const renderList = async (req: Request, res: Response) => {
     try {
-        const branches = await getAllBranches();
+        const branches = await getAllBranches() || [];
         res.render('terminals/list', {
             page: 'terminals',
             user: res.locals.user,

@@ -6,9 +6,9 @@ import * as auditService from '../audit/audit.service';
 export const renderUserList = async (req: Request, res: Response) => {
     try {
         // Obtenemos sucursales para pintarlas en el modal
-        const branches = await getAllBranches();
+        const branches = await getAllBranches() || [];
 
-        const systemModules = await userService.getSystemModules();
+        const systemModules = await userService.getSystemModules() || [];
 
         // La tabla carga datos por AJAX, así que aquí no hace falta traer usuarios, solo la estructura
         res.render('users/list', {

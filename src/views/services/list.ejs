@@ -511,10 +511,10 @@
             <p>Verificación de disponibilidad mediante ping</p>
         </div>
         <div class="header-actions">
-            <button class="btn-action btn-info-custom" onclick="pingAll()">
+            <button class="btn-action btn-info-custom" id="btnPingAll">
                 <i class="bi bi-broadcast-pin"></i> Ping Todos
             </button>
-            <button class="btn-action btn-primary-custom" onclick="abrirModalCrear()">
+            <button class="btn-action btn-primary-custom" id="btnNewService">
                 <i class="bi bi-plus-circle"></i> Nuevo Servicio
             </button>
         </div>
@@ -689,7 +689,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="guardarServicio()">
+                    <button type="button" class="btn btn-primary" id="btnSaveService">
                         <i class="bi bi-save"></i> Guardar
                     </button>
                 </div>

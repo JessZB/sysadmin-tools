@@ -1,3 +1,5 @@
+const d = document;
+
 // Formateador para el Estado (Badge)
 function statusFormatter(value, row, index) {
     if (value === 1 || value === true) {
@@ -24,16 +26,22 @@ function actionFormatter(value, row, index) {
     const branchId = row.branch_id || 1;
     
     let botones = `
-        <button class="btn btn-sm btn-outline-cerulean me-1" 
-            onclick="abrirModalEditar('${row.id}', '${row.name}', '${row.ip_address}', '${row.db_user}', ${isServer}, ${isActive}, ${branchId})">
+        <button class="btn btn-sm btn-outline-cerulean me-1 btn-edit" 
+            data-id="${row.id}"
+            data-name="${row.name}"
+            data-ip="${row.ip_address}"
+            data-user="${row.db_user}"
+            data-server="${isServer}"
+            data-active="${isActive}"
+            data-branch="${branchId}">
             <i class="bi bi-pencil"></i>
         </button>
     `;
 
     // Botón Eliminar
     botones += `
-        <button class="btn btn-sm btn-outline-punch" 
-            onclick="eliminarTerminal('${row.id}')">
+        <button class="btn btn-sm btn-outline-punch btn-delete" 
+            data-id="${row.id}">
             <i class="bi bi-trash"></i>
         </button>
     `;
@@ -46,178 +54,200 @@ window.statusFormatter = statusFormatter;
 window.typeFormatter = typeFormatter;
 window.actionFormatter = actionFormatter;
 
-const modalEl = document.getElementById('modalTerminal');
-const modal = new bootstrap.Modal(modalEl);
+d.addEventListener('DOMContentLoaded', () => {
+    const modalEl = d.getElementById('modalTerminal');
+    const modal = new bootstrap.Modal(modalEl);
 
-// Event Listener para el checkbox de borrar contraseña
-document.getElementById('forceBlankPassword').addEventListener('change', function() {
-    const passInput = document.getElementById('db_pass');
-    if (this.checked) {
-        passInput.value = '';
-        passInput.disabled = true;
-        passInput.placeholder = "Contraseña se guardará vacía";
-    } else {
-        passInput.disabled = false;
-        passInput.placeholder = "Dejar vacío para no cambiar";
+    // --- EVENT LISTENERS ---
+
+    // 1. Botón Nueva Terminal
+    const btnNewTerminal = d.getElementById('btnNewTerminal');
+    if (btnNewTerminal) {
+        btnNewTerminal.addEventListener('click', abrirModalCrear);
+    }
+
+    // 2. Botón Guardar Terminal
+    const btnSaveTerminal = d.getElementById('btnSaveTerminal');
+    if (btnSaveTerminal) {
+        btnSaveTerminal.addEventListener('click', guardarTerminal);
+    }
+
+    // 3. Delegación de eventos para la tabla
+    const tablaTerminales = d.getElementById('tablaTerminales');
+    if (tablaTerminales) {
+        tablaTerminales.addEventListener('click', (e) => {
+            const target = e.target.closest('button');
+            if (!target) return;
+
+            if (target.classList.contains('btn-edit')) {
+                const { id, name, ip, user, server, active, branch } = target.dataset;
+                abrirModalEditar(id, name, ip, user, server, active, branch);
+            } else if (target.classList.contains('btn-delete')) {
+                const { id } = target.dataset;
+                eliminarTerminal(id);
+            }
+        });
+    }
+
+    // 4. Checkbox Force Blank
+    const forceBlank = d.getElementById('forceBlankPassword');
+    if (forceBlank) {
+        forceBlank.addEventListener('change', function() {
+            const passInput = d.getElementById('db_pass');
+            if (this.checked) {
+                passInput.value = '';
+                passInput.disabled = true;
+                passInput.placeholder = "Contraseña se guardará vacía";
+            } else {
+                passInput.disabled = false;
+                passInput.placeholder = "Dejar vacío para no cambiar";
+            }
+        });
+    }
+
+    // --- FUNCIONES ---
+
+    function abrirModalCrear() {
+        d.getElementById('modalTitulo').innerText = 'Nueva Terminal POS';
+        d.getElementById('terminalId').value = ''; // ID vacío = Crear
+        d.getElementById('formTerminal').reset();
+        
+        // Resetear campos específicos
+        d.getElementById('type').value = "0";
+        d.getElementById('is_active').value = "1"; // Activa por defecto
+        d.getElementById('branchId').value = d.getElementById('branchId').options[0].value; // Primera sucursal
+        d.getElementById('divForceBlank').style.display = 'none';
+        d.getElementById('forceBlankPassword').checked = false;
+        d.getElementById('db_pass').disabled = false;
+        d.getElementById('db_pass').placeholder = "Contraseña";
+        
+        d.getElementById('passHelp').innerText = 'Opcional (puede dejarse vacío).';
+        d.getElementById('db_pass').required = false;
+        modal.show();
+    }
+
+    function abrirModalEditar(id, name, ip_address, db_user, is_server, is_active, branch_id) {
+        d.getElementById('modalTitulo').innerText = 'Editar Terminal';
+        d.getElementById('terminalId').value = id;
+        d.getElementById('name').value = name;
+        d.getElementById('ip_address').value = ip_address;
+        d.getElementById('db_user').value = db_user;
+        
+        // Setear tipo
+        d.getElementById('type').value = is_server == "1" ? "1" : "0";
+        
+        // Setear estado
+        d.getElementById('is_active').value = is_active == "1" ? "1" : "0";
+        
+        // Setear sucursal
+        d.getElementById('branchId').value = branch_id || 1;
+        
+        // Configurar contraseña
+        d.getElementById('db_pass').value = ''; // Limpiar contraseña
+        d.getElementById('divForceBlank').style.display = 'block';
+        d.getElementById('forceBlankPassword').checked = false;
+        d.getElementById('db_pass').disabled = false;
+        d.getElementById('db_pass').placeholder = "Dejar vacío para no cambiar";
+        
+        d.getElementById('passHelp').innerText = 'Dejar vacío para mantener la actual.';
+        d.getElementById('db_pass').required = false;
+        modal.show();
+    }
+
+    async function guardarTerminal() {
+        const id = d.getElementById('terminalId').value;
+        const name = d.getElementById('name').value;
+        const ip_address = d.getElementById('ip_address').value;
+        const db_user = d.getElementById('db_user').value;
+        const db_pass = d.getElementById('db_pass').value;
+        const typeVal = d.getElementById('type').value;
+        const is_server = typeVal === "1";
+        const is_active = Number(d.getElementById('is_active').value);
+        const branch_id = Number(d.getElementById('branchId').value);
+        const forceBlankPassword = d.getElementById('forceBlankPassword').checked;
+
+        // Validación básica
+        if (!name) return Swal.fire('Error', 'El nombre es obligatorio', 'warning');
+        if (!ip_address) return Swal.fire('Error', 'La dirección IP es obligatoria', 'warning');
+        if (!db_user) return Swal.fire('Error', 'El usuario de BD es obligatorio', 'warning');
+
+        const url = id ? `/terminals/${id}` : '/terminals';
+        const method = id ? 'PUT' : 'POST';
+        
+        const payload = { 
+            name, 
+            ip_address, 
+            db_user, 
+            db_pass, 
+            is_server,
+            is_active,
+            branch_id,
+            forceBlankPassword 
+        };
+
+        try {
+            // Bloqueamos pantalla mientras procesa
+            Swal.fire({
+                title: 'Guardando...',
+                text: 'Por favor espere',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            // Cerramos el loading inmediatamente
+            Swal.close();
+
+            if (result.success) {
+                modal.hide();
+                showSuccessToast('Terminal guardada correctamente');
+                $('#tablaTerminales').bootstrapTable('refresh');
+            } else {
+                showErrorToast(result.error || 'Error desconocido');
+            }
+        } catch (error) {
+            Swal.close();
+            console.error(error);
+            showErrorToast('Error de conexión con el servidor');
+        }
+    }
+
+    async function eliminarTerminal(id) {
+        const confirmacion = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: "No podrás revertir esta acción",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (!confirmacion.isConfirmed) return;
+
+        try {
+            Swal.fire({ title: 'Eliminando...', didOpen: () => Swal.showLoading() });
+
+            const response = await fetch(`/terminals/${id}`, { method: 'DELETE' });
+            const result = await response.json();
+
+            if (result.success) {
+                showSuccessToast('La terminal ha sido eliminada');
+                $('#tablaTerminales').bootstrapTable('refresh');
+            } else {
+                showErrorToast(result.error);
+            }
+        } catch (error) {
+            Swal.close();
+            showErrorToast('Error al intentar eliminar');
+        }
     }
 });
-
-// 1. Abrir Modal para CREAR
-function abrirModalCrear() {
-    document.getElementById('modalTitulo').innerText = 'Nueva Terminal POS';
-    document.getElementById('terminalId').value = ''; // ID vacío = Crear
-    document.getElementById('formTerminal').reset();
-    
-    // Resetear campos específicos
-    document.getElementById('type').value = "0";
-    document.getElementById('is_active').value = "1"; // Activa por defecto
-    document.getElementById('branchId').value = document.getElementById('branchId').options[0].value; // Primera sucursal
-    document.getElementById('divForceBlank').style.display = 'none';
-    document.getElementById('forceBlankPassword').checked = false;
-    document.getElementById('db_pass').disabled = false;
-    document.getElementById('db_pass').placeholder = "Contraseña";
-    
-    document.getElementById('passHelp').innerText = 'Opcional (puede dejarse vacío).';
-    document.getElementById('db_pass').required = false;
-    modal.show();
-}
-
-// 2. Abrir Modal para EDITAR
-function abrirModalEditar(id, name, ip_address, db_user, is_server, is_active, branch_id) {
-    document.getElementById('modalTitulo').innerText = 'Editar Terminal';
-    document.getElementById('terminalId').value = id;
-    document.getElementById('name').value = name;
-    document.getElementById('ip_address').value = ip_address;
-    document.getElementById('db_user').value = db_user;
-    
-    // Setear tipo
-    document.getElementById('type').value = is_server ? "1" : "0";
-    
-    // Setear estado
-    document.getElementById('is_active').value = is_active ? "1" : "0";
-    
-    // Setear sucursal
-    document.getElementById('branchId').value = branch_id || 1;
-    
-    // Configurar contraseña
-    document.getElementById('db_pass').value = ''; // Limpiar contraseña
-    document.getElementById('divForceBlank').style.display = 'block';
-    document.getElementById('forceBlankPassword').checked = false;
-    document.getElementById('db_pass').disabled = false;
-    document.getElementById('db_pass').placeholder = "Dejar vacío para no cambiar";
-    
-    document.getElementById('passHelp').innerText = 'Dejar vacío para mantener la actual.';
-    document.getElementById('db_pass').required = false;
-    modal.show();
-}
-
-// 3. Guardar (Create o Update)
-async function guardarTerminal() {
-    const id = document.getElementById('terminalId').value;
-    const name = document.getElementById('name').value;
-    const ip_address = document.getElementById('ip_address').value;
-    const db_user = document.getElementById('db_user').value;
-    const db_pass = document.getElementById('db_pass').value;
-    const typeVal = document.getElementById('type').value;
-    const is_server = typeVal === "1";
-    const is_active = Number(document.getElementById('is_active').value);
-    const branch_id = Number(document.getElementById('branchId').value);
-    const forceBlankPassword = document.getElementById('forceBlankPassword').checked;
-
-    // Validación básica
-    if (!name) return Swal.fire('Error', 'El nombre es obligatorio', 'warning');
-    if (!ip_address) return Swal.fire('Error', 'La dirección IP es obligatoria', 'warning');
-    if (!db_user) return Swal.fire('Error', 'El usuario de BD es obligatorio', 'warning');
-
-    const url = id ? `/terminals/${id}` : '/terminals';
-    const method = id ? 'PUT' : 'POST';
-    
-    const payload = { 
-        name, 
-        ip_address, 
-        db_user, 
-        db_pass, 
-        is_server,
-        is_active,
-        branch_id,
-        forceBlankPassword 
-    };
-
-    try {
-        // Bloqueamos pantalla mientras procesa
-        Swal.fire({
-            title: 'Guardando...',
-            text: 'Por favor espere',
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading()
-        });
-
-        const response = await fetch(url, {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        const result = await response.json();
-
-        // Cerramos el loading inmediatamente
-        Swal.close();
-
-        if (result.success) {
-            // Ocultar modal y refrescar
-            const modalEl = document.getElementById('modalTerminal');
-            const modal = bootstrap.Modal.getInstance(modalEl);
-            modal.hide();
-
-            // Mostrar toast de éxito
-            showSuccessToast('Terminal guardada correctamente');
-
-            // Recargar tabla
-            $('#tablaTerminales').bootstrapTable('refresh');
-
-        } else {
-            // Mostrar toast de error
-            showErrorToast(result.error || 'Error desconocido');
-        }
-    } catch (error) {
-        Swal.close();
-        console.error(error);
-        showErrorToast('Error de conexión con el servidor');
-    }
-}
-
-// 4. Eliminar con SweetAlert (Confirmación bonita)
-async function eliminarTerminal(id) {
-    const confirmacion = await Swal.fire({
-        title: '¿Estás seguro?',
-        text: "No podrás revertir esta acción",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-    });
-
-    if (!confirmacion.isConfirmed) return;
-
-    try {
-        Swal.fire({ title: 'Eliminando...', didOpen: () => Swal.showLoading() });
-
-        const response = await fetch(`/terminals/${id}`, { method: 'DELETE' });
-        const result = await response.json();
-
-        if (result.success) {
-            // Mostrar toast de éxito
-            showSuccessToast('La terminal ha sido eliminada');
-
-            // Refrescar tabla
-            $('#tablaTerminales').bootstrapTable('refresh');
-        } else {
-            showErrorToast(result.error);
-        }
-    } catch (error) {
-        Swal.close();
-        showErrorToast('Error al intentar eliminar');
-    }
-}

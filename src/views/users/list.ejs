@@ -6,7 +6,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Gestión de Usuarios</h2>
-        <button class="btn btn-cerulean" onclick="abrirModalCrear()">
+        <button class="btn btn-cerulean" id="btnNewUser" >
             <i class="bi bi-person-plus"></i> Nuevo Usuario
         </button>
     </div>
@@ -83,25 +83,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-frosted" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-cerulean" onclick="guardarUsuario()">Guardar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="modalUsuario" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Usuario</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="userId">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="guardarUsuario()">Guardar</button>
+                    <button type="button" class="btn btn-cerulean" id="btnNewUser" id="btnSaveUser">Guardar</button>
                 </div>
             </div>
         </div>
