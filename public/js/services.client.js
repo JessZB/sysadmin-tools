@@ -37,6 +37,12 @@ d.addEventListener('DOMContentLoaded', function() {
         btnPingAll.addEventListener('click', pingAll);
     }
 
+    // 1.1 Botón Cancelar Todos
+    const btnCancelAll = d.getElementById('btnCancelAll');
+    if (btnCancelAll) {
+        btnCancelAll.addEventListener('click', cancelAll);
+    }
+
     // 2. Botón Nuevo Servicio
     const btnNewService = d.getElementById('btnNewService');
     if (btnNewService) {
@@ -67,9 +73,6 @@ d.addEventListener('DOMContentLoaded', function() {
             if (btn.classList.contains('btn-ping')) {
                 const id = btn.dataset.id;
                 pingServiceAsync(Number(id));
-            } else if (btn.classList.contains('btn-cancel-service-ping')) {
-                const id = btn.dataset.id;
-                cancelServicePing(Number(id));
             } else if (btn.classList.contains('btn-history')) {
                 const { id, name } = btn.dataset;
                 verHistorial(Number(id), name);
@@ -256,19 +259,19 @@ function cancelServicePing(serviceId) {
     }
 }
 
+// Exponer función globalmente para uso en onclick del overlay
+window.cancelServicePing = cancelServicePing;
+
+
 /**
- * Toggle cancel button visibility for individual service
+ * Cancel all ongoing pings (global ping operation)
  */
-function toggleServiceCancelButton(serviceId, show) {
-    // Find cancel button in all grids
-    const cancelBtns = d.querySelectorAll(`.btn-cancel-service-ping[data-id="${serviceId}"]`);
-    cancelBtns.forEach(btn => {
-        if (show) {
-            btn.classList.remove('d-none');
-        } else {
-            btn.classList.add('d-none');
-        }
-    });
+function cancelAll() {
+    const controller = activePingControllers.get('global');
+    if (controller) {
+        controller.abort();
+        showInfoToast('Cancelando todos los pings...');
+    }
 }
 
 /* =========================================
@@ -391,6 +394,9 @@ function createServiceCard(service, viewCategory) {
         <div class="card-loading-overlay">
             <div class="spinner"></div>
             <p>Ejecutando ping...</p>
+            <button class="btn btn-sm btn-danger mt-2" onclick="cancelServicePing(${service.id})">
+                <i class="bi bi-x-circle"></i> Cancelar
+            </button>
         </div>
     ` : '';
     
@@ -440,9 +446,6 @@ function createServiceCard(service, viewCategory) {
             <div class="card-actions">
                 <button class="action-btn-small btn-ping" data-id="${service.id}" title="Ping" ${isLoading ? 'disabled' : ''}>
                     <i class="bi bi-broadcast"></i> Ping
-                </button>
-                <button class="action-btn-small btn-cancel-service-ping d-none" data-id="${service.id}" title="Cancelar Ping" style="background: linear-gradient(135deg, var(--danger-color) 0%, #c62828 100%); color: white; border: none;">
-                    <i class="bi bi-x-circle"></i>
                 </button>
                 <button class="action-btn-small btn-history" data-id="${service.id}" data-name="${escapeHtml(service.name)}" title="Historial">
                     <i class="bi bi-clock-history"></i>
@@ -714,9 +717,6 @@ async function pingServiceAsync(id, signal = null) {
         controller = new AbortController();
         serviceAbortControllers.set(id, controller);
         signal = controller.signal;
-        
-        // Show cancel button for this service
-        toggleServiceCancelButton(id, true);
     }
     
     try {
@@ -767,10 +767,9 @@ async function pingServiceAsync(id, signal = null) {
         hideLoadingState(id);
         showErrorToast('Error de conexión');
     } finally {
-        // Cleanup: remove AbortController and hide cancel button
+        // Cleanup: remove AbortController
         if (serviceAbortControllers.has(id)) {
             serviceAbortControllers.delete(id);
-            toggleServiceCancelButton(id, false);
         }
     }
 }
@@ -791,16 +790,45 @@ async function pingAll() {
     
     const serviceIds = servicesDataByCategory.todos.map(s => s.id);
     
+    // Crear AbortController global
+    const globalController = new AbortController();
+    activePingControllers.set('global', globalController);
+    
+    // Mostrar botón de cancelar todos
+    const btnCancelAll = d.getElementById('btnCancelAll');
+    const btnPingAll = d.getElementById('btnPingAll');
+    if (btnCancelAll) btnCancelAll.classList.remove('d-none');
+    if (btnPingAll) btnPingAll.disabled = true;
+    
     showInfoToast(`Ejecutando ping a ${serviceIds.length} servicio(s)...`);
     
-    // Ejecutar pings en paralelo con actualización asíncrona
-    const pingPromises = serviceIds.map(id => pingServiceAsync(id));
-    
     try {
-        await Promise.all(pingPromises);
-        showSuccessToast('Pings completados');
+        // Ejecutar pings secuencialmente para permitir cancelación
+        for (const id of serviceIds) {
+            if (globalController.signal.aborted) {
+                showInfoToast('Ping global cancelado');
+                break;
+            }
+            try {
+                await pingServiceAsync(id, globalController.signal);
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    break;
+                }
+                // Continuar con el siguiente servicio si hay error
+            }
+        }
+        
+        if (!globalController.signal.aborted) {
+            showSuccessToast('Pings completados');
+        }
     } catch (error) {
         console.error('Error en ping batch:', error);
+    } finally {
+        // Cleanup
+        activePingControllers.delete('global');
+        if (btnCancelAll) btnCancelAll.classList.add('d-none');
+        if (btnPingAll) btnPingAll.disabled = false;
     }
 }
 
