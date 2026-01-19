@@ -55,38 +55,43 @@ d.addEventListener('DOMContentLoaded', function() {
         btnSaveService.addEventListener('click', guardarServicio);
     }
 
-    // 4. Delegación de eventos para las tarjetas de servicio (Grid)
+    // 4. Delegación de eventos para el contenido de las pestañas (Grid y Acciones de Sección)
     const tabContent = d.getElementById('categoryTabContent');
     if (tabContent) {
         tabContent.addEventListener('click', (e) => {
-            // Manejar click en "Añadir Servicio" card
-            const addCard = e.target.closest('.add-service-card');
-            if (addCard) {
-                abrirModalCrear();
+            const btn = e.target.closest('button');
+            if (!btn) {
+                // Manejar click en "Añadir Servicio" card (que no es un botón)
+                const addCard = e.target.closest('.add-service-card');
+                if (addCard) {
+                    abrirModalCrear();
+                }
                 return;
             }
 
-            // Manejar botones de acción
-            const btn = e.target.closest('button');
-            if (!btn) return;
-
+            // --- Botones de Servicio (Cards) ---
             if (btn.classList.contains('btn-ping')) {
-                const id = btn.dataset.id;
-                pingServiceAsync(Number(id));
+                pingServiceAsync(Number(btn.dataset.id));
+            } else if (btn.classList.contains('btn-cancel-overlay')) {
+                cancelServicePing(Number(btn.dataset.id));
             } else if (btn.classList.contains('btn-history')) {
-                const { id, name } = btn.dataset;
-                verHistorial(Number(id), name);
+                verHistorial(Number(btn.dataset.id), btn.dataset.name);
             } else if (btn.classList.contains('btn-edit')) {
-                const id = btn.dataset.id;
-                abrirModalEditar(Number(id));
+                abrirModalEditar(Number(btn.dataset.id));
             } else if (btn.classList.contains('btn-delete')) {
-                const { id, name } = btn.dataset;
-                eliminarServicio(Number(id), name);
+                eliminarServicio(Number(btn.dataset.id), btn.dataset.name);
+            }
+            
+            // --- Botones de Sección (Header de Tab) ---
+            else if (btn.classList.contains('btn-ping-section')) {
+                pingSection(btn.dataset.category);
+            } else if (btn.classList.contains('btn-cancel-ping')) {
+                cancelPing(btn.dataset.category);
             }
         });
     }
     
-    // Event listener para cambio de tabs (Bootstrap)
+    // 5. Event listener para cambio de tabs (Bootstrap)
     const tabElements = d.querySelectorAll('button[data-bs-toggle="tab"]');
     tabElements.forEach(tab => {
         tab.addEventListener('shown.bs.tab', function (event) {
@@ -95,7 +100,7 @@ d.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Event listener para cambio de sucursal
+    // 6. Event listener para cambio de sucursal
     const branchSelect = d.getElementById('branchSelect');
     if (branchSelect) {
         branchSelect.addEventListener('change', function() {
@@ -103,24 +108,6 @@ d.addEventListener('DOMContentLoaded', function() {
             loadServicesByCategory('terminales');
         });
     }
-    
-    // Event listener for section ping buttons
-    const sectionPingButtons = d.querySelectorAll('.btn-ping-section');
-    sectionPingButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const category = e.target.closest('button').dataset.category;
-            pingSection(category);
-        });
-    });
-    
-    // Event listener for cancel ping buttons
-    const cancelPingButtons = d.querySelectorAll('.btn-cancel-ping');
-    cancelPingButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const category = e.target.closest('button').dataset.category;
-            cancelPing(category);
-        });
-    });
     
     // Cargar categoría inicial
     loadServicesByCategory('todos');
@@ -259,8 +246,6 @@ function cancelServicePing(serviceId) {
     }
 }
 
-// Exponer función globalmente para uso en onclick del overlay
-window.cancelServicePing = cancelServicePing;
 
 
 /**
@@ -394,7 +379,7 @@ function createServiceCard(service, viewCategory) {
         <div class="card-loading-overlay">
             <div class="spinner"></div>
             <p>Ejecutando ping...</p>
-            <button class="btn btn-sm btn-danger mt-2" onclick="cancelServicePing(${service.id})">
+            <button class="btn btn-sm btn-danger mt-2 btn-cancel-overlay" data-id="${service.id}">
                 <i class="bi bi-x-circle"></i> Cancelar
             </button>
         </div>
@@ -761,7 +746,7 @@ async function pingServiceAsync(id, signal = null) {
     } catch (error) {
         if (error.name === 'AbortError') {
             hideLoadingState(id);
-            throw error; // Re-throw to be caught by caller
+            return; // No relanzar para evitar "Uncaught (in promise)"
         }
         console.error('Error:', error);
         hideLoadingState(id);
