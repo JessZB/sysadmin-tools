@@ -19,6 +19,7 @@ let servicesDataByCategory = {
 let pingInProgress = new Set();
 let activePingControllers = new Map(); // category -> AbortController
 let categoryPingInProgress = new Set(); // Set of categories with active pings
+let serviceAbortControllers = new Map(); // serviceId -> AbortController for individual pings
 
 d.addEventListener('DOMContentLoaded', function() {
     modalServicio = new bootstrap.Modal(d.getElementById('modalServicio'));
@@ -66,6 +67,9 @@ d.addEventListener('DOMContentLoaded', function() {
             if (btn.classList.contains('btn-ping')) {
                 const id = btn.dataset.id;
                 pingServiceAsync(Number(id));
+            } else if (btn.classList.contains('btn-cancel-service-ping')) {
+                const id = btn.dataset.id;
+                cancelServicePing(Number(id));
             } else if (btn.classList.contains('btn-history')) {
                 const { id, name } = btn.dataset;
                 verHistorial(Number(id), name);
@@ -241,6 +245,32 @@ function getCategoryDisplayName(category) {
     return names[category] || category;
 }
 
+/**
+ * Cancel ongoing ping for an individual service
+ */
+function cancelServicePing(serviceId) {
+    const controller = serviceAbortControllers.get(serviceId);
+    if (controller) {
+        controller.abort();
+        showInfoToast('Ping cancelado');
+    }
+}
+
+/**
+ * Toggle cancel button visibility for individual service
+ */
+function toggleServiceCancelButton(serviceId, show) {
+    // Find cancel button in all grids
+    const cancelBtns = d.querySelectorAll(`.btn-cancel-service-ping[data-id="${serviceId}"]`);
+    cancelBtns.forEach(btn => {
+        if (show) {
+            btn.classList.remove('d-none');
+        } else {
+            btn.classList.add('d-none');
+        }
+    });
+}
+
 /* =========================================
    TAB CHANGE HANDLER
    ========================================= */
@@ -410,6 +440,9 @@ function createServiceCard(service, viewCategory) {
             <div class="card-actions">
                 <button class="action-btn-small btn-ping" data-id="${service.id}" title="Ping" ${isLoading ? 'disabled' : ''}>
                     <i class="bi bi-broadcast"></i> Ping
+                </button>
+                <button class="action-btn-small btn-cancel-service-ping d-none" data-id="${service.id}" title="Cancelar Ping" style="background: linear-gradient(135deg, var(--danger-color) 0%, #c62828 100%); color: white; border: none;">
+                    <i class="bi bi-x-circle"></i>
                 </button>
                 <button class="action-btn-small btn-history" data-id="${service.id}" data-name="${escapeHtml(service.name)}" title="Historial">
                     <i class="bi bi-clock-history"></i>
@@ -675,16 +708,24 @@ async function pingServiceAsync(id, signal = null) {
         return;
     }
     
+    // Create AbortController for individual ping if no signal provided
+    let controller = null;
+    if (!signal) {
+        controller = new AbortController();
+        serviceAbortControllers.set(id, controller);
+        signal = controller.signal;
+        
+        // Show cancel button for this service
+        toggleServiceCancelButton(id, true);
+    }
+    
     try {
         showLoadingState(id);
         
         const fetchOptions = {
-            method: 'POST'
+            method: 'POST',
+            signal: signal
         };
-        
-        if (signal) {
-            fetchOptions.signal = signal;
-        }
         
         const response = await fetch(`/services/ping/${id}`, fetchOptions);
         const data = await response.json();
@@ -725,6 +766,12 @@ async function pingServiceAsync(id, signal = null) {
         console.error('Error:', error);
         hideLoadingState(id);
         showErrorToast('Error de conexión');
+    } finally {
+        // Cleanup: remove AbortController and hide cancel button
+        if (serviceAbortControllers.has(id)) {
+            serviceAbortControllers.delete(id);
+            toggleServiceCancelButton(id, false);
+        }
     }
 }
 
