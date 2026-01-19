@@ -17,6 +17,8 @@ let servicesDataByCategory = {
     otros: []
 };
 let pingInProgress = new Set();
+let activePingControllers = new Map(); // category -> AbortController
+let categoryPingInProgress = new Set(); // Set of categories with active pings
 
 d.addEventListener('DOMContentLoaded', function() {
     modalServicio = new bootstrap.Modal(d.getElementById('modalServicio'));
@@ -95,9 +97,145 @@ d.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Event listener for section ping buttons
+    const sectionPingButtons = d.querySelectorAll('.btn-ping-section');
+    sectionPingButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const category = e.target.closest('button').dataset.category;
+            pingSection(category);
+        });
+    });
+    
+    // Event listener for cancel ping buttons
+    const cancelPingButtons = d.querySelectorAll('.btn-cancel-ping');
+    cancelPingButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const category = e.target.closest('button').dataset.category;
+            cancelPing(category);
+        });
+    });
+    
     // Cargar categoría inicial
     loadServicesByCategory('todos');
 });
+
+/* =========================================
+   SECTION PING AND CANCEL
+   ========================================= */
+
+/**
+ * Ping all services in a specific category/section
+ */
+async function pingSection(category) {
+    if (categoryPingInProgress.has(category)) {
+        showInfoToast('Ya hay un ping en progreso para esta sección');
+        return;
+    }
+    
+    const services = servicesDataByCategory[category];
+    if (!services || services.length === 0) {
+        showInfoToast('No hay servicios en esta sección');
+        return;
+    }
+    
+    // Create abort controller for this category
+    const controller = new AbortController();
+    activePingControllers.set(category, controller);
+    categoryPingInProgress.add(category);
+    
+    // Show cancel button, disable ping button
+    toggleCategoryPingUI(category, true);
+    
+    showInfoToast(`Iniciando ping a ${services.length} servicio(s) en ${getCategoryDisplayName(category)}...`);
+    
+    let completedCount = 0;
+    let successCount = 0;
+    
+    try {
+        // Ping services sequentially to avoid overwhelming the server
+        for (const service of services) {
+            if (controller.signal.aborted) {
+                showInfoToast(`Ping cancelado (${completedCount}/${services.length} completados)`);
+                break;
+            }
+            
+            try {
+                await pingServiceAsync(service.id, controller.signal);
+                completedCount++;
+                
+                // Check if it was successful
+                const updatedService = servicesDataByCategory[category].find(s => s.id === service.id);
+                if (updatedService && updatedService.last_status === 1) {
+                    successCount++;
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw error; // Re-throw to break the loop
+                }
+                // Continue with next service on error
+                completedCount++;
+            }
+        }
+        
+        if (!controller.signal.aborted) {
+            showSuccessToast(`Ping completado: ${successCount}/${completedCount} servicios disponibles`);
+        }
+    } catch (error) {
+        if (error.name !== 'AbortError') {
+            console.error('Error en ping de sección:', error);
+            showErrorToast('Error durante el ping de la sección');
+        }
+    } finally {
+        // Cleanup
+        activePingControllers.delete(category);
+        categoryPingInProgress.delete(category);
+        toggleCategoryPingUI(category, false);
+    }
+}
+
+/**
+ * Cancel ongoing ping for a category
+ */
+function cancelPing(category) {
+    const controller = activePingControllers.get(category);
+    if (controller) {
+        controller.abort();
+        showInfoToast('Cancelando ping...');
+    }
+}
+
+/**
+ * Toggle UI elements for category ping state
+ */
+function toggleCategoryPingUI(category, isPinging) {
+    const pingBtn = d.querySelector(`.btn-ping-section[data-category="${category}"]`);
+    const cancelBtn = d.querySelector(`.btn-cancel-ping[data-category="${category}"]`);
+    
+    if (pingBtn) {
+        pingBtn.disabled = isPinging;
+        pingBtn.innerHTML = isPinging 
+            ? '<i class="bi bi-hourglass-split"></i> Ejecutando...'
+            : '<i class="bi bi-broadcast-pin"></i> Ping Esta Sección';
+    }
+    
+    if (cancelBtn) {
+        cancelBtn.style.display = isPinging ? 'inline-flex' : 'none';
+    }
+}
+
+/**
+ * Get display name for category
+ */
+function getCategoryDisplayName(category) {
+    const names = {
+        'todos': 'Todos los Servicios',
+        'servicios': 'Servicios',
+        'terminales': 'Terminales',
+        'balanzas': 'Balanzas',
+        'otros': 'Otros'
+    };
+    return names[category] || category;
+}
 
 /* =========================================
    TAB CHANGE HANDLER
@@ -525,16 +663,26 @@ async function eliminarServicio(id, nombre) {
    PING OPERATIONS - ASYNC
    ========================================= */
 
-async function pingServiceAsync(id) {
+/**
+ * Ping a single service (updated to support AbortSignal)
+ */
+async function pingServiceAsync(id, signal = null) {
     if (pingInProgress.has(id)) {
-        showInfoToast('Ya se está ejecutando un ping a este servicio');
         return;
     }
     
     try {
         showLoadingState(id);
         
-        const response = await fetch(`/services/ping/${id}`, { method: 'POST' });
+        const fetchOptions = {
+            method: 'POST'
+        };
+        
+        if (signal) {
+            fetchOptions.signal = signal;
+        }
+        
+        const response = await fetch(`/services/ping/${id}`, fetchOptions);
         const data = await response.json();
         
         if (data.success) {
@@ -566,6 +714,10 @@ async function pingServiceAsync(id) {
             showErrorToast(data.error || 'Error al ejecutar ping');
         }
     } catch (error) {
+        if (error.name === 'AbortError') {
+            hideLoadingState(id);
+            throw error; // Re-throw to be caught by caller
+        }
         console.error('Error:', error);
         hideLoadingState(id);
         showErrorToast('Error de conexión');

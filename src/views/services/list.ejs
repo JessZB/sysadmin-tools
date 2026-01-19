@@ -502,6 +502,51 @@
             color: var(--text-primary);
             margin-bottom: 0.5rem;
         }
+
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .section-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-cancel-ping {
+            background: linear-gradient(135deg, var(--danger-color) 0%, #c62828 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-cancel-ping:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+        }
     </style>
 
     <!-- Header -->
@@ -579,6 +624,17 @@
     <div class="tab-content" id="categoryTabContent">
         <!-- Todos Tab -->
         <div class="tab-pane fade show active" id="todos-pane" role="tabpanel" aria-labelledby="todos-tab">
+            <div class="section-header mb-3">
+                <h4><i class="bi bi-grid-3x3-gap"></i> Todos los Servicios</h4>
+                <div class="section-actions">
+                    <button class="btn btn-sm btn-success-custom btn-ping-section" data-category="todos">
+                        <i class="bi bi-broadcast-pin"></i> Ping Esta Sección
+                    </button>
+                    <button class="btn btn-sm btn-danger btn-cancel-ping" data-category="todos" style="display: none;">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                </div>
+            </div>
             <section class="services-grid" id="servicesGrid-todos">
                 <!-- Las tarjetas se cargarán dinámicamente aquí -->
             </section>
@@ -586,6 +642,18 @@
 
         <!-- Servicios Tab -->
         <div class="tab-pane fade" id="servicios-pane" role="tabpanel" aria-labelledby="servicios-tab">
+            <div class="section-header mb-3">
+                <h4><i class="bi bi-hdd-network"></i> Servicios</h4>
+                <div class="section-actions">
+                    <button class="btn btn-sm btn-success-custom btn-ping-section" data-category="servicios">
+                        <i class="bi bi-broadcast-pin"></i> Ping Esta Sección
+                    </button>
+                    <button class="btn btn-sm btn-danger btn-cancel-ping" data-category="servicios"
+                        style="display: none;">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                </div>
+            </div>
             <section class="services-grid" id="servicesGrid-servicios">
                 <!-- Las tarjetas se cargarán dinámicamente aquí -->
             </section>
@@ -600,6 +668,18 @@
                     <!-- Se carga dinámicamente -->
                 </select>
             </div>
+            <div class="section-header mb-3">
+                <h4><i class="bi bi-pc-display"></i> Terminales</h4>
+                <div class="section-actions">
+                    <button class="btn btn-sm btn-success-custom btn-ping-section" data-category="terminales">
+                        <i class="bi bi-broadcast-pin"></i> Ping Esta Sección
+                    </button>
+                    <button class="btn btn-sm btn-danger btn-cancel-ping" data-category="terminales"
+                        style="display: none;">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                </div>
+            </div>
             <section class="services-grid" id="servicesGrid-terminales">
                 <!-- Las tarjetas se cargarán dinámicamente aquí -->
             </section>
@@ -607,6 +687,18 @@
 
         <!-- Balanzas Tab -->
         <div class="tab-pane fade" id="balanzas-pane" role="tabpanel" aria-labelledby="balanzas-tab">
+            <div class="section-header mb-3">
+                <h4><i class="bi bi-speedometer2"></i> Balanzas</h4>
+                <div class="section-actions">
+                    <button class="btn btn-sm btn-success-custom btn-ping-section" data-category="balanzas">
+                        <i class="bi bi-broadcast-pin"></i> Ping Esta Sección
+                    </button>
+                    <button class="btn btn-sm btn-danger btn-cancel-ping" data-category="balanzas"
+                        style="display: none;">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                </div>
+            </div>
             <section class="services-grid" id="servicesGrid-balanzas">
                 <!-- Las tarjetas se cargarán dinámicamente aquí -->
             </section>
@@ -614,6 +706,17 @@
 
         <!-- Otros Tab -->
         <div class="tab-pane fade" id="otros-pane" role="tabpanel" aria-labelledby="otros-tab">
+            <div class="section-header mb-3">
+                <h4><i class="bi bi-gear"></i> Otros</h4>
+                <div class="section-actions">
+                    <button class="btn btn-sm btn-success-custom btn-ping-section" data-category="otros">
+                        <i class="bi bi-broadcast-pin"></i> Ping Esta Sección
+                    </button>
+                    <button class="btn btn-sm btn-danger btn-cancel-ping" data-category="otros" style="display: none;">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                </div>
+            </div>
             <section class="services-grid" id="servicesGrid-otros">
                 <!-- Las tarjetas se cargarán dinámicamente aquí -->
             </section>
