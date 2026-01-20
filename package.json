@@ -1,17 +1,30 @@
 {
   "dependencies": {
+    "@types/node-ssdp": "^4.0.5",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
+    "express": "^5.2.1",
+    "http-proxy-middleware": "^3.0.5",
     "jsonwebtoken": "^9.0.3",
+    "mssql": "^12.2.0",
+    "mysql2": "^3.16.1",
+    "node-ssdp": "^4.0.1",
     "nodemon": "^3.1.11",
-    "ts-node": "^10.9.2"
+    "ping": "^1.0.0",
+    "socket.io": "^4.8.3",
+    "ts-node": "^10.9.2",
+    "upnp-mediarenderer-client": "^1.4.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
     "@types/cookie-parser": "^1.4.10",
+    "@types/http-proxy-middleware": "^0.19.3",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/ping": "^0.4.4"
+    "@types/mssql": "^9.1.9",
+    "@types/ping": "^0.4.4",
+    "@types/socket.io": "^3.0.1"
   },
   "scripts": {
     "start": "node dist/app.js",
