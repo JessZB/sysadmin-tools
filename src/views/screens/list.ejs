@@ -1,0 +1,214 @@
+<%- include('../layout/header') %>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Gestión de Pantallas</h2>
+        <button class="btn btn-cerulean" data-bs-toggle="modal" data-bs-target="#modalScreen">
+            <i class="fa-solid fa-plus"></i> Nueva Pantalla
+        </button>
+    </div>
+
+    <div class="row">
+        <% if (screens.length===0) { %>
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    No hay pantallas registradas. ¡Agrega una nueva!
+                </div>
+            </div>
+            <% } %>
+
+                <% screens.forEach(screen=> { %>
+                    <div class="col-md-4 mb-4">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center bg-light">
+                                <h5 class="mb-0 text-truncate" title="<%= screen.name %>">
+                                    <%= screen.name %>
+                                </h5>
+                                <span class="badge bg-<%= screen.is_active ? 'success' : 'secondary' %>">
+                                    <%= screen.device_type==='browser' ? 'Navegador' : 'DLNA (TV)' %>
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text text-muted mb-3">
+                                    <i class="fa-solid fa-network-wired me-1"></i>
+                                    <%= screen.ip_address || 'Sin IP asignada' %>
+                                </p>
+
+                                <% if (screen.device_type==='browser' ) { %>
+                                    <div class="d-grid gap-2">
+                                        <a href="/screens/viewer/<%= screen.id %>" target="_blank"
+                                            class="btn btn-outline-primary btn-sm">
+                                            <i class="fa-solid fa-external-link-alt me-1"></i> Abrir Visor
+                                        </a>
+                                        <button onclick="reloadScreen('<%= screen.id %>')"
+                                            class="btn btn-primary btn-sm">
+                                            <i class="fa-solid fa-sync-alt me-1"></i> Recargar Tasa
+                                        </button>
+                                    </div>
+                                    <% } else if (screen.device_type==='dlna' ) { %>
+                                        <div class="mb-2">
+                                            <label class="form-label small text-muted">Seleccionar Medio:</label>
+                                            <select id="media-<%= screen.id %>" class="form-select form-select-sm mb-2">
+                                                <% if (mediaFiles.length===0) { %>
+                                                    <option disabled selected>Sin archivos en public/media</option>
+                                                    <% } %>
+                                                        <% mediaFiles.forEach(file=> { %>
+                                                            <option value="http://localhost:4000/media/<%= file %>">
+                                                                <%= file %>
+                                                            </option>
+                                                            <% }) %>
+                                            </select>
+                                            <button onclick="playVideo('<%= screen.ip_address %>', '<%= screen.id %>')"
+                                                class="btn btn-success btn-sm w-100" <%=!screen.ip_address ? 'disabled'
+                                                : '' %>>
+                                                <i class="fa-solid fa-play me-1"></i> Reproducir
+                                            </button>
+                                        </div>
+                                        <% } %>
+                            </div>
+                            <div class="card-footer bg-white border-top-0 text-end">
+                                <small class="text-muted" style="font-size: 0.75rem;">ID: <%= screen.id %></small>
+                            </div>
+                        </div>
+                    </div>
+                    <% }) %>
+    </div>
+
+    <!-- Modal Nueva Pantalla -->
+    <div class="modal fade" id="modalScreen" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header card-header-cerulean">
+                    <h5 class="modal-title text-white">Nueva Pantalla</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formScreen" action="/screens/create" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-control" name="name" required placeholder="Ej: TV Recepción">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Tipo de Dispositivo</label>
+                            <select class="form-select" name="device_type" id="deviceTypeSelect"
+                                onchange="toggleIpField()">
+                                <option value="browser">Navegador (Samsung/PC)</option>
+                                <option value="dlna">DLNA (LG/Smart TV)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3" id="ipField" style="display: none;">
+                            <label class="form-label">Dirección IP (Requerido para DLNA)</label>
+                            <input type="text" class="form-control" name="ip_address" placeholder="Ej: 192.168.1.50">
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="isActive" checked>
+                                <label class="form-check-label" for="isActive">Activo</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-frosted" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" onclick="submitForm()" class="btn btn-cerulean">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleIpField() {
+            const type = document.getElementById('deviceTypeSelect').value;
+            const ipField = document.getElementById('ipField');
+            if (type === 'dlna') {
+                ipField.style.display = 'block';
+                ipField.querySelector('input').setAttribute('required', 'required');
+            } else {
+                ipField.style.display = 'none';
+                ipField.querySelector('input').removeAttribute('required');
+            }
+        }
+
+        async function submitForm() {
+            const form = document.getElementById('formScreen');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            // Checkbox fix
+            data.is_active = document.getElementById('isActive').checked ? 1 : 0;
+
+            try {
+                const res = await fetch('/screens/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Error al crear la pantalla');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error de conexión');
+            }
+        }
+
+        async function reloadScreen(id) {
+            try {
+                const res = await fetch('/screens/reload', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                const data = await res.json();
+                // Usar SweetAlert si está disponible, sino alert
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Comando enviado',
+                        text: data.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) {
+                alert('Error al recargar');
+            }
+        }
+
+        async function playVideo(ip, screenId) {
+            const select = document.getElementById('media-' + screenId);
+            const url = select.value;
+            const finalUrl = url.replace('localhost:4000', window.location.hostname + ':4000');
+
+            try {
+                const res = await fetch('/screens/play', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip, url: finalUrl })
+                });
+                const data = await res.json();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Reproduciendo',
+                        text: data.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) {
+                alert('Error al reproducir');
+            }
+        }
+    </script>
+
+    <%- include('../layout/footer') %>

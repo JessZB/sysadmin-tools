@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor de Pantalla</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+    <iframe id="contentFrame" src="<%= targetUrl %>"></iframe>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const screenId = '<%= screenId %>';
+        const iframe = document.getElementById('contentFrame');
+
+        // Registrar pantalla
+        socket.emit('register-screen', screenId);
+
+        // Escuchar recarga forzada
+        socket.on('force-reload', () => {
+            console.log('Recargando iframe...');
+            iframe.src = iframe.src;
+        });
+
+        // Reconexión automática
+        socket.on('connect', () => {
+            console.log('Conectado al servidor');
+            socket.emit('register-screen', screenId);
+        });
+    </script>
+</body>
+
+</html>
