@@ -121,6 +121,19 @@
                                                                             actividades</p>
                                                                     </a>
                                                                     <% } %>
+
+                                                                        <!-- Pantallas -->
+                                                                        <% if (user.modules &&
+                                                                            user.modules.includes('screens')) { %>
+                                                                            <a href="/screens" class="menu-card">
+                                                                                <div class="menu-icon">
+                                                                                    <i class="fa-solid fa-tv"></i>
+                                                                                </div>
+                                                                                <h4 class="menu-title">Pantallas</h4>
+                                                                                <p class="menu-description">Gestión de
+                                                                                    TV y DLNA</p>
+                                                                            </a>
+                                                                            <% } %>
             </div>
 
             <!-- Logout Button -->
