@@ -31,8 +31,19 @@
         const screenId = '<%= screenId %>';
         const iframe = document.getElementById('contentFrame');
 
-        // Registrar pantalla
-        socket.emit('register-screen', screenId);
+        // Registrar pantalla y guardar socket_id en BD
+        function registerScreen() {
+            socket.emit('register-screen', screenId);
+
+            // Guardar socket_id en la base de datos
+            fetch('/screens/register-socket', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ screenId, socketId: socket.id })
+            }).then(res => res.json())
+                .then(data => console.log('Socket registrado en BD'))
+                .catch(err => console.error('Error al registrar socket:', err));
+        }
 
         // Escuchar recarga forzada
         socket.on('force-reload', () => {
@@ -43,7 +54,7 @@
         // Reconexión automática
         socket.on('connect', () => {
             console.log('Conectado al servidor');
-            socket.emit('register-screen', screenId);
+            registerScreen();
         });
     </script>
 </body>

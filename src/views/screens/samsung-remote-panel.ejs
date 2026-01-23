@@ -1,0 +1,101 @@
+<!-- Indicador de Token -->
+<% if (screen.samsung_token) { %>
+    <span class="badge bg-success mb-2">✅ Validado</span>
+    <% } else { %>
+        <span class="badge bg-warning mb-2">⚠️ Sin validar</span>
+        <% } %>
+
+            <!-- Botón Validar/Re-validar -->
+            <button class="btn btn-primary btn-sm w-100 mb-2" data-action="validate" data-id="<%= screen.id %>">
+                <i class="bi bi-check-circle me-1"></i>
+                <%= screen.samsung_token ? 'Re-validar' : 'Validar Conexión' %>
+            </button>
+
+            <!-- Panel de Control Remoto -->
+            <div class="card mb-2">
+                <div class="card-header py-1">
+                    <strong>Control Remoto</strong>
+                </div>
+                <div class="card-body p-2">
+                    <!-- Fila 1: Power, Mute -->
+                    <div class="btn-group w-100 mb-1" role="group">
+                        <button class="btn btn-sm btn-outline-danger" data-action="send-key" data-id="<%= screen.id %>"
+                            data-key="KEY_POWER" data-label="Power" title="Power">
+                            <i class="bi bi-power"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" data-action="send-key"
+                            data-id="<%= screen.id %>" data-key="KEY_MUTE" data-label="Mute" title="Mute">
+                            <i class="bi bi-volume-mute"></i>
+                        </button>
+                    </div>
+
+                    <!-- Fila 2: Volumen -->
+                    <div class="btn-group w-100 mb-1" role="group">
+                        <button class="btn btn-sm btn-outline-primary" data-action="send-key" data-id="<%= screen.id %>"
+                            data-key="KEY_VOLUP" data-label="Vol+" title="Volumen +">
+                            Vol+
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" data-action="send-key" data-id="<%= screen.id %>"
+                            data-key="KEY_VOLDOWN" data-label="Vol-" title="Volumen -">
+                            Vol-
+                        </button>
+                    </div>
+
+                    <!-- Fila 3: Navegación -->
+                    <div class="text-center mb-1">
+                        <button class="btn btn-sm btn-outline-dark" data-action="send-key" data-id="<%= screen.id %>"
+                            data-key="KEY_UP" data-label="Arriba" title="Arriba">
+                            <i class="bi bi-arrow-up"></i>
+                        </button>
+                    </div>
+                    <div class="btn-group w-100 mb-1" role="group">
+                        <button class="btn btn-sm btn-outline-dark" data-action="send-key" data-id="<%= screen.id %>"
+                            data-key="KEY_LEFT" data-label="Izquierda" title="Izquierda">
+                            <i class="bi bi-arrow-left"></i>
+                        </button>
+                        <button class="btn btn-sm btn-dark" data-action="send-key" data-id="<%= screen.id %>"
+                            data-key="KEY_ENTER" data-label="Enter" title="Enter">
+                            OK
+                        </button>
+                        <button class="btn btn-sm btn-outline-dark" data-action="send-key" data-id="<%= screen.id %>"
+                            data-key="KEY_RIGHT" data-label="Derecha" title="Derecha">
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                    <div class="text-center mb-1">
+                        <button class="btn btn-sm btn-outline-dark" data-action="send-key" data-id="<%= screen.id %>"
+                            data-key="KEY_DOWN" data-label="Abajo" title="Abajo">
+                            <i class="bi bi-arrow-down"></i>
+                        </button>
+                    </div>
+
+                    <!-- Fila 4: Funciones -->
+                    <div class="btn-group w-100" role="group">
+                        <button class="btn btn-sm btn-outline-info" data-action="send-key" data-id="<%= screen.id %>"
+                            data-key="KEY_HOME" data-label="Home" title="Home">
+                            <i class="bi bi-house"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" data-action="send-key" data-id="<%= screen.id %>"
+                            data-key="KEY_RETURN" data-label="Return" title="Return">
+                            <i class="bi bi-arrow-return-left"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" data-action="send-key" data-id="<%= screen.id %>"
+                            data-key="KEY_MENU" data-label="Menu" title="Menu">
+                            <i class="bi bi-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Navegador -->
+            <button class="btn btn-info btn-sm w-100 mb-2" data-action="open-browser" data-id="<%= screen.id %>"
+                <%=!screen.samsung_token ? 'disabled' : '' %>
+                title="<%= !screen.samsung_token ? 'Valida la conexión primero' : 'Abrir navegador' %>">
+                    <i class="bi bi-globe me-1"></i> Abrir Navegador
+            </button>
+
+            <button class="btn btn-success btn-sm w-100 mb-2" data-action="startup" data-id="<%= screen.id %>"
+                <%=!screen.mac_address ? 'disabled' : '' %>
+                title="<%= !screen.mac_address ? 'Configura MAC address primero' : 'Encender y abrir navegador' %>">
+                    <i class="bi bi-rocket-takeoff me-1"></i> Encender y Abrir Navegador
+            </button>
