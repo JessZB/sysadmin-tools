@@ -1,4 +1,5 @@
 import path from 'path';
+import os from 'os';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import type { IncomingMessage, ServerResponse } from 'http';
 
@@ -163,9 +164,32 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 const PORT = process.env.PORT || 4000;
-httpServer.listen(PORT, () => {
+const HOST = '0.0.0.0'; // Escuchar en todas las interfaces de red
+
+httpServer.listen(Number(PORT), HOST, () => {
     console.log(`🚀 Servidor TS corriendo en puerto ${PORT}`);
-    console.log(`🌐 URL del Servidor: http://localhost:${PORT}`);
+    console.log(`🌐 Acceso Local: http://localhost:${PORT}`);
+    console.log('');
+    console.log('📡 Acceso desde Red Local:');
+
+    // Obtener todas las interfaces de red
+    const networkInterfaces = os.networkInterfaces();
+
+    Object.keys(networkInterfaces).forEach((interfaceName) => {
+        const interfaces = networkInterfaces[interfaceName];
+        if (interfaces) {
+            interfaces.forEach((iface: os.NetworkInterfaceInfo) => {
+                // Mostrar solo direcciones IPv4 que no sean localhost
+                if (iface.family === 'IPv4' && !iface.internal) {
+                    console.log(`   → http://${iface.address}:${PORT} (${interfaceName})`);
+                }
+            });
+        }
+    });
+
+    console.log('');
+    console.log('💡 Usa cualquiera de las URLs anteriores desde otros dispositivos en tu red');
+    console.log('');
 
     // Iniciar limpieza automática del caché de tasas de cambio cada 15 minutos
     setInterval(() => {
