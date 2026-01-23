@@ -19,6 +19,7 @@ import auditRoutes from './modules/audit/audit.routes';
 import barcodeRoutes from './modules/barcode/barcode.routes';
 import servicesRoutes from './modules/services/services.routes';
 import screensRoutes from './modules/screens/screens.routes';
+import mediaRoutes from './modules/media/media.routes';
 import { notFoundHandler } from './shared/middlewares/not-found.middleware';
 import { requireAuth } from './shared/middlewares/auth.middleware';
 import { allowRoles } from './shared/middlewares/role.middleware';
@@ -103,6 +104,9 @@ app.use('/proxy', createProxyMiddleware({
 }));
 
 app.use(express.static(path.join(__dirname, '../public'))) // Servir CSS/JS estáticos
+
+// Servir archivos de media (videos)
+app.use('/media', express.static(path.join(__dirname, '../public/media')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser()); // Para leer cookie de la sesión
@@ -154,6 +158,9 @@ app.use('/services', requireAuth, requireModule('services'), servicesRoutes);
 // Pantallas
 app.use('/screens', screensRoutes);
 
+// Media Management
+app.use('/media', requireAuth, requireModule('screens'), mediaRoutes);
+
 // Manejo de Rutas No Encontradas
 app.use(notFoundHandler);
 
@@ -163,7 +170,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     res.status(500).json({ error: err.message });
 });
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3435;
 const HOST = '0.0.0.0'; // Escuchar en todas las interfaces de red
 
 httpServer.listen(Number(PORT), HOST, () => {

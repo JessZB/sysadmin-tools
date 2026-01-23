@@ -58,6 +58,21 @@ export {
 export { startRoutine } from './samsung-startup-routine';
 
 // ==========================================
+// LG TV CONTROL METHODS (WebSocket)
+// ==========================================
+
+export {
+    validateLGConnection,
+    openLGBrowser,
+    castContent,
+    turnOffLG,
+    wakeOnLanLG,
+    sendToast,
+    getSystemInfo,
+    startupRoutineLG
+} from './lg-websocket';
+
+// ==========================================
 // DLNA CONTROL METHODS
 // ==========================================
 

@@ -303,5 +303,176 @@ export const openBrowser = async (req: Request, res: Response) => {
     }
 };
 
+// ============================================
+// LG TV Control Endpoints
+// ============================================
 
+/**
+ * Validate LG TV connection and get token
+ */
+export const validateLGConnection = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.body;
 
+        if (!id) {
+            return res.status(400).json({ success: false, message: 'ID es requerido' });
+        }
+
+        const token = await screensService.validateLGConnection(Number(id));
+
+        res.json({
+            success: true,
+            message: 'Conexión validada. Acepta el emparejamiento en el TV si aparece.',
+            token,
+            hasToken: !!token
+        });
+    } catch (error: any) {
+        console.error('Error en validateLGConnection:', error);
+        res.status(500).json({ success: false, message: error.message || 'Error validando conexión' });
+    }
+};
+
+/**
+ * Open URL in LG TV browser
+ */
+export const openLGBrowser = async (req: Request, res: Response) => {
+    try {
+        const { id, url } = req.body;
+
+        if (!id || !url) {
+            return res.status(400).json({ success: false, message: 'ID y URL son requeridos' });
+        }
+
+        await screensService.openLGBrowser(Number(id), url);
+
+        res.json({ success: true, message: 'Navegador abierto en LG TV' });
+    } catch (error: any) {
+        console.error('Error en openLGBrowser:', error);
+        res.status(500).json({ success: false, message: error.message || 'Error abriendo navegador' });
+    }
+};
+
+/**
+ * Cast video playlist to LG TV
+ */
+export const castLGContent = async (req: Request, res: Response) => {
+    try {
+        const { id, playlist, loop } = req.body;
+
+        if (!id || !playlist || !Array.isArray(playlist)) {
+            return res.status(400).json({ success: false, message: 'ID y playlist son requeridos' });
+        }
+
+        const serverUrl = `${req.protocol}://${req.get('host')}`;
+        await screensService.castContent(Number(id), playlist, loop === true, serverUrl);
+
+        res.json({
+            success: true,
+            message: `Reproduciendo ${playlist.length} video(s) en LG TV`
+        });
+    } catch (error: any) {
+        console.error('Error en castLGContent:', error);
+        res.status(500).json({ success: false, message: error.message || 'Error reproduciendo contenido' });
+    }
+};
+
+/**
+ * Turn off LG TV
+ */
+export const turnOffLG = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.body;
+
+        if (!id) {
+            return res.status(400).json({ success: false, message: 'ID es requerido' });
+        }
+
+        await screensService.turnOffLG(Number(id));
+
+        res.json({ success: true, message: 'LG TV apagado' });
+    } catch (error: any) {
+        console.error('Error en turnOffLG:', error);
+        res.status(500).json({ success: false, message: error.message || 'Error apagando TV' });
+    }
+};
+
+/**
+ * Wake LG TV using Wake-on-LAN
+ */
+export const wakeLG = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.body;
+
+        if (!id) {
+            return res.status(400).json({ success: false, message: 'ID es requerido' });
+        }
+
+        await screensService.wakeOnLanLG(Number(id));
+
+        res.json({ success: true, message: 'Señal Wake-on-LAN enviada' });
+    } catch (error: any) {
+        console.error('Error en wakeLG:', error);
+        res.status(500).json({ success: false, message: error.message || 'Error enviando Wake-on-LAN' });
+    }
+};
+
+/**
+ * Send toast notification to LG TV
+ */
+export const sendLGToast = async (req: Request, res: Response) => {
+    try {
+        const { id, message } = req.body;
+
+        if (!id || !message) {
+            return res.status(400).json({ success: false, message: 'ID y mensaje son requeridos' });
+        }
+
+        await screensService.sendToast(Number(id), message);
+
+        res.json({ success: true, message: 'Notificación enviada' });
+    } catch (error: any) {
+        console.error('Error en sendLGToast:', error);
+        res.status(500).json({ success: false, message: error.message || 'Error enviando notificación' });
+    }
+};
+
+/**
+ * Get LG TV system info
+ */
+export const getLGSystemInfo = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.query;
+
+        if (!id) {
+            return res.status(400).json({ success: false, message: 'ID es requerido' });
+        }
+
+        const info = await screensService.getSystemInfo(Number(id));
+
+        res.json({ success: true, info });
+    } catch (error: any) {
+        console.error('Error en getLGSystemInfo:', error);
+        res.status(500).json({ success: false, message: error.message || 'Error obteniendo información' });
+    }
+};
+
+/**
+ * LG TV startup routine (Wake + Open Browser)
+ */
+export const startupRoutineLG = async (req: Request, res: Response) => {
+    try {
+        const { id, url } = req.body;
+
+        if (!id) {
+            return res.status(400).json({ success: false, message: 'ID es requerido' });
+        }
+
+        const targetUrl = url || `${req.protocol}://${req.get('host')}/proxy/`;
+        await screensService.startupRoutineLG(Number(id), targetUrl);
+
+        res.json({ success: true, message: 'Rutina de encendido completada' });
+    } catch (error: any) {
+        console.error('Error en startupRoutineLG:', error);
+        res.status(500).json({ success: false, message: error.message || 'Error en rutina de encendido' });
+    }
+};

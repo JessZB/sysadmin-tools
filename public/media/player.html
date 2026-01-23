@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Video Player</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        #videoPlayer {
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
+            background-color: #000;
+        }
+
+        #loadingIndicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 24px;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #errorMessage {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 0, 0, 0.8);
+            color: #fff;
+            padding: 15px 30px;
+            border-radius: 8px;
+            display: none;
+            z-index: 20;
+        }
+
+        #playlistInfo {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            z-index: 15;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loadingIndicator">
+        <div class="spinner"></div>
+        <div>Cargando video...</div>
+    </div>
+
+    <div id="errorMessage"></div>
+    <div id="playlistInfo"></div>
+
+    <video id="videoPlayer" autoplay></video>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            baseUrl: window.location.origin,
+            mediaPath: '/media/videos/'
+        };
+
+        // State
+        let playlist = [];
+        let currentIndex = 0;
+        let loopMode = false;
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
+
+        // DOM Elements
+        const video = document.getElementById('videoPlayer');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const errorMessage = document.getElementById('errorMessage');
+        const playlistInfo = document.getElementById('playlistInfo');
+
+        // Parse URL parameters
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            const playlistParam = params.get('playlist');
+            const loopParam = params.get('loop');
+
+            if (!playlistParam) {
+                showError('No se especificó ningún video en la playlist');
+                return false;
+            }
+
+            playlist = playlistParam.split(',').map(v => v.trim()).filter(v => v);
+            loopMode = loopParam === 'true';
+
+            console.log('📋 Playlist:', playlist);
+            console.log('🔄 Loop mode:', loopMode);
+
+            return playlist.length > 0;
+        }
+
+        // Show error message
+        function showError(message) {
+            console.error('❌ Error:', message);
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            loadingIndicator.style.display = 'none';
+
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Update playlist info display
+        function updatePlaylistInfo() {
+            if (playlist.length > 1) {
+                playlistInfo.textContent = `Video ${currentIndex + 1} de ${playlist.length}${loopMode ? ' (Loop)' : ''}`;
+                playlistInfo.style.display = 'block';
+
+                setTimeout(() => {
+                    playlistInfo.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // Load video by index
+        function loadVideo(index) {
+            if (index < 0 || index >= playlist.length) {
+                console.error('❌ Índice de video inválido:', index);
+                return;
+            }
+
+            currentIndex = index;
+            const videoFile = playlist[currentIndex];
+            const videoUrl = `${CONFIG.baseUrl}${CONFIG.mediaPath}${videoFile}`;
+
+            console.log(`📹 Cargando video ${currentIndex + 1}/${playlist.length}: ${videoFile}`);
+
+            loadingIndicator.style.display = 'block';
+            video.src = videoUrl;
+            video.load();
+
+            updatePlaylistInfo();
+        }
+
+        // Play next video in playlist
+        function playNext() {
+            if (loopMode && playlist.length === 1) {
+                // Single video loop - restart same video
+                console.log('🔄 Reiniciando video en loop');
+                video.currentTime = 0;
+                video.play();
+                return;
+            }
+
+            // Playlist mode
+            currentIndex++;
+
+            if (currentIndex >= playlist.length) {
+                // End of playlist - loop back to start
+                currentIndex = 0;
+                console.log('🔄 Fin de playlist, volviendo al inicio');
+            }
+
+            loadVideo(currentIndex);
+        }
+
+        // Video event handlers
+        video.addEventListener('loadstart', () => {
+            console.log('⏳ Iniciando carga de video...');
+            loadingIndicator.style.display = 'block';
+        });
+
+        video.addEventListener('canplay', () => {
+            console.log('✅ Video listo para reproducir');
+            loadingIndicator.style.display = 'none';
+            retryCount = 0; // Reset retry count on successful load
+        });
+
+        video.addEventListener('playing', () => {
+            console.log('▶️ Reproduciendo video');
+            loadingIndicator.style.display = 'none';
+        });
+
+        video.addEventListener('ended', () => {
+            console.log('⏹️ Video terminado');
+            playNext();
+        });
+
+        video.addEventListener('error', (e) => {
+            const error = video.error;
+            let errorMsg = 'Error al cargar el video';
+
+            if (error) {
+                switch (error.code) {
+                    case error.MEDIA_ERR_ABORTED:
+                        errorMsg = 'Carga de video abortada';
+                        break;
+                    case error.MEDIA_ERR_NETWORK:
+                        errorMsg = 'Error de red al cargar video';
+                        break;
+                    case error.MEDIA_ERR_DECODE:
+                        errorMsg = 'Error al decodificar video';
+                        break;
+                    case error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                        errorMsg = 'Formato de video no soportado';
+                        break;
+                }
+            }
+
+            console.error('❌ Error en video:', errorMsg, error);
+
+            // Retry logic
+            if (retryCount < MAX_RETRIES) {
+                retryCount++;
+                console.log(`🔄 Reintentando (${retryCount}/${MAX_RETRIES})...`);
+                setTimeout(() => {
+                    video.load();
+                }, 2000);
+            } else {
+                // Skip to next video after max retries
+                showError(`${errorMsg}. Saltando al siguiente video...`);
+                retryCount = 0;
+
+                setTimeout(() => {
+                    if (playlist.length > 1) {
+                        playNext();
+                    } else {
+                        showError('No se pudo reproducir el video');
+                    }
+                }, 3000);
+            }
+        });
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            switch (e.key) {
+                case ' ':
+                case 'k':
+                    // Space or K = Play/Pause
+                    if (video.paused) {
+                        video.play();
+                    } else {
+                        video.pause();
+                    }
+                    e.preventDefault();
+                    break;
+
+                case 'ArrowRight':
+                    // Right arrow = +10 seconds
+                    video.currentTime = Math.min(video.currentTime + 10, video.duration);
+                    e.preventDefault();
+                    break;
+
+                case 'ArrowLeft':
+                    // Left arrow = -10 seconds
+                    video.currentTime = Math.max(video.currentTime - 10, 0);
+                    e.preventDefault();
+                    break;
+
+                case 'n':
+                    // N = Next video
+                    if (playlist.length > 1) {
+                        playNext();
+                    }
+                    e.preventDefault();
+                    break;
+
+                case 'f':
+                    // F = Fullscreen toggle
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen();
+                    } else {
+                        document.documentElement.requestFullscreen();
+                    }
+                    e.preventDefault();
+                    break;
+            }
+        });
+
+        // Initialize player
+        function init() {
+            console.log('🎬 Inicializando Smart Video Player');
+
+            if (!getUrlParams()) {
+                showError('Parámetros de URL inválidos');
+                return;
+            }
+
+            // Set loop attribute if single video loop mode
+            if (loopMode && playlist.length === 1) {
+                video.loop = true;
+                console.log('🔄 Modo loop activado para video único');
+            }
+
+            // Start playing first video
+            loadVideo(0);
+        }
+
+        // Start when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+
+</html>
