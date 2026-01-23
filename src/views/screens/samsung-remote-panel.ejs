@@ -1,5 +1,5 @@
 <!-- Indicador de Token -->
-<% if (screen.samsung_token) { %>
+<% if (screen.client_token) { %>
     <span class="badge bg-success mb-2">✅ Validado</span>
     <% } else { %>
         <span class="badge bg-warning mb-2">⚠️ Sin validar</span>
@@ -8,7 +8,7 @@
             <!-- Botón Validar/Re-validar -->
             <button class="btn btn-primary btn-sm w-100 mb-2" data-action="validate" data-id="<%= screen.id %>">
                 <i class="bi bi-check-circle me-1"></i>
-                <%= screen.samsung_token ? 'Re-validar' : 'Validar Conexión' %>
+                <%= screen.client_token ? 'Re-validar' : 'Validar Conexión' %>
             </button>
 
             <!-- Panel de Control Remoto -->
@@ -89,8 +89,8 @@
 
             <!-- Botones de Navegador -->
             <button class="btn btn-info btn-sm w-100 mb-2" data-action="open-browser" data-id="<%= screen.id %>"
-                <%=!screen.samsung_token ? 'disabled' : '' %>
-                title="<%= !screen.samsung_token ? 'Valida la conexión primero' : 'Abrir navegador' %>">
+                <%=!screen.client_token ? 'disabled' : '' %>
+                title="<%= !screen.client_token ? 'Valida la conexión primero' : 'Abrir navegador' %>">
                     <i class="bi bi-globe me-1"></i> Abrir Navegador
             </button>
 

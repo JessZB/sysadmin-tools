@@ -10,7 +10,7 @@ interface Screen {
     name: string;
     ip_address?: string;
     mac_address?: string;
-    samsung_token?: string;
+    client_token?: string;
 }
 
 interface WebSocketResult {
@@ -90,7 +90,7 @@ const createWebSocketConnection = (ip: string, token?: string): Promise<WebSocke
  * Registrar token de emparejamiento Samsung
  */
 export const registerToken = async (id: number, token: string) => {
-    await mainDbPool.query('UPDATE branch_screens SET samsung_token = ? WHERE id = ?', [token, id]);
+    await mainDbPool.query('UPDATE branch_screens SET client_token = ? WHERE id = ?', [token, id]);
 };
 
 /**
@@ -133,13 +133,13 @@ export const sendSamsungCommand = async (id: number, key: string): Promise<void>
         throw new Error('Pantalla no encontrada o sin IP');
     }
 
-    if (!screen.samsung_token) {
+    if (!screen.client_token) {
         throw new Error('TV no validado. Valida la conexión primero.');
     }
 
     console.log(`📤 Enviando comando ${key} a TV ${id}`);
 
-    const { ws } = await createWebSocketConnection(screen.ip_address, screen.samsung_token);
+    const { ws } = await createWebSocketConnection(screen.ip_address, screen.client_token);
 
     return new Promise((resolve, reject) => {
         const payload = JSON.stringify({

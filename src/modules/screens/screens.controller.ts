@@ -199,7 +199,7 @@ export const pairDevice = async (req: Request, res: Response) => {
         res.json({
             success: true,
             message: 'El emparejamiento se realizará automáticamente en el próximo comando. Acepta la solicitud en el TV.',
-            hasToken: !!screen.samsung_token
+            hasToken: !!screen.client_token
         });
     } catch (error: any) {
         console.error('Error en pairDevice:', error);

@@ -11,7 +11,7 @@ export interface Screen {
     is_active: number;
     created_at: Date;
     mac_address?: string;
-    samsung_token?: string;
+    client_token?: string;
 }
 
 export const getAll = async (): Promise<Screen[]> => {
