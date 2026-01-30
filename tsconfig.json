@@ -1,13 +1,29 @@
 {
   "compilerOptions": {
-    "target": "es2016",           // Versión de JS a la que compilará
-    "module": "commonjs",         // Sistema de módulos estándar de Node
-    "outDir": "./dist",           // Dónde guardará los archivos .js compilados
-    "rootDir": "./src",           // Dónde está tu código fuente
-    "strict": true,               // Activa el modo estricto (te obliga a tipar bien)
-    "esModuleInterop": true,      // Permite importar módulos CommonJS como ES6
-    "skipLibCheck": true
+    "target": "es2016",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@modules/*": [
+        "modules/*"
+      ],
+      "@shared/*": [
+        "shared/*"
+      ],
+      "@config/*": [
+        "config/*"
+      ]
+    }
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

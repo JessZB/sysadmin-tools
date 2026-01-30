@@ -14,9 +14,11 @@ router.use(requireAuth, requireModule('screens'));
 
 // Screen management
 router.get('/', screensController.index);
+router.get('/player-viewer/:id', screensController.playerViewer);
 router.get('/:id', screensController.getScreenById);
 router.post('/reload', screensController.reloadScreen);
 router.post('/play', screensController.playVideo);
+router.post('/stop', screensController.stopVideo);
 router.post('/create', screensController.createScreen);
 router.put('/:id', screensController.updateScreen);
 router.delete('/:id', screensController.deleteScreenById);
@@ -25,10 +27,12 @@ router.delete('/:id', screensController.deleteScreenById);
 router.post('/control/power', screensController.controlPower);
 router.post('/control/mute', screensController.controlMute);
 router.post('/pair', screensController.pairDevice);
-router.post('/startup', screensController.startupRoutine);
 router.post('/validate', screensController.validateConnection);
 router.post('/send-key', screensController.sendKey);
 router.post('/open-browser', screensController.openBrowser);
+
+// DLNA control
+router.post('/dlna/check-status', screensController.checkDLNAStatus);
 
 // LG TV control
 router.post('/lg/validate', screensController.validateLGConnection);
@@ -39,5 +43,13 @@ router.post('/lg/wake', screensController.wakeLG);
 router.post('/lg/toast', screensController.sendLGToast);
 router.get('/lg/system-info', screensController.getLGSystemInfo);
 router.post('/lg/startup', screensController.startupRoutineLG);
+
+// LG TV Remote Control
+router.post('/lg/send-key', screensController.sendLGRemoteKey);
+router.get('/lg/volume', screensController.getLGVolume);
+router.post('/lg/volume', screensController.setLGVolume);
+router.post('/lg/mute', screensController.setLGMute);
+router.get('/lg/apps', screensController.getLGApps);
+router.post('/lg/launch-app', screensController.launchLGApp);
 
 export default router;

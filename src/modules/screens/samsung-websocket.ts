@@ -23,8 +23,15 @@ interface WebSocketResult {
  */
 const getById = async (id: number): Promise<Screen | null> => {
     const [rows] = await mainDbPool.query('SELECT * FROM branch_screens WHERE id = ?', [id]);
-    const screens = rows as Screen[];
-    return screens.length > 0 ? screens[0] : null;
+    const screens = rows as any[];
+    if (screens.length > 0) {
+        const screen = screens[0];
+        if (screen.samsung_token && !screen.client_token) {
+            screen.client_token = screen.samsung_token;
+        }
+        return screen as Screen;
+    }
+    return null;
 };
 
 /**
@@ -33,7 +40,11 @@ const getById = async (id: number): Promise<Screen | null> => {
 const createWebSocketConnection = (ip: string, token?: string): Promise<WebSocketResult> => {
     return new Promise((resolve, reject) => {
         const appName = Buffer.from('SysAdmin-Control').toString('base64');
-        const url = `wss://${ip}:8002/api/v2/channels/samsung.remote.control?name=${appName}${token ? '&token=' + token : ''}`;
+        const url = `wss://${ip}:8002/api/v2/channels/samsung.remote.control?name=${appName}${token ? '&token=' + encodeURIComponent(token) : ''}`;
+
+        if (token) {
+            console.log(`🔑 Usando token guardado para conexión: ${token.substring(0, 5)}...`);
+        }
 
         const ws = new WebSocket(url, { rejectUnauthorized: false } as any);
         let capturedToken: string | undefined = token;
@@ -82,7 +93,7 @@ const createWebSocketConnection = (ip: string, token?: string): Promise<WebSocke
                     reject(new Error('Timeout conectando al TV'));
                 }
             }
-        }, 10000);
+        }, 30000);
     });
 };
 
@@ -90,7 +101,12 @@ const createWebSocketConnection = (ip: string, token?: string): Promise<WebSocke
  * Registrar token de emparejamiento Samsung
  */
 export const registerToken = async (id: number, token: string) => {
-    await mainDbPool.query('UPDATE branch_screens SET client_token = ? WHERE id = ?', [token, id]);
+    try {
+        await mainDbPool.query('UPDATE branch_screens SET client_token = ? WHERE id = ?', [token, id]);
+    } catch (e) {
+        console.warn('Failed to update client_token (Samsung), trying samsung_token (legacy)...');
+        await mainDbPool.query('UPDATE branch_screens SET samsung_token = ? WHERE id = ?', [token, id]);
+    }
 };
 
 /**

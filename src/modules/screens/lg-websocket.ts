@@ -26,7 +26,7 @@ interface LGTVClient {
 /**
  * Create LG TV WebSocket connection
  */
-export const createLGConnection = (ip: string, port: number = 3001, token?: string): Promise<LGTVClient> => {
+export const createLGConnection = (ip: string, port: number = 3001, token?: string, screenId?: number): Promise<LGTVClient> => {
     return new Promise((resolve, reject) => {
         const url = `wss://${ip}:${port}`;
 
@@ -37,8 +37,30 @@ export const createLGConnection = (ip: string, port: number = 3001, token?: stri
             timeout: 5000,
             reconnect: false,
             clientKey: token || null,
-            saveKey: (key: string, cb: (err: any) => void) => {
+            saveKey: async (key: string, cb: (err: any) => void) => {
                 console.log(`🔐 New LG TV token received: ${key}`);
+
+                if (screenId) {
+                    try {
+                        await mainDbPool.query(
+                            'UPDATE branch_screens SET client_token = ? WHERE id = ?',
+                            [key, screenId]
+                        );
+                        console.log(`✅ Token automatically updated in DB for screen ${screenId}`);
+                    } catch (e) {
+                        console.warn('Failed to update client_token, trying samsung_token (legacy)...');
+                        try {
+                            await mainDbPool.query(
+                                'UPDATE branch_screens SET samsung_token = ? WHERE id = ?',
+                                [key, screenId]
+                            );
+                            console.log(`✅ Token updated in DB (legacy samsung_token) for screen ${screenId}`);
+                        } catch (e2) {
+                            console.error('Error saving new token:', e);
+                        }
+                    }
+                }
+
                 cb(null);
             }
         }) as LGTVClient;
@@ -47,20 +69,16 @@ export const createLGConnection = (ip: string, port: number = 3001, token?: stri
             reject(new Error('Connection timeout'));
         }, 10000);
 
-        client.request = client.request || (() => { });
+        // Remove defensive wrapper that causes 'Not connected' errors during token renewal
+        // client.request is handled natively by lgtv2
 
-        const originalRequest = client.request.bind(client);
-        client.request = (command: string, params?: any, callback?: (err: any, res?: any) => void) => {
-            if (!client.connected) {
-                if (callback) callback(new Error('Not connected'));
-                return;
-            }
-            originalRequest(command, params, callback);
-        };
-
-        (client as any).on('connect', () => {
+        (client as any).on('connect', async () => {
             clearTimeout(timeout);
             console.log('✅ Connected to LG TV');
+
+            // Wait a bit for connection to stabilize and auth to complete
+            await new Promise(r => setTimeout(r, 1000));
+
             resolve(client);
         });
 
@@ -85,44 +103,74 @@ export const validateLGConnection = async (id: number): Promise<string> => {
     console.log(`🔍 Validating LG TV connection for screen ${id}...`);
 
     let newToken: string | null = null;
-
-    const client = lgtv({
-        url: `wss://${screen.ip_address}:3001`,
-        timeout: 10000,
-        reconnect: false,
-        clientKey: null, // Force new pairing
-        saveKey: (key: string, cb: (err: any) => void) => {
-            console.log(`🔐 New token for screen ${id}: ${key}`);
-            newToken = key;
-            cb(null);
-        }
-    });
+    let keyResolved = false;
 
     return new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-            (client as any).disconnect();
-            reject(new Error('Validation timeout. Please accept pairing on TV.'));
-        }, 15000);
-
-        (client as any).on('connect', async () => {
-            clearTimeout(timeout);
-
-            if (newToken) {
-                // Save token to database
-                await mainDbPool.query(
-                    'UPDATE branch_screens SET client_token = ? WHERE id = ?',
-                    [newToken, id]
-                );
-                console.log(`✅ Token saved for screen ${id}`);
+        // Overall timeout (increased to 30s for user interaction)
+        const overallTimeout = setTimeout(() => {
+            if (!keyResolved) {
+                try { (client as any).disconnect(); } catch (e) { }
+                reject(new Error('Validation timeout or user denied pairing.'));
             }
+        }, 30000);
 
-            (client as any).disconnect();
-            resolve(newToken || screen.client_token || '');
+        const client = lgtv({
+            url: `wss://${screen.ip_address}:3001`,
+            timeout: 10000,
+            reconnect: false,
+            clientKey: null, // Force new pairing
+            saveKey: async (key: string, cb: (err: any) => void) => {
+                console.log(`🔐 New token received for screen ${id}: ${key}`);
+                newToken = key;
+                keyResolved = true;
+
+                try {
+                    // Save token immediately
+                    await mainDbPool.query(
+                        'UPDATE branch_screens SET client_token = ? WHERE id = ?',
+                        [key, id]
+                    );
+                    console.log(`✅ Token explicitly saved to DB for screen ${id}`);
+                } catch (dbErr) {
+                    console.warn('Failed to update client_token, trying samsung_token (legacy)...');
+                    try {
+                        await mainDbPool.query(
+                            'UPDATE branch_screens SET samsung_token = ? WHERE id = ?',
+                            [key, id]
+                        );
+                        console.log(`✅ Token explicitly saved to DB (legacy samsung_token) for screen ${id}`);
+                    } catch (dbErr2) {
+                        console.error('❌ Error saving token to DB:', dbErr);
+                    }
+                }
+
+                cb(null);
+
+                // Cleanup and return success
+                clearTimeout(overallTimeout);
+                setTimeout(() => {
+                    try { (client as any).disconnect(); } catch (e) { }
+                    resolve(key);
+                }, 500); // Small delay to ensure Ack sent
+            }
+        });
+
+        (client as any).on('connect', () => {
+            console.log('✅ Connected to LG TV (Waiting for pairing/key)...');
+            // Do NOT disconnect here. Wait for saveKey.
         });
 
         (client as any).on('error', (err: Error) => {
-            clearTimeout(timeout);
-            reject(err);
+            console.error('❌ LG TV connection error during validation:', err.message);
+            // Don't reject immediately on transient errors, but if critical...
+            // lgtv2 usually emits error on fail.
+        });
+
+        (client as any).on('close', () => {
+            if (!keyResolved) {
+                // Connection closed without key
+                console.warn('⚠️ Connection closed without receiving key');
+            }
         });
     });
 };
@@ -137,11 +185,13 @@ export const sendLGCommand = async (id: number, command: string, params?: any): 
         throw new Error('Screen not found or missing IP address');
     }
 
+    console.log('DEBUG Screen in sendLGCommand:', screen);
+
     if (!screen.client_token) {
         throw new Error('TV not paired. Please validate connection first.');
     }
 
-    const client = await createLGConnection(screen.ip_address, 3001, screen.client_token);
+    const client = await createLGConnection(screen.ip_address, 3001, screen.client_token, id);
 
     return new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
@@ -255,4 +305,55 @@ export const startupRoutineLG = async (id: number, url: string): Promise<void> =
     await openLGBrowser(id, url);
 
     console.log('✅ Startup routine completed');
+};
+
+/**
+ * Send remote control key to LG TV
+ * Available keys: POWER, UP, DOWN, LEFT, RIGHT, ENTER, BACK, HOME, MENU, 
+ *                 VOLUMEUP, VOLUMEDOWN, MUTE, CHANNELUP, CHANNELDOWN,
+ *                 RED, GREEN, YELLOW, BLUE, 0-9, etc.
+ */
+export const sendRemoteKey = async (id: number, key: string): Promise<void> => {
+    console.log(`🎮 Sending remote key to LG TV ${id}: ${key}`);
+    await sendLGCommand(id, 'ssap://com.webos.service.ime/sendEnterKey', { key });
+};
+
+/**
+ * Get current volume level
+ */
+export const getVolume = async (id: number): Promise<any> => {
+    console.log(`🔊 Getting volume for LG TV ${id}`);
+    return await sendLGCommand(id, 'ssap://audio/getVolume');
+};
+
+/**
+ * Set volume level (0-100)
+ */
+export const setVolume = async (id: number, volume: number): Promise<void> => {
+    console.log(`🔊 Setting volume for LG TV ${id} to ${volume}`);
+    await sendLGCommand(id, 'ssap://audio/setVolume', { volume });
+};
+
+/**
+ * Mute/Unmute TV
+ */
+export const setMute = async (id: number, mute: boolean): Promise<void> => {
+    console.log(`🔇 ${mute ? 'Muting' : 'Unmuting'} LG TV ${id}`);
+    await sendLGCommand(id, 'ssap://audio/setMute', { mute });
+};
+
+/**
+ * Get list of installed apps
+ */
+export const getApps = async (id: number): Promise<any> => {
+    console.log(`📱 Getting apps list for LG TV ${id}`);
+    return await sendLGCommand(id, 'ssap://com.webos.applicationManager/listApps');
+};
+
+/**
+ * Launch an app by ID
+ */
+export const launchApp = async (id: number, appId: string): Promise<void> => {
+    console.log(`🚀 Launching app ${appId} on LG TV ${id}`);
+    await sendLGCommand(id, 'ssap://system.launcher/launch', { id: appId });
 };

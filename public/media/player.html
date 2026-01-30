@@ -95,6 +95,8 @@
 
     <video id="videoPlayer" autoplay></video>
 
+    <!-- Socket.IO for real-time communication -->
+    <script src="/socket.io/socket.io.js"></script>
     <script>
         // Configuration
         const CONFIG = {
@@ -115,14 +117,154 @@
         const errorMessage = document.getElementById('errorMessage');
         const playlistInfo = document.getElementById('playlistInfo');
 
+        // WebSocket for real-time communication
+        let socket = null;
+        let screenId = null;
+        let lastProgressUpdate = 0;
+        const PROGRESS_UPDATE_INTERVAL = 2000; // Update every 2 seconds
+
+        // Initialize WebSocket connection
+        function initWebSocket() {
+            const params = new URLSearchParams(window.location.search);
+            screenId = params.get('screenId');
+
+            if (!screenId) {
+                console.warn('⚠️ No screenId provided, WebSocket disabled');
+                return;
+            }
+
+            try {
+                socket = io();
+
+                socket.on('connect', () => {
+                    console.log('🔌 WebSocket connected');
+                    socket.emit('player:join', parseInt(screenId));
+
+                    // Initialize server state explicitly
+                    socket.emit('player:init', {
+                        screenId: parseInt(screenId),
+                        playlist,
+                        loopMode
+                    });
+
+                    // Send initial state
+                    broadcastState();
+                });
+
+                socket.on('disconnect', () => {
+                    console.log('❌ WebSocket disconnected');
+                });
+
+                // Listen for commands from viewer
+                socket.on('player:command', (cmd) => {
+                    console.log('🎮 Command received:', cmd.action);
+                    handleRemoteCommand(cmd);
+                });
+
+                console.log('✅ WebSocket initialized for screen', screenId);
+            } catch (error) {
+                console.error('❌ WebSocket initialization failed:', error);
+            }
+        }
+
+        // Handle remote commands
+        function handleRemoteCommand(cmd) {
+            switch (cmd.action) {
+                case 'play':
+                    video.play();
+                    break;
+                case 'pause':
+                    video.pause();
+                    break;
+                case 'seek':
+                    video.currentTime = cmd.value;
+                    break;
+                case 'playIndex':
+                    loadVideo(cmd.value);
+                    break;
+                case 'setLoop':
+                    loopMode = cmd.value;
+                    video.loop = loopMode && playlist.length === 1;
+                    break;
+                case 'setVolume':
+                    video.volume = cmd.value;
+                    break;
+                case 'next':
+                    playNext();
+                    break;
+                case 'previous':
+                    if (currentIndex > 0) {
+                        loadVideo(currentIndex - 1);
+                    }
+                    break;
+                case 'setPlaylist':
+                    console.log('📋 Nueva playlist recibida:', cmd.value.playlist);
+                    playlist = cmd.value.playlist;
+                    loopMode = cmd.value.loop;
+                    currentIndex = 0;
+                    loadVideo(0);
+                    break;
+            }
+        }
+
+        // Broadcast player state
+        function broadcastState() {
+            if (!socket || !screenId) return;
+
+            const state = {
+                screenId: parseInt(screenId),
+                currentVideo: playlist[currentIndex] || '',
+                currentTime: video.currentTime || 0,
+                duration: video.duration || 0,
+                paused: video.paused,
+                playlist: playlist,
+                currentIndex: currentIndex,
+                loopMode: loopMode,
+                volume: video.volume
+            };
+
+            socket.emit('player:state', state);
+        }
+
+        // Broadcast progress (throttled)
+        function broadcastProgress() {
+            if (!socket || !screenId) return;
+
+            const now = Date.now();
+            if (now - lastProgressUpdate < PROGRESS_UPDATE_INTERVAL) return;
+
+            lastProgressUpdate = now;
+            socket.emit('player:progress', {
+                screenId: parseInt(screenId),
+                currentTime: video.currentTime,
+                duration: video.duration
+            });
+        }
+
+        // Broadcast video change
+        function broadcastVideoChange() {
+            if (!socket || !screenId) return;
+
+            socket.emit('player:videoChange', {
+                screenId: parseInt(screenId),
+                currentVideo: playlist[currentIndex],
+                currentIndex: currentIndex
+            });
+        }
+
         // Parse URL parameters
         function getUrlParams() {
             const params = new URLSearchParams(window.location.search);
+            screenId = params.get('screenId');
             const playlistParam = params.get('playlist');
             const loopParam = params.get('loop');
 
             if (!playlistParam) {
-                showError('No se especificó ningún video en la playlist');
+                if (screenId) {
+                    console.log('ℹ️ Modo espera: No hay playlist inicial, esperando comandos...');
+                    return true;
+                }
+                showError('No se especificó ningún video en la playlist ni ID de pantalla');
                 return false;
             }
 
@@ -142,14 +284,17 @@
             errorMessage.style.display = 'block';
             loadingIndicator.style.display = 'none';
 
-            setTimeout(() => {
-                errorMessage.style.display = 'none';
-            }, 5000);
+            // Don't hide error automatically if it's critical
+            if (!message.includes('URL invalidos')) {
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 5000);
+            }
         }
 
         // Update playlist info display
         function updatePlaylistInfo() {
-            if (playlist.length > 1) {
+            if (playlist && playlist.length > 1) {
                 playlistInfo.textContent = `Video ${currentIndex + 1} de ${playlist.length}${loopMode ? ' (Loop)' : ''}`;
                 playlistInfo.style.display = 'block';
 
@@ -161,6 +306,10 @@
 
         // Load video by index
         function loadVideo(index) {
+            if (!playlist || playlist.length === 0) {
+                console.log('⚠️ Playlist vacia, esperando...');
+                return;
+            }
             if (index < 0 || index >= playlist.length) {
                 console.error('❌ Índice de video inválido:', index);
                 return;
@@ -168,151 +317,29 @@
 
             currentIndex = index;
             const videoFile = playlist[currentIndex];
-            const videoUrl = `${CONFIG.baseUrl}${CONFIG.mediaPath}${videoFile}`;
+            const videoUrl = `${CONFIG.baseUrl}${CONFIG.mediaPath}${encodeURIComponent(videoFile)}`;
 
             console.log(`📹 Cargando video ${currentIndex + 1}/${playlist.length}: ${videoFile}`);
 
+            loadingIndicator.innerHTML = '<div class="spinner"></div><div>Cargando video...</div>';
             loadingIndicator.style.display = 'block';
             video.src = videoUrl;
             video.load();
 
+            // Force play after load (needed for playlist continuity)
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.warn('Autoplay prevented or interrupted:', error);
+                });
+            }
+
             updatePlaylistInfo();
         }
 
-        // Play next video in playlist
-        function playNext() {
-            if (loopMode && playlist.length === 1) {
-                // Single video loop - restart same video
-                console.log('🔄 Reiniciando video en loop');
-                video.currentTime = 0;
-                video.play();
-                return;
-            }
+        // ... playNext ...
 
-            // Playlist mode
-            currentIndex++;
-
-            if (currentIndex >= playlist.length) {
-                // End of playlist - loop back to start
-                currentIndex = 0;
-                console.log('🔄 Fin de playlist, volviendo al inicio');
-            }
-
-            loadVideo(currentIndex);
-        }
-
-        // Video event handlers
-        video.addEventListener('loadstart', () => {
-            console.log('⏳ Iniciando carga de video...');
-            loadingIndicator.style.display = 'block';
-        });
-
-        video.addEventListener('canplay', () => {
-            console.log('✅ Video listo para reproducir');
-            loadingIndicator.style.display = 'none';
-            retryCount = 0; // Reset retry count on successful load
-        });
-
-        video.addEventListener('playing', () => {
-            console.log('▶️ Reproduciendo video');
-            loadingIndicator.style.display = 'none';
-        });
-
-        video.addEventListener('ended', () => {
-            console.log('⏹️ Video terminado');
-            playNext();
-        });
-
-        video.addEventListener('error', (e) => {
-            const error = video.error;
-            let errorMsg = 'Error al cargar el video';
-
-            if (error) {
-                switch (error.code) {
-                    case error.MEDIA_ERR_ABORTED:
-                        errorMsg = 'Carga de video abortada';
-                        break;
-                    case error.MEDIA_ERR_NETWORK:
-                        errorMsg = 'Error de red al cargar video';
-                        break;
-                    case error.MEDIA_ERR_DECODE:
-                        errorMsg = 'Error al decodificar video';
-                        break;
-                    case error.MEDIA_ERR_SRC_NOT_SUPPORTED:
-                        errorMsg = 'Formato de video no soportado';
-                        break;
-                }
-            }
-
-            console.error('❌ Error en video:', errorMsg, error);
-
-            // Retry logic
-            if (retryCount < MAX_RETRIES) {
-                retryCount++;
-                console.log(`🔄 Reintentando (${retryCount}/${MAX_RETRIES})...`);
-                setTimeout(() => {
-                    video.load();
-                }, 2000);
-            } else {
-                // Skip to next video after max retries
-                showError(`${errorMsg}. Saltando al siguiente video...`);
-                retryCount = 0;
-
-                setTimeout(() => {
-                    if (playlist.length > 1) {
-                        playNext();
-                    } else {
-                        showError('No se pudo reproducir el video');
-                    }
-                }, 3000);
-            }
-        });
-
-        // Keyboard controls
-        document.addEventListener('keydown', (e) => {
-            switch (e.key) {
-                case ' ':
-                case 'k':
-                    // Space or K = Play/Pause
-                    if (video.paused) {
-                        video.play();
-                    } else {
-                        video.pause();
-                    }
-                    e.preventDefault();
-                    break;
-
-                case 'ArrowRight':
-                    // Right arrow = +10 seconds
-                    video.currentTime = Math.min(video.currentTime + 10, video.duration);
-                    e.preventDefault();
-                    break;
-
-                case 'ArrowLeft':
-                    // Left arrow = -10 seconds
-                    video.currentTime = Math.max(video.currentTime - 10, 0);
-                    e.preventDefault();
-                    break;
-
-                case 'n':
-                    // N = Next video
-                    if (playlist.length > 1) {
-                        playNext();
-                    }
-                    e.preventDefault();
-                    break;
-
-                case 'f':
-                    // F = Fullscreen toggle
-                    if (document.fullscreenElement) {
-                        document.exitFullscreen();
-                    } else {
-                        document.documentElement.requestFullscreen();
-                    }
-                    e.preventDefault();
-                    break;
-            }
-        });
+        // ... event handlers ...
 
         // Initialize player
         function init() {
@@ -329,8 +356,60 @@
                 console.log('🔄 Modo loop activado para video único');
             }
 
-            // Start playing first video
-            loadVideo(0);
+            // Initialize WebSocket
+            initWebSocket();
+
+            // Add video event listeners for WebSocket broadcasting
+            video.addEventListener('waiting', () => {
+                console.log('⏳ Buffering/Waiting...');
+                loadingIndicator.innerHTML = '<div class="spinner"></div><div>Cargando...</div>';
+                loadingIndicator.style.display = 'block';
+            });
+
+            video.addEventListener('loadeddata', () => {
+                loadingIndicator.style.display = 'none';
+            });
+
+            video.addEventListener('play', () => {
+                console.log('▶️ Video playing');
+                loadingIndicator.style.display = 'none';
+                broadcastState();
+            });
+
+            video.addEventListener('pause', () => {
+                console.log('⏸️ Video paused');
+                broadcastState();
+            });
+
+            video.addEventListener('timeupdate', () => {
+                if (loadingIndicator.style.display !== 'none') {
+                    loadingIndicator.style.display = 'none';
+                }
+                broadcastProgress();
+            });
+
+            video.addEventListener('loadedmetadata', () => {
+                console.log('📊 Metadata loaded');
+                broadcastState();
+            });
+
+            video.addEventListener('ended', () => {
+                console.log('⏹️ Video ended');
+                broadcastState();
+                playNext();
+            });
+
+            video.addEventListener('volumechange', () => {
+                broadcastState();
+            });
+
+            // Start playing first video IF playlist exists
+            if (playlist.length > 0) {
+                loadVideo(0);
+            } else {
+                loadingIndicator.innerHTML = '<div class="spinner"></div><div>Esperando contenido...</div>';
+                loadingIndicator.style.display = 'block';
+            }
         }
 
         // Start when DOM is ready

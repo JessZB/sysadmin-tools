@@ -25,6 +25,7 @@ import { requireAuth } from './shared/middlewares/auth.middleware';
 import { allowRoles } from './shared/middlewares/role.middleware';
 import { requireModule } from './shared/middlewares/permission.middleware';
 import { cleanExpiredCache } from './modules/terminals/currency.service';
+import { setupPlayerWebSocket } from './modules/screens/player-websocket';
 
 
 
@@ -32,8 +33,16 @@ dotenv.config();
 
 const app: Application = express();
 const httpServer = createServer(app);
-const io = new Server(httpServer);
+const io = new Server(httpServer, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 app.set('socketio', io);
+
+// Setup player WebSocket for real-time playback monitoring
+setupPlayerWebSocket(httpServer);
 
 io.on('connection', (socket) => {
     console.log('🔌 Cliente conectado a Socket.io:', socket.id);

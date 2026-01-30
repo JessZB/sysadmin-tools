@@ -1,0 +1,432 @@
+<!-- LG TV Control Modal -->
+<div class="modal fade" id="lgControlModal<%= screen.id %>" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen-md-down modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-tv me-2"></i>
+                    Control LG TV - <%= screen.name %>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Connection Status -->
+                <div
+                    class="alert alert-<%= screen.client_token ? 'success' : 'warning' %> d-flex align-items-center mb-4">
+                    <i
+                        class="bi bi-<%= screen.client_token ? 'check-circle-fill' : 'exclamation-triangle-fill' %> me-2 fs-4"></i>
+                    <div>
+                        <strong>Estado:</strong>
+                        <%= screen.client_token ? 'Conectado y emparejado' : 'Sin emparejar' %>
+                            <% if (screen.client_token) { %>
+                                <br><small class="text-muted">Token guardado en base de datos</small>
+                                <% } %>
+                    </div>
+                </div>
+
+                <!-- Tabs Navigation -->
+                <ul class="nav nav-tabs mb-3" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" data-bs-toggle="tab"
+                            data-bs-target="#lgConnection<%= screen.id %>" type="button">
+                            <i class="bi bi-plug me-1"></i> Conexión
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#lgRemote<%= screen.id %>"
+                            type="button">
+                            <i class="bi bi-controller me-1"></i> Control Remoto
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#lgBrowser<%= screen.id %>"
+                            type="button">
+                            <i class="bi bi-globe me-1"></i> Navegador
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#lgMedia<%= screen.id %>"
+                            type="button">
+                            <i class="bi bi-film me-1"></i> Media
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#lgPower<%= screen.id %>"
+                            type="button">
+                            <i class="bi bi-power me-1"></i> Energía
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tabs Content -->
+                <div class="tab-content">
+                    <!-- Connection Tab -->
+                    <div class="tab-pane fade show active" id="lgConnection<%= screen.id %>">
+                        <div class="card">
+                            <div class="card-body">
+                                <button class="btn btn-primary w-100 mb-3"
+                                    onclick="validateLGConnection(<%= screen.id %>)">
+                                    <i
+                                        class="bi bi-<%= screen.client_token ? 'arrow-repeat' : 'check-circle' %> me-2"></i>
+                                    <%= screen.client_token ? 'Re-validar Conexión' : 'Validar y Emparejar' %>
+                                </button>
+                                <small class="text-muted d-block">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Acepta el emparejamiento en la pantalla del TV
+                                </small>
+                                <hr>
+                                <button class="btn btn-outline-info w-100" onclick="getLGSystemInfo(<%= screen.id %>)"
+                                    <%=!screen.client_token ? 'disabled' : '' %>>
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    Ver Información del Sistema
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Remote Control Tab -->
+                    <div class="tab-pane fade" id="lgRemote<%= screen.id %>">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="remote-control">
+                                    <!-- Navigation Pad -->
+                                    <div class="text-center mb-4">
+                                        <div class="d-flex justify-content-center align-items-center mb-2">
+                                            <button class="btn btn-outline-primary remote-btn"
+                                                onclick="sendLGKey(<%= screen.id %>, 'UP')" <%=!screen.client_token
+                                                ? 'disabled' : '' %>>
+                                                <i class="bi bi-arrow-up"></i>
+                                            </button>
+                                        </div>
+                                        <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
+                                            <button class="btn btn-outline-primary remote-btn"
+                                                onclick="sendLGKey(<%= screen.id %>, 'LEFT')" <%=!screen.client_token
+                                                ? 'disabled' : '' %>>
+                                                <i class="bi bi-arrow-left"></i>
+                                            </button>
+                                            <button class="btn btn-primary remote-btn-ok"
+                                                onclick="sendLGKey(<%= screen.id %>, 'ENTER')" <%=!screen.client_token
+                                                ? 'disabled' : '' %>>
+                                                OK
+                                            </button>
+                                            <button class="btn btn-outline-primary remote-btn"
+                                                onclick="sendLGKey(<%= screen.id %>, 'RIGHT')" <%=!screen.client_token
+                                                ? 'disabled' : '' %>>
+                                                <i class="bi bi-arrow-right"></i>
+                                            </button>
+                                        </div>
+                                        <div class="d-flex justify-content-center align-items-center">
+                                            <button class="btn btn-outline-primary remote-btn"
+                                                onclick="sendLGKey(<%= screen.id %>, 'DOWN')" <%=!screen.client_token
+                                                ? 'disabled' : '' %>>
+                                                <i class="bi bi-arrow-down"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Quick Actions -->
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-4">
+                                            <button class="btn btn-outline-secondary w-100"
+                                                onclick="sendLGKey(<%= screen.id %>, 'BACK')" <%=!screen.client_token
+                                                ? 'disabled' : '' %>>
+                                                <i class="bi bi-arrow-left-circle"></i><br>
+                                                <small>Atrás</small>
+                                            </button>
+                                        </div>
+                                        <div class="col-4">
+                                            <button class="btn btn-outline-secondary w-100"
+                                                onclick="sendLGKey(<%= screen.id %>, 'HOME')" <%=!screen.client_token
+                                                ? 'disabled' : '' %>>
+                                                <i class="bi bi-house"></i><br>
+                                                <small>Home</small>
+                                            </button>
+                                        </div>
+                                        <div class="col-4">
+                                            <button class="btn btn-outline-secondary w-100"
+                                                onclick="sendLGKey(<%= screen.id %>, 'MENU')" <%=!screen.client_token
+                                                ? 'disabled' : '' %>>
+                                                <i class="bi bi-list"></i><br>
+                                                <small>Menú</small>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Volume Controls -->
+                                    <div class="card bg-light mb-3">
+                                        <div class="card-body">
+                                            <h6 class="card-title"><i class="bi bi-volume-up me-2"></i>Volumen</h6>
+                                            <div class="row g-2">
+                                                <div class="col-4">
+                                                    <button class="btn btn-outline-primary w-100"
+                                                        onclick="sendLGKey(<%= screen.id %>, 'VOLUMEUP')"
+                                                        <%=!screen.client_token ? 'disabled' : '' %>>
+                                                        <i class="bi bi-plus-lg"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="col-4">
+                                                    <button class="btn btn-outline-primary w-100"
+                                                        onclick="sendLGKey(<%= screen.id %>, 'VOLUMEDOWN')"
+                                                        <%=!screen.client_token ? 'disabled' : '' %>>
+                                                        <i class="bi bi-dash-lg"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="col-4">
+                                                    <button class="btn btn-outline-danger w-100"
+                                                        onclick="toggleLGMute(<%= screen.id %>)" <%=!screen.client_token
+                                                        ? 'disabled' : '' %>>
+                                                        <i class="bi bi-volume-mute"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Channel Controls -->
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <button class="btn btn-outline-info w-100"
+                                                onclick="sendLGKey(<%= screen.id %>, 'CHANNELUP')"
+                                                <%=!screen.client_token ? 'disabled' : '' %>>
+                                                <i class="bi bi-chevron-up"></i> Canal +
+                                            </button>
+                                        </div>
+                                        <div class="col-6">
+                                            <button class="btn btn-outline-info w-100"
+                                                onclick="sendLGKey(<%= screen.id %>, 'CHANNELDOWN')"
+                                                <%=!screen.client_token ? 'disabled' : '' %>>
+                                                <i class="bi bi-chevron-down"></i> Canal -
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Color Buttons -->
+                                    <div class="row g-2">
+                                        <div class="col-3">
+                                            <button class="btn btn-danger w-100"
+                                                onclick="sendLGKey(<%= screen.id %>, 'RED')" <%=!screen.client_token
+                                                ? 'disabled' : '' %>>
+                                                ●
+                                            </button>
+                                        </div>
+                                        <div class="col-3">
+                                            <button class="btn btn-success w-100"
+                                                onclick="sendLGKey(<%= screen.id %>, 'GREEN')" <%=!screen.client_token
+                                                ? 'disabled' : '' %>>
+                                                ●
+                                            </button>
+                                        </div>
+                                        <div class="col-3">
+                                            <button class="btn btn-warning w-100"
+                                                onclick="sendLGKey(<%= screen.id %>, 'YELLOW')" <%=!screen.client_token
+                                                ? 'disabled' : '' %>>
+                                                ●
+                                            </button>
+                                        </div>
+                                        <div class="col-3">
+                                            <button class="btn btn-primary w-100"
+                                                onclick="sendLGKey(<%= screen.id %>, 'BLUE')" <%=!screen.client_token
+                                                ? 'disabled' : '' %>>
+                                                ●
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Browser Tab -->
+                    <div class="tab-pane fade" id="lgBrowser<%= screen.id %>">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="input-group mb-2">
+                                    <input type="url" class="form-control" id="lgBrowserUrl<%= screen.id %>"
+                                        placeholder="https://ejemplo.com"
+                                        value="<%= process.env.SCREEN_TARGET_URL || '/proxy/' %>">
+                                    <button class="btn btn-primary" onclick="openLGBrowser(<%= screen.id %>)"
+                                        <%=!screen.client_token ? 'disabled' : '' %>>
+                                        <i class="bi bi-box-arrow-up-right me-1"></i>
+                                        Abrir
+                                    </button>
+                                </div>
+                                <% if (screen.mac_address) { %>
+                                    <button class="btn btn-success w-100" onclick="startupRoutineLG(<%= screen.id %>)">
+                                        <i class="bi bi-rocket-takeoff me-2"></i>
+                                        Rutina de Encendido (WoL + Navegador)
+                                    </button>
+                                    <% } %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Media Tab -->
+                    <div class="tab-pane fade" id="lgMedia<%= screen.id %>">
+                        <div class="card">
+                            <div class="card-body">
+                                <!-- Video Selection -->
+                                <div class="mb-3">
+                                    <label class="form-label">Seleccionar Videos</label>
+                                    <select class="form-select" id="lgVideoSelect<%= screen.id %>" multiple size="4">
+                                        <!-- Videos will be loaded dynamically -->
+                                    </select>
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Mantén Ctrl/Cmd para seleccionar múltiples videos
+                                    </small>
+                                </div>
+
+                                <div class="d-grid gap-2 mb-3">
+                                    <button class="btn btn-success" onclick="playAllLG(<%= screen.id %>)">
+                                        <i class="bi bi-collection-play me-2"></i>
+                                        Reproducir TODOS (Playlist en Bucle)
+                                    </button>
+                                </div>
+
+                                <!-- Loop Toggle -->
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="lgLoopMode<%= screen.id %>">
+                                    <label class="form-check-label" for="lgLoopMode<%= screen.id %>">
+                                        <i class="bi bi-arrow-repeat me-1"></i>
+                                        Modo Loop (Repetir)
+                                    </label>
+                                </div>
+
+                                <!-- Cast Button -->
+                                <button class="btn btn-info w-100 mb-2" onclick="castLGPlaylist(<%= screen.id %>)"
+                                    <%=!screen.client_token ? 'disabled' : '' %>>
+                                    <i class="bi bi-play-circle me-2"></i>
+                                    Reproducir en TV
+                                </button>
+
+                                <!-- Upload Video -->
+                                <div class="border-top pt-3 mt-3">
+                                    <label class="form-label">Subir Nuevo Video</label>
+                                    <input type="file" class="form-control" id="lgVideoUpload<%= screen.id %>"
+                                        accept="video/mp4,video/webm,video/quicktime">
+                                    <button class="btn btn-outline-primary w-100 mt-2"
+                                        onclick="uploadVideo(<%= screen.id %>)">
+                                        <i class="bi bi-cloud-upload me-2"></i>
+                                        Subir Video
+                                    </button>
+                                </div>
+
+                                <!-- Toast Notification -->
+                                <div class="border-top pt-3 mt-3">
+                                    <label class="form-label">Enviar Notificación</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="lgToastMessage<%= screen.id %>"
+                                            placeholder="Mensaje de notificación">
+                                        <button class="btn btn-outline-secondary"
+                                            onclick="sendLGToast(<%= screen.id %>)" <%=!screen.client_token ? 'disabled'
+                                            : '' %>>
+                                            <i class="bi bi-chat-dots me-1"></i>
+                                            Enviar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Power Tab -->
+                    <div class="tab-pane fade" id="lgPower<%= screen.id %>">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row g-2">
+                                    <% if (screen.mac_address) { %>
+                                        <div class="col-6">
+                                            <button class="btn btn-success w-100" onclick="wakeLGTV(<%= screen.id %>)">
+                                                <i class="bi bi-lightning-charge me-2"></i>
+                                                Encender (WoL)
+                                            </button>
+                                        </div>
+                                        <% } %>
+                                            <div class="col-<%= screen.mac_address ? '6' : '12' %>">
+                                                <button class="btn btn-danger w-100"
+                                                    onclick="turnOffLGTV(<%= screen.id %>)" <%=!screen.client_token
+                                                    ? 'disabled' : '' %>>
+                                                    <i class="bi bi-power me-2"></i>
+                                                    Apagar TV
+                                                </button>
+                                            </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Remote Control Styles */
+    .remote-control .remote-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        font-size: 1.5rem;
+    }
+
+    .remote-control .remote-btn-ok {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    /* Modal Enhancements */
+    #lgControlModal<%=screen.id %>.modal-content {
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    #lgControlModal<%=screen.id %>.card {
+        border: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+    }
+
+    #lgControlModal<%=screen.id %>.btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    #lgControlModal<%=screen.id %>.btn:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Mobile Optimizations */
+    @media (max-width: 768px) {
+        #lgControlModal<%=screen.id %>.modal-dialog {
+            margin: 0;
+        }
+
+        #lgControlModal<%=screen.id %>.modal-content {
+            border-radius: 0;
+            height: 100vh;
+        }
+
+        #lgControlModal<%=screen.id %>.modal-body {
+            padding: 1rem;
+        }
+
+        .remote-control .remote-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+        }
+
+        .remote-control .remote-btn-ok {
+            width: 70px;
+            height: 70px;
+        }
+    }
+</style>

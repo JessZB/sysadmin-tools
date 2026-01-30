@@ -17,11 +17,15 @@
                     <strong>Control Remoto</strong>
                 </div>
                 <div class="card-body p-2">
-                    <!-- Fila 1: Power, Mute -->
+                    <!-- Fila 1: Power On/Off, Mute -->
                     <div class="btn-group w-100 mb-1" role="group">
-                        <button class="btn btn-sm btn-outline-danger" data-action="send-key" data-id="<%= screen.id %>"
-                            data-key="KEY_POWER" data-label="Power" title="Power">
-                            <i class="bi bi-power"></i>
+                        <button class="btn btn-sm btn-outline-success" data-action="power-on" data-id="<%= screen.id %>"
+                            title="Encender (WoL)">
+                            <i class="bi bi-power"></i> On
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" data-action="power-off" data-id="<%= screen.id %>"
+                            title="Apagar">
+                            <i class="bi bi-power"></i> Off
                         </button>
                         <button class="btn btn-sm btn-outline-secondary" data-action="send-key"
                             data-id="<%= screen.id %>" data-key="KEY_MUTE" data-label="Mute" title="Mute">
@@ -92,10 +96,4 @@
                 <%=!screen.client_token ? 'disabled' : '' %>
                 title="<%= !screen.client_token ? 'Valida la conexión primero' : 'Abrir navegador' %>">
                     <i class="bi bi-globe me-1"></i> Abrir Navegador
-            </button>
-
-            <button class="btn btn-success btn-sm w-100 mb-2" data-action="startup" data-id="<%= screen.id %>"
-                <%=!screen.mac_address ? 'disabled' : '' %>
-                title="<%= !screen.mac_address ? 'Configura MAC address primero' : 'Encender y abrir navegador' %>">
-                    <i class="bi bi-rocket-takeoff me-1"></i> Encender y Abrir Navegador
             </button>
