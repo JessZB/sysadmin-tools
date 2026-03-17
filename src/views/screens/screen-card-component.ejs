@@ -1,0 +1,127 @@
+<% 
+    const isPaired = screen.client_token;
+    const hasIP = screen.ip_address;
+    const hasMAC = screen.mac_address;
+    const modalTarget = type === 'lg' ? `lgControlModal${screen.id}` : 
+                       type === 'samsung' ? `samsungControlModal${screen.id}` : 
+                       `dlnaControlModal${screen.id}`;
+%>
+
+<div class="card h-100 pos-card glass-effect border-opacity-10 border-white">
+    <div class="card-header border-bottom border-white border-opacity-5 bg-transparent d-flex justify-content-between align-items-center p-3">
+        <div class="d-flex align-items-center">
+            <div class="device-icon-bg bg-<%= color %> bg-opacity-10 me-3">
+                <i class="bi bi-display text-<%= color %>"></i>
+            </div>
+            <div>
+                <h5 class="mb-0 text-white font-display fw-bold" style="font-size: 1rem;"><%= screen.name %></h5>
+                <span class="text-white-50 x-small font-monospace opacity-75"><%= hasIP || 'Requiere IP' %></span>
+            </div>
+        </div>
+        <div class="status-indicator">
+            <span class="badge rounded-pill <%= isPaired ? 'bg-success-mint-subtle text-success-mint' : 'bg-warning-amber-subtle text-warning-amber' %> border border-<%= isPaired ? 'success-mint' : 'warning-amber' %> border-opacity-10" style="font-size: 0.65rem;">
+                <%= isPaired ? 'CONECTADO' : 'PENDIENTE' %>
+            </span>
+        </div>
+    </div>
+    
+    <div class="card-body p-4 d-flex flex-column">
+        <!-- Detalle de Conectividad -->
+        <div class="connectivity-info mb-4">
+            <% if (!hasIP) { %>
+                <div class="alert glass-effect border-danger border-opacity-20 text-danger p-2 mb-0 d-flex align-items-center">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    <small>Falta dirección IP</small>
+                </div>
+            <% } else if (!hasMAC) { %>
+                <div class="input-group input-group-sm glass-effect rounded-3 p-1 border border-white border-opacity-5">
+                    <span class="input-group-text bg-transparent border-0 text-white-50"><i class="bi bi-ethernet"></i></span>
+                    <input type="text" class="form-control bg-transparent border-0 text-white x-small"
+                        placeholder="Configurar MAC..." id="mac-input-<%= screen.id %>">
+                    <button class="btn btn-action-premium border-0" data-action="save-mac" data-id="<%= screen.id %>" style="width: auto;">
+                        <i class="bi bi-check2"></i>
+                    </button>
+                </div>
+            <% } else { %>
+                <div class="d-flex align-items-center text-white-50 small">
+                    <i class="bi bi-cpu me-2 text-<%= color %>"></i>
+                    <span class="font-monospace x-small">MAC: <%= screen.mac_address %></span>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Botón Central de Control -->
+        <div class="mt-auto">
+            <button class="btn btn-action-premium w-100 py-2 d-flex align-items-center justify-content-center shadow-lg"
+                data-bs-toggle="modal"
+                data-bs-target="#<%= modalTarget %>">
+                <i class="bi bi-controller me-2"></i>
+                Panel de Control
+            </button>
+        </div>
+    </div>
+
+    <!-- Acciones de Gestión (Hover) -->
+    <div class="card-management-overlay">
+        <button class="management-btn btn-edit" data-action="edit" data-id="<%= screen.id %>" title="Editar">
+            <i class="bi bi-pencil-square"></i>
+        </button>
+        <button class="management-btn btn-delete" data-action="delete" data-id="<%= screen.id %>" data-name="<%= screen.name %>" title="Eliminar">
+            <i class="bi bi-trash3-fill"></i>
+        </button>
+    </div>
+</div>
+
+<style>
+    .device-icon-bg {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .x-small { font-size: 0.75rem; }
+
+    .card-management-overlay {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        display: flex;
+        gap: 8px;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 10;
+    }
+
+    .pos-card:hover .card-management-overlay {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .management-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(5px);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+
+    .btn-edit:hover { background: var(--neon-blue); color: white; border-color: var(--neon-blue); }
+    .btn-delete:hover { background: var(--punch-red); color: white; border-color: var(--punch-red); }
+
+    .bg-success-mint-subtle { background: rgba(0, 255, 204, 0.05); }
+    .text-success-mint { color: var(--success-mint); }
+    .bg-warning-amber-subtle { background: rgba(255, 183, 3, 0.05); }
+    .text-warning-amber { color: var(--warning-amber); }
+</style>

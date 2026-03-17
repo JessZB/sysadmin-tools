@@ -1,25 +1,23 @@
 <%- include('../layout/header') %>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Gestión de Sucursales</h2>
-        <button class="btn btn-cerulean" id="btnNewBranch">
-            <i class="bi bi-building"></i> Nueva Sucursal
+    <div class="d-flex justify-content-between align-items-center mb-4 p-3 glass-effect rounded-4 shadow-sm border border-white border-opacity-5">
+        <h2 class="text-white mb-0 font-display"><i class="bi bi-building me-2 text-primary"></i>Gestión de Sucursales</h2>
+        <button class="btn btn-action-premium btn-ping-premium" id="btnNewBranch" aria-label="Crear nueva sucursal">
+            <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Nueva Sucursal
         </button>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-
+    <div class="card glass-effect border-opacity-10 rounded-4 overflow-hidden border border-white border-opacity-5">
+        <div class="card-body p-0">
             <table id="tablaBranches" data-toggle="table" data-url="/branches/data" data-search="true"
                 data-pagination="true" data-page-list="[5, 10, 25, 50]" data-show-refresh="true"
                 data-show-columns="true" data-show-toggle="true" data-icons-prefix="bi" data-icons="icons"
-                class="table table-hover table-bordered">
+                class="table table-frosted align-middle mb-0">
 
-                <thead class="table-light bg-cerulean text-white">
+                <thead>
                     <tr>
                         <th data-field="id" data-sortable="true">ID</th>
-                        <th data-field="name" data-sortable="true" data-sort-name="name" data-sort-order="asc">Nombre
-                        </th>
+                        <th data-field="name" data-sortable="true" data-sort-name="name" data-sort-order="asc">Nombre</th>
                         <th data-field="code" data-sortable="true">Código</th>
                         <th data-field="address" data-sortable="true">Dirección</th>
                         <th data-field="is_active" data-sortable="true" data-formatter="statusFormatter">Estado</th>
@@ -31,45 +29,62 @@
         </div>
     </div>
 
-    <!-- Modal para Crear/Editar -->
-    <div class="modal fade" id="modalBranch" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header card-header-cerulean">
-                    <h5 class="modal-title" id="modalTitle">Sucursal</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- Modal para Crear/Editar Premium -->
+    <div class="modal fade" id="modalBranch" tabindex="-1" aria-labelledby="modalBranchLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-effect border-opacity-10 border-white">
+                <div class="modal-header glass-effect border-bottom-0 p-4">
+                    <h5 class="modal-title font-display fw-bold text-white" id="modalBranchLabel">
+                        <i class="bi bi-building me-2 text-primary"></i>
+                        <span id="modalTitle">Sucursal</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <input type="hidden" id="branchId">
+                <div class="modal-body p-4">
+                    <form id="formBranch">
+                        <input type="hidden" id="branchId">
 
-                    <div class="mb-3">
-                        <label class="form-label">Nombre de la Sucursal</label>
-                        <input type="text" class="form-control" id="name" required placeholder="Ej: Casa Matriz">
-                    </div>
+                        <div class="mb-4">
+                            <label for="name" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                <i class="bi bi-tag-fill me-2 text-primary"></i>Nombre de la Sucursal
+                            </label>
+                            <input type="text" class="form-control glass-effect border-opacity-10 text-white p-3" id="name" required placeholder="Ej: Casa Matriz">
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Código</label>
-                        <input type="text" class="form-control" id="code" required placeholder="Ej: MTZ-001">
-                        <div class="form-text">Código único de identificación (Ej: SUC-01, MTZ-001)</div>
-                    </div>
+                        <div class="mb-4">
+                            <label for="code" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                <i class="bi bi-upc-scan me-2 text-primary"></i>Código Identificador
+                            </label>
+                            <input type="text" class="form-control glass-effect border-opacity-10 text-white p-3 font-monospace" id="code" required placeholder="Ej: MTZ-001">
+                            <div class="form-text text-white-50 small mt-2">Código único de identificación interna</div>
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Dirección</label>
-                        <textarea class="form-control" id="address" rows="2"
-                            placeholder="Dirección completa de la sucursal"></textarea>
-                    </div>
+                        <div class="mb-4">
+                            <label for="address" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                <i class="bi bi-geo-alt-fill me-2 text-primary"></i>Dirección Física
+                            </label>
+                            <textarea class="form-control glass-effect border-opacity-10 text-white p-3" id="address" rows="2"
+                                placeholder="Dirección completa de la sucursal"></textarea>
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Estado</label>
-                        <select class="form-select" id="is_active">
-                            <option value="1">Activa</option>
-                            <option value="0">Inactiva</option>
-                        </select>
-                    </div>
+                        <div class="mb-4">
+                            <label for="is_active" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                <i class="bi bi-toggle-on me-2 text-primary"></i>Estado de Operación
+                            </label>
+                            <select class="form-select glass-effect border-opacity-10 text-white p-3" id="is_active">
+                                <option value="1" class="bg-dark">Activa</option>
+                                <option value="0" class="bg-dark">Inactiva</option>
+                            </select>
+                        </div>
+                    </form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-frosted" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-cerulean" id="btnSaveBranch">Guardar</button>
+                <div class="modal-footer border-top-0 p-4">
+                    <button type="button" class="btn btn-frosted border border-white border-opacity-10 text-white px-4" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-action-premium btn-ping-premium px-5" id="btnSaveBranch" style="width: auto;">
+                        <i class="bi bi-save me-2"></i>Guardar Cambios
+                    </button>
                 </div>
             </div>
         </div>

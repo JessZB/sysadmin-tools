@@ -41,9 +41,6 @@ class SlideMenu {
                 this.close();
             }
         });
-
-        // Prevenir scroll del body cuando el menú está abierto
-        this.preventBodyScroll();
     }
 
     open() {
@@ -81,14 +78,6 @@ class SlideMenu {
         });
     }
 
-    preventBodyScroll() {
-        // Prevenir scroll cuando el menú está abierto
-        this.overlay.addEventListener('touchmove', (e) => {
-            if (this.isOpen) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-    }
 }
 
 // Inicializar el menú cuando el DOM esté listo

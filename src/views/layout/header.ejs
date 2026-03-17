@@ -17,26 +17,31 @@
     <script src="/js/common.js"></script>
 </head>
 
-<body>
-    <!-- Navbar Simplificado con solo botón de menú -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-cerulean mb-4">
-        <div class="container-fluid">
-            <button class="btn btn-frosted btn-sm me-3" data-slide-menu-open title="Abrir Menú">
-                <i class="fa-solid fa-bars me-1"></i> Menú
-            </button>
-            <a class="navbar-brand" href="/home">SysAdmin Tool</a>
-            <div class="ms-auto d-flex align-items-center">
-                <span class="navbar-text text-white me-3 d-none d-md-inline">
-                    <i class="fa-solid fa-user me-1"></i>
-                    <%= user.username %>
-                </span>
-                <a href="/logout" class="btn btn-punch btn-sm">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span class="d-none d-md-inline ms-1">Salir</span>
+<body class="noise-overlay">
+    <!-- Navbar Premium Flotante de Cristal -->
+    <div class="container mt-4 mb-5">
+        <nav class="navbar navbar-expand-lg glass-effect rounded-pill px-4" style="z-index: 1050;">
+            <div class="container-fluid">
+                <button class="btn btn-cerulean btn-sm me-3 rounded-pill px-3" data-slide-menu-open title="Abrir Menú" aria-label="Abrir menú de navegación">
+                    <i class="fa-solid fa-bars-staggered me-2" aria-hidden="true"></i> Menú
+                </button>
+                <a class="navbar-brand fw-bold" href="/home" style="font-family: var(--font-display); color: var(--neon-blue) !important; font-size: 1.4rem;">
+                   <i class="fa-solid fa-bolt-lightning me-2"></i>SYS<span style="color: #fff; font-weight: 300;">ADMIN</span>
                 </a>
+                <div class="ms-auto d-flex align-items-center">
+                    <div class="d-none d-md-flex align-items-center me-4">
+                        <div class="user-pill glass-effect rounded-pill px-3 py-1">
+                            <i class="fa-solid fa-circle text-success me-1" style="font-size: 0.5rem;"></i>
+                            <span class="small fw-semibold text-white"><%= user.username %></span>
+                        </div>
+                    </div>
+                    <a href="/logout" class="btn btn-punch btn-sm rounded-pill px-3" aria-label="Cerrar sesión">
+                        <i class="fa-solid fa-power-off me-2" aria-hidden="true"></i>Salir
+                    </a>
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
+    </div>
 
     <!-- Incluir el Slide Menu -->
     <%- include('./slide-menu') %>

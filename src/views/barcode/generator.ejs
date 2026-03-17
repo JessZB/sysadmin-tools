@@ -1,87 +1,118 @@
 <%- include('../layout/header') %>
 
-    <div class="container-fluid">
+    <div class="container-fluid py-5">
         <div class="row justify-content-center">
-            <div class="col-lg-8 col-xl-6">
-                <div class="card card-cerulean shadow-lg">
-                    <div class="card-header card-header-cerulean">
-                        <h3 class="mb-0">
-                            <i class="fa-solid fa-barcode me-2"></i>Generador de Códigos de Barra
-                        </h3>
-                        <p class="mb-0 mt-1 opacity-75">Generador PLU con peso incluido (Dibal)</p>
+            <div class="col-lg-10 col-xl-8">
+                <!-- Header Principal de la Sección -->
+                <div class="d-flex justify-content-between align-items-center mb-4 p-3 glass-effect rounded-4 shadow-sm border border-white border-opacity-5">
+                    <div>
+                        <h2 class="text-white mb-0 font-display fw-bold">
+                            <i class="bi bi-barcode me-2 text-primary"></i>Generador de Etiquetas
+                        </h2>
+                        <p class="text-white-50 small mb-0 mt-1">Sincronización de balanzas Dibal/Soles • Estándar EAN-13</p>
                     </div>
-                    <div class="card-body p-4">
-                        <!-- Formulario -->
-                        <div class="row mb-4">
-                            <div class="col-md-6 mb-3">
-                                <label for="plu" class="form-label fw-bold">
-                                    <i class="fa-solid fa-hashtag me-1"></i>PLU (4 dígitos)
-                                </label>
-                                <input type="text" class="form-control" id="plu" maxlength="4" placeholder="Ej: 0123"
-                                    value="0001">
-                                <div class="form-text">Código del producto (4 dígitos)</div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="weight" class="form-label fw-bold">
-                                    <i class="fa-solid fa-weight-scale me-1"></i>Peso (kg)
-                                </label>
-                                <input type="number" class="form-control" id="weight" step="0.001"
-                                    placeholder="Ej: 1.500">
-                                <div class="form-text">Peso del producto en kilogramos</div>
-                            </div>
-                        </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-frosted text-white border border-white border-opacity-10 px-3" id="view-records-button">
+                            <i class="bi bi-clock-history me-1"></i> Historial
+                        </button>
+                    </div>
+                </div>
 
-                        <!-- Botones -->
-                        <div class="d-grid gap-2 mb-4">
-                            <button class="btn btn-cerulean btn-lg" id="generate-button">
-                                <i class="fa-solid fa-wand-magic-sparkles me-2"></i>GENERAR CÓDIGO
-                            </button>
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <button class="btn btn-frosted w-100" id="download-button">
-                                        <i class="fa-solid fa-download me-1"></i>DESCARGAR PNG
+                <div class="row">
+                    <!-- Panel de Configuración -->
+                    <div class="col-md-5">
+                        <div class="card glass-effect border-opacity-10 rounded-4 overflow-hidden mb-4 border border-white border-opacity-5">
+                            <div class="card-header border-bottom border-white border-opacity-5 bg-transparent p-4">
+                                <h5 class="text-white font-display mb-0 small text-uppercase fw-bold ls-1">Configuración del Producto</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="mb-4">
+                                    <label for="plu" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                        <i class="bi bi-hash me-2 text-primary"></i>PLU de Referencia
+                                    </label>
+                                    <input type="text" class="form-control glass-effect border-opacity-10 text-white p-3 font-monospace" id="plu" maxlength="4" placeholder="Ej: 0001" value="0001">
+                                    <div class="form-text text-white-50 x-small mt-2">Identificador único de 4 dígitos</div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="weight" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                        <i class="bi bi-speedometer2 me-2 text-primary"></i>Peso del Artículo (kg)
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control glass-effect border-opacity-10 text-white p-3" id="weight" step="0.001" placeholder="0.000">
+                                        <span class="input-group-text glass-effect border-opacity-10 text-white border-start-0">KG</span>
+                                    </div>
+                                    <div class="form-text text-white-50 x-small mt-2">Peso neto para cálculo de EAN</div>
+                                </div>
+
+                                <div class="d-grid gap-3">
+                                    <button class="btn btn-action-premium btn-ping-premium py-3 font-display fw-bold" id="generate-button">
+                                        <i class="bi bi-lightning-charge-fill me-2"></i>GENERAR EAN-13
+                                    </button>
+                                    <button class="btn btn-frosted border border-white border-opacity-10 text-white py-2 opacity-50" id="download-button" disabled>
+                                        <i class="bi bi-download me-2"></i>Exportar como PNG
                                     </button>
                                 </div>
-                                <div class="col-6">
-                                    <button class="btn btn-outline-cerulean w-100" id="view-records-button">
-                                        <i class="fa-solid fa-clock-rotate-left me-1"></i>VER HISTORIAL
-                                    </button>
-                                </div>
                             </div>
                         </div>
 
-                        <!-- Área del código de barras -->
-                        <div class="barcode-container">
-                            <canvas id="barcode"></canvas>
-                            <p id="barcode-text" class="fw-bold mt-3 mb-2 text-oxford"></p>
-                            <p id="date-time" class="text-muted small"></p>
+                        <!-- Info Card -->
+                        <div class="card glass-effect border-opacity-10 rounded-4 border border-white border-opacity-5">
+                            <div class="card-body p-4">
+                                <h6 class="text-primary small text-uppercase fw-bold ls-1 mb-3">
+                                    <i class="bi bi-info-circle me-2"></i>Resumen Técnico
+                                </h6>
+                                <div class="x-small text-white-50 lh-lg">
+                                    <div class="d-flex justify-content-between border-bottom border-white border-opacity-5 pb-1 mb-1">
+                                        <span>Prefijo Balanza:</span>
+                                        <span class="text-white">22</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between border-bottom border-white border-opacity-5 pb-1 mb-1">
+                                        <span>Dígitos Peso:</span>
+                                        <span class="text-white">5 (Gramos)</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span>Check Digit:</span>
+                                        <span class="text-white">Auto Mod-10</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                    </div>
 
-                        <!-- Historial -->
-                        <div class="record-list mt-4" id="record-list-container" style="display: none;">
-                            <div class="alert alert-cerulean">
-                                <h5 class="mb-3">
-                                    <i class="fa-solid fa-list me-2"></i>Últimos registros
-                                </h5>
-                                <ul id="record-list" class="list-unstyled mb-0"></ul>
+                    <!-- Visualización del Código -->
+                    <div class="col-md-7">
+                        <div class="card glass-effect border-opacity-10 rounded-4 h-100 border border-white border-opacity-5 d-flex flex-column align-items-center justify-content-center p-5 text-center">
+                            <div id="barcode-display-wrapper" class="d-none w-100">
+                                <div class="bg-white p-4 rounded-4 shadow-lg mb-4 d-inline-block transition-base" style="transform: scale(1.1);">
+                                    <canvas id="barcode"></canvas>
+                                </div>
+                                <h3 id="barcode-text" class="font-display fw-bold text-white ls-2 mb-2"></h3>
+                                <p id="date-time" class="text-white-50 x-small font-monospace mb-0"></p>
+                            </div>
+
+                            <div id="barcode-placeholder" class="text-white-50 opacity-25">
+                                <i class="bi bi-upc-scan" style="font-size: 5rem;"></i>
+                                <p class="mt-3 font-display">Configure los datos y genere el código</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Información adicional -->
-                <div class="card mt-4">
-                    <div class="card-body">
-                        <h5 class="card-title text-cerulean">
-                            <i class="fa-solid fa-circle-info me-2"></i>Información
-                        </h5>
-                        <ul class="mb-0">
-                            <li>El código generado es formato <strong>EAN-13</strong></li>
-                            <li>Prefijo de balanza: <code>22</code></li>
-                            <li>El peso se codifica en gramos (5 dígitos)</li>
-                            <li>Rango de peso válido: <strong>0 - 99.999 kg</strong></li>
-                            <li>El historial guarda los últimos 10 códigos generados</li>
-                        </ul>
+                <!-- Historial Expandible -->
+                <div class="row mt-4 d-none" id="record-list-container">
+                    <div class="col-12">
+                        <div class="card glass-effect border-opacity-10 rounded-4 border border-white border-opacity-5">
+                            <div class="card-header border-bottom border-white border-opacity-5 bg-transparent p-4 d-flex justify-content-between align-items-center">
+                                <h5 class="text-white font-display mb-0 small text-uppercase fw-bold ls-1">Registros Recientes</h5>
+                                <button class="btn btn-sm btn-link text-white-50 text-decoration-none" id="btn-clear-history">Limpiar</button>
+                            </div>
+                            <div class="card-body p-4">
+                                <div id="record-list" class="row g-3">
+                                    <!-- Dinámico -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -89,43 +120,32 @@
     </div>
 
     <style>
-        .barcode-container {
-            text-align: center;
-            background: linear-gradient(135deg, #f1faee 0%, #a8dadc 100%);
-            padding: 30px;
-            border-radius: 15px;
-            border: 3px solid #457b9d;
-            box-shadow: 0 5px 15px rgba(69, 123, 157, 0.2);
+        .transition-base { transition: all 0.3s ease; }
+        
+        .record-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .record-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--neon-blue);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         #barcode {
             max-width: 100%;
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
+            height: auto !important;
         }
 
-        .record-list ul li {
-            padding: 12px;
-            background: white;
-            border-left: 4px solid #457b9d;
-            margin-bottom: 8px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            color: #1d3557;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .record-list ul li:hover {
-            background: #f1faee;
-            transform: translateX(5px);
-            transition: all 0.3s ease;
-        }
-
-        input:focus {
-            border-color: #457b9d !important;
-            box-shadow: 0 0 0 0.2rem rgba(69, 123, 157, 0.25) !important;
-        }
+        .x-small { font-size: 0.75rem; }
+        .ls-2 { letter-spacing: 0.15em; }
+    </style>
+em; }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
@@ -140,21 +160,29 @@
         const generateButton = document.getElementById('generate-button');
         const downloadButton = document.getElementById('download-button');
         const viewRecordsButton = document.getElementById('view-records-button');
+        const displayWrapper = document.getElementById('barcode-display-wrapper');
+        const placeholder = document.getElementById('barcode-placeholder');
+        const clearHistoryBtn = document.getElementById('btn-clear-history');
 
         let records = [];
         let historialVisible = false;
 
+        // Cargar registros desde localStorage si existen
+        const savedRecords = localStorage.getItem('barcode_history');
+        if (savedRecords) {
+            records = JSON.parse(savedRecords);
+        }
+
         generateButton.addEventListener('click', () => {
-            const plu = pluInput.value.padStart(4, '0');
+            const plu = pluInput.value.trim().padStart(4, '0');
             const weight = parseFloat(weightInput.value);
 
-            // Validación
-            if (plu.length !== 4 || isNaN(weight) || weight < 0 || weight >= 100) {
+            if (!plu || isNaN(weight) || weight < 0 || weight >= 100) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error de validación',
-                    text: 'PLU debe ser de 4 dígitos y el peso entre 0 y 99.999 kg.',
-                    confirmButtonColor: '#457b9d'
+                    title: 'Datos Inválidos',
+                    text: 'El PLU debe ser numérico y el peso estar entre 0 y 99.999 kg.',
+                    confirmButtonColor: 'var(--punch-red)'
                 });
                 return;
             }
@@ -163,13 +191,13 @@
             displayBarcode(barcodeValue);
             addRecord(barcodeValue, weight);
 
-            Swal.fire({
-                icon: 'success',
-                title: '¡Código generado!',
-                text: `EAN-13: ${barcodeValue}`,
-                timer: 2000,
-                showConfirmButton: false
-            });
+            // UI Feedback
+            displayWrapper.classList.remove('d-none');
+            placeholder.classList.add('d-none');
+            downloadButton.disabled = false;
+            downloadButton.classList.remove('opacity-50');
+
+            showSuccessToast('EAN-13 Generado: ' + barcodeValue);
         });
 
         function generateEAN13Barcode(plu, weight) {
@@ -194,83 +222,98 @@
         function displayBarcode(barcodeValue) {
             JsBarcode(barcodeCanvas, barcodeValue, {
                 format: 'EAN13',
-                displayValue: true,
-                fontSize: 18,
+                displayValue: false,
+                fontSize: 20,
                 background: "#ffffff",
-                lineColor: "#1d3557"
+                lineColor: "#000000",
+                width: 2.5,
+                height: 100,
+                margin: 10
             });
 
             const now = new Date();
-            barcodeText.textContent = 'EAN-13: ' + barcodeValue;
-            dateTimeText.textContent = 'Generado: ' + now.toLocaleString('es-ES');
+            barcodeText.textContent = barcodeValue.match(/.{1,4}/g).join(' '); // Formatear visualmente
+            dateTimeText.textContent = 'TIMESTAMP: ' + now.toLocaleString('es-VE');
         }
 
         function addRecord(barcodeValue, weight) {
             records.unshift({
                 barcode: barcodeValue,
-                dateTime: new Date().toLocaleString('es-ES'),
+                dateTime: new Date().toLocaleString('es-VE'),
                 weight: weight.toFixed(3)
             });
-            if (records.length > 10) records.pop();
+            if (records.length > 12) records.pop();
+            localStorage.setItem('barcode_history', JSON.stringify(records));
             if (historialVisible) displayRecords();
         }
 
         function displayRecords() {
             recordList.innerHTML = '';
             if (records.length === 0) {
-                recordList.innerHTML = '<li class="text-center text-muted">No hay registros aún</li>';
+                recordList.innerHTML = '<div class="col-12 text-center text-white-50 py-4"><i class="bi bi-inbox me-2"></i>No hay registros guardados</div>';
             } else {
                 records.forEach(record => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                    <i class="fa-solid fa-box me-2"></i>
-                    <strong>${record.weight}kg</strong> - 
-                    <code>${record.barcode}</code> - 
-                    <small class="text-muted">${record.dateTime}</small>
-                `;
-                    recordList.appendChild(li);
+                    const col = document.createElement('div');
+                    col.className = 'col-md-6 col-lg-4';
+                    col.innerHTML = `
+                        <div class="record-card role="button">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-primary bg-opacity-10 text-primary">${record.weight} KG</span>
+                                <small class="text-white-50 font-monospace" style="font-size: 0.6rem;">${record.dateTime}</small>
+                            </div>
+                            <div class="font-monospace text-info fw-bold">${record.barcode}</div>
+                        </div>
+                    `;
+                    col.addEventListener('click', () => {
+                        const [plu, w] = extractInfoFromBarcode(record.barcode);
+                        pluInput.value = plu;
+                        weightInput.value = w;
+                        generateButton.click();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                    recordList.appendChild(col);
                 });
             }
         }
 
-        downloadButton.addEventListener('click', () => {
-            if (!barcodeText.textContent) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Sin código',
-                    text: 'Primero debes generar un código de barras',
-                    confirmButtonColor: '#457b9d'
-                });
-                return;
-            }
+        function extractInfoFromBarcode(ean) {
+            // 22 00001 00000 X
+            const plu = parseInt(ean.substring(2, 7)).toString();
+            const weight = (parseInt(ean.substring(7, 12)) / 1000).toFixed(3);
+            return [plu, weight];
+        }
 
+        downloadButton.addEventListener('click', () => {
             const link = document.createElement('a');
             link.href = barcodeCanvas.toDataURL('image/png');
-            link.download = `barcode_${pluInput.value}_${new Date().getTime()}.png`;
+            link.download = `EAN13_${pluInput.value}_${Date.now()}.png`;
             link.click();
-
-            showSuccessToast('Código de barras descargado');
+            showSuccessToast('Archivo PNG exportado con éxito');
         });
 
         viewRecordsButton.addEventListener('click', () => {
             historialVisible = !historialVisible;
+            recordListContainer.classList.toggle('d-none', !historialVisible);
+            viewRecordsButton.classList.toggle('btn-primary-custom', historialVisible);
+            
             if (historialVisible) {
-                recordListContainer.style.display = 'block';
                 displayRecords();
-                viewRecordsButton.innerHTML = '<i class="fa-solid fa-eye-slash me-1"></i>OCULTAR HISTORIAL';
-            } else {
-                recordListContainer.style.display = 'none';
-                viewRecordsButton.innerHTML = '<i class="fa-solid fa-clock-rotate-left me-1"></i>VER HISTORIAL';
+                recordListContainer.scrollIntoView({ behavior: 'smooth' });
             }
         });
 
-        // Enter key para generar
-        weightInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') generateButton.click();
+        clearHistoryBtn?.addEventListener('click', () => {
+            records = [];
+            localStorage.removeItem('barcode_history');
+            displayRecords();
+            showInfoToast('Historial limpiado');
         });
 
-        pluInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') weightInput.focus();
+        // Eventos de teclado
+        [pluInput, weightInput].forEach(el => {
+            el.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') generateButton.click();
+            });
         });
     </script>
 

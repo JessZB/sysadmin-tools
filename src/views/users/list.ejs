@@ -4,22 +4,27 @@
         const currentUserId = Number('<%= user.id %>');
     </script>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Gestión de Usuarios</h2>
-        <button class="btn btn-cerulean" id="btnNewUser" >
-            <i class="bi bi-person-plus"></i> Nuevo Usuario
+    <div class="dashboard-header d-flex justify-content-between align-items-center mb-5 sticky-top" style="z-index: 1000; margin-top: -20px;">
+        <div>
+            <h2 class="text-white mb-0 font-display fw-bold">
+                <i class="bi bi-person-gear me-2 text-primary"></i>Gestión de Usuarios
+            </h2>
+            <p class="text-white-50 small mb-0 mt-1">Administración de accesos, roles y permisos del sistema</p>
+        </div>
+        <button class="btn btn-action-premium btn-ping-premium px-4" id="btnNewUser">
+            <i class="bi bi-person-plus me-2"></i>Nuevo Usuario
         </button>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
+    <div class="card glass-effect border-opacity-10 rounded-4 overflow-hidden shadow-lg">
+        <div class="card-body p-0">
 
             <table id="tablaUsuarios" data-toggle="table" data-url="/users/data" data-search="true"
                 data-pagination="true" data-page-list="[5, 10, 25, 50]" data-show-refresh="true"
                 data-show-columns="true" data-show-toggle="true" data-icons-prefix="bi" data-icons="icons"
-                class="table table-hover table-bordered">
+                class="table table-frosted align-middle mb-0">
 
-                <thead class="table-light bg-cerulean text-white">
+                <thead>
                     <tr>
                         <th data-field="id" data-sortable="true">ID</th>
                         <th data-field="username" data-sortable="true">Usuario</th>
@@ -36,109 +41,147 @@
     </div>
 
 
-    <div class="modal fade" id="modalUsuario" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header card-header-cerulean">
-                    <h5 class="modal-title" id="modalTitle">Usuario</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="userId">
-
-                    <div class="mb-3">
-                        <label class="form-label">Nombre de Usuario</label>
-                        <input type="text" class="form-control" id="username" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Sucursal Asignada</label>
-                        <select class="form-select" id="branchId">
-                            <% branches.forEach(function(branch) { %>
-                                <option value="<%= branch.id %>">
-                                    <%= branch.name %>
-                                </option>
-                                <% }); %>
-                        </select>
-                        <div class="form-text small">El usuario solo verá datos de esta sucursal.</div>
-                    </div>
-
-
-                    <div class="mb-3">
-                        <label class="form-label">Rol</label>
-                        <select class="form-select" id="role">
-                            <option value="admin">Administrador</option>
-                            <option value="analista">Analista</option>
-
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Contraseña</label>
-                        <input type="password" class="form-control" id="password" placeholder="••••••">
-                        <div class="form-text" id="passHelp"></div>
-                    </div>
-
-
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-frosted" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-cerulean" id="btnNewUser" id="btnSaveUser">Guardar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="modalPermisos" tabindex="-1">
+    <!-- Modal Usuario Premium -->
+    <div class="modal fade" id="modalUsuario" tabindex="-1" aria-labelledby="modalUsuarioLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-light">
-                    <div>
-                        <h5 class="modal-title fw-bold">Asignar Permisos</h5>
-                        <small class="text-muted" id="permUserDisplay">-</small>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-content glass-effect border-opacity-10 border-white">
+                <div class="modal-header glass-effect border-bottom-0 p-4">
+                    <h5 class="modal-title font-display fw-bold text-white" id="modalUsuarioLabel">
+                        <i class="bi bi-person-circle me-2 text-primary"></i>
+                        <span id="modalTitle">Usuario</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <input type="hidden" id="permUserId">
-                    <input type="hidden" id="permUserName">
+                <div class="modal-body p-4">
+                    <form id="formUsuario">
+                        <input type="hidden" id="userId">
 
-                    <div class="alert alert-info small py-2 mb-3">
-                        <i class="fa-solid fa-circle-info me-1"></i> Seleccione los módulos a los que este usuario
-                        tendrá acceso.
-                    </div>
+                        <div class="mb-4">
+                            <label for="username" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                <i class="bi bi-at me-2 text-primary"></i>Nombre de Usuario
+                            </label>
+                            <input type="text" class="form-control glass-effect border-opacity-10 text-white p-3" id="username" required placeholder="Ej: jdoe">
+                        </div>
 
-                    <div class="row g-3">
-                        <% systemModules.forEach(function(mod) { %>
-                            <div class="col-6">
-                                <div class="card h-100 shadow-sm border-0 bg-light permission-card">
-                                    <div class="card-body p-2 d-flex align-items-center">
-                                        <div class="form-check form-switch w-100">
-                                            <input class="form-check-input module-check" type="checkbox"
-                                                value="<%= mod.code %>" id="mod_<%= mod.code %>">
-                                            <label class="form-check-label w-100 stretched-link"
-                                                for="mod_<%= mod.code %>" style="cursor: pointer;">
-                                                <i
-                                                    class="fa-solid <%= mod.icon || 'fa-circle' %> text-secondary me-2"></i>
-                                                <span class="fw-semibold">
-                                                    <%= mod.name %>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div class="mb-4">
+                            <label for="branchId" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                <i class="bi bi-building me-2 text-primary"></i>Sucursal Asignada
+                            </label>
+                            <select class="form-select glass-effect border-opacity-10 text-white p-3" id="branchId">
+                                <% branches.forEach(function(branch) { %>
+                                    <option value="<%= branch.id %>" class="bg-dark text-white">
+                                        <%= branch.name %>
+                                    </option>
+                                <% }); %>
+                            </select>
+                            <div class="form-text text-white-50 x-small mt-2">El usuario tendrá visibilidad restringida a esta sucursal.</div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-4">
+                                <label for="role" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                    <i class="bi bi-shield-lock me-2 text-primary"></i>Rol
+                                </label>
+                                <select class="form-select glass-effect border-opacity-10 text-white p-3" id="role">
+                                    <option value="admin" class="bg-dark text-white">Administrador</option>
+                                    <option value="analista" class="bg-dark text-white">Analista</option>
+                                </select>
                             </div>
-                            <% }); %>
-                    </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="password" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                    <i class="bi bi-key-fill me-2 text-primary"></i>Contraseña
+                                </label>
+                                <input type="password" class="form-control glass-effect border-opacity-10 text-white p-3" id="password" placeholder="••••••••">
+                            </div>
+                        </div>
+                        <div class="form-text text-white-50 x-small" id="passHelp"></div>
+                    </form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-primary" onclick="guardarPermisos()">
-                        <i class="fa-solid fa-save me-1"></i> Guardar Permisos
+                <div class="modal-footer border-top-0 p-4">
+                    <button type="button" class="btn btn-frosted border border-white border-opacity-10 text-white px-4" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-action-premium btn-ping-premium px-5" id="btnSaveUser" style="width: auto;">
+                        <i class="bi bi-save me-2"></i>Guardar Usuario
                     </button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Modal Permisos Premium -->
+    <div class="modal fade" id="modalPermisos" tabindex="-1" aria-labelledby="modalPermisosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content glass-effect border-opacity-10 border-white">
+                <div class="modal-header glass-effect border-bottom-0 p-4">
+                    <div>
+                        <h5 class="modal-title font-display fw-bold text-white" id="modalPermisosLabel">
+                            <i class="bi bi-shield-lock-fill me-2 text-primary"></i>Asignar Permisos de Módulo
+                        </h5>
+                        <p class="text-white-50 small mb-0" id="permUserDisplay">Configurando accesos para el usuario</p>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <input type="hidden" id="permUserId">
+                    <input type="hidden" id="permUserName">
+
+                    <div class="alert glass-effect border-opacity-10 d-flex align-items-center mb-4 border-info">
+                        <i class="bi bi-info-circle-fill me-3 fs-4 text-info"></i>
+                        <div class="text-white-50 small">
+                            Seleccione los módulos específicos a los que este usuario tendrá acceso habilitado. 
+                            Los cambios se aplicarán en el siguiente inicio de sesión del usuario.
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <% systemModules.forEach(function(mod) { %>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card h-100 glass-effect border-opacity-10 permission-card-premium transition-base">
+                                    <div class="card-body p-3">
+                                        <div class="form-check form-switch d-flex align-items-center gap-3 w-100">
+                                            <input class="form-check-input module-check cursor-pointer" type="checkbox"
+                                                value="<%= mod.code %>" id="mod_<%= mod.code %>" style="width: 2.5em; height: 1.25em;">
+                                            <label class="form-check-label flex-grow-1 cursor-pointer"
+                                                for="mod_<%= mod.code %>">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi <%= mod.icon || 'bi-circle' %> text-primary opacity-75 fs-5 me-2"></i>
+                                                    <span class="fw-bold text-white small text-uppercase ls-1">
+                                                        <%= mod.name %>
+                                                    </span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 p-4">
+                    <button type="button" class="btn btn-frosted border border-white border-opacity-10 text-white px-4" data-bs-dismiss="modal">
+                        Cerrar
+                    </button>
+                    <button type="button" class="btn btn-action-premium btn-ping-premium px-5" onclick="guardarPermisos()" style="width: auto;">
+                        <i class="bi bi-check2-circle me-2"></i>Confirmar Permisos
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .permission-card-premium {
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        .permission-card-premium:hover {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: var(--neon-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .cursor-pointer { cursor: pointer; }
+    </style>
 
     <%- include('../layout/footer') %>

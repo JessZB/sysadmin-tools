@@ -1,0 +1,46 @@
+<!-- Samsung TV Control Modal -->
+<div class="modal fade" id="samsungControlModal<%= screen.id %>" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-effect border-opacity-10">
+            <div class="modal-header glass-effect border-bottom-0 p-4">
+                <h5 class="modal-title font-display fw-bold text-white">
+                    <i class="bi bi-tv me-2 text-info"></i>
+                    Control Samsung - <%= screen.name %>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- Connectivity Status -->
+                <div class="alert glass-effect border-opacity-10 d-flex align-items-center mb-4 border-<%= screen.client_token ? 'success' : 'warning' %>">
+                    <i class="bi bi-<%= screen.client_token ? 'check-circle-fill' : 'exclamation-triangle-fill' %> me-2 fs-4 text-<%= screen.client_token ? 'success' : 'warning' %>"></i>
+                    <div>
+                        <strong class="text-white">Estado:</strong>
+                        <span class="text-white-50"><%= screen.client_token ? 'Conectado y emparejado' : 'Sin emparejar' %></span>
+                    </div>
+                </div>
+
+                <div class="remote-control-container">
+                    <%- include('samsung-remote-panel', { screen: screen }) %>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <a href="/screens/viewer/<%= screen.id %>" target="_blank"
+                        class="btn btn-frosted border border-white border-opacity-10 text-white py-2 shadow-sm">
+                        <i class="bi bi-box-arrow-up-right me-2 text-info"></i>
+                        Abrir Visor Externo
+                    </a>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 p-4">
+                <button type="button" class="btn btn-frosted border border-white border-opacity-10 text-white w-auto px-4" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    [id^="samsungControlModal"] .modal-content {
+        background: var(--space-deep);
+        border: 1px solid var(--glass-border);
+    }
+</style>

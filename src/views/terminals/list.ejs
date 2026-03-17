@@ -1,21 +1,26 @@
 <%- include('../layout/header') %>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Gestión de Terminales POS</h2>
-        <button class="btn btn-cerulean" id="btnNewTerminal">
-            <i class="bi bi-hdd-network"></i> Nueva Terminal
+    <div class="dashboard-header d-flex justify-content-between align-items-center mb-5 sticky-top" style="z-index: 1000; margin-top: -20px;">
+        <div>
+            <h2 class="text-white mb-0 font-display fw-bold">
+                <i class="bi bi-hdd-network me-2 text-primary"></i>Gestión de Terminales POS
+            </h2>
+            <p class="text-white-50 small mb-0 mt-1">Configuración técnica de puntos de venta y servidores</p>
+        </div>
+        <button class="btn btn-action-premium btn-ping-premium px-4" id="btnNewTerminal">
+            <i class="bi bi-plus-lg me-2"></i>Nueva Terminal
         </button>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
+    <div class="card glass-effect border-opacity-10 rounded-4 overflow-hidden shadow-lg">
+        <div class="card-body p-0">
 
             <table id="tablaTerminales" data-toggle="table" data-url="/terminals/data" data-search="true"
                 data-pagination="true" data-page-list="[5, 10, 25, 50]" data-show-refresh="true"
                 data-show-columns="true" data-show-toggle="true" data-icons-prefix="bi" data-icons="icons"
-                class="table table-hover table-bordered">
+                class="table table-frosted align-middle mb-0">
 
-                <thead class="table-light bg-cerulean text-white">
+                <thead>
                     <tr>
                         <th data-field="name" data-sortable="true" data-sort-name="name" data-sort-order="desc">Nombre
                         </th>
@@ -31,77 +36,105 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modalTerminal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header card-header-cerulean">
-                    <h5 class="modal-title" id="modalTitulo">Terminal</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- Modal Terminal Premium -->
+    <div class="modal fade" id="modalTerminal" tabindex="-1" aria-labelledby="modalTerminalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-effect border-opacity-10 border-white">
+                <div class="modal-header glass-effect border-bottom-0 p-4">
+                    <h5 class="modal-title font-display fw-bold text-white" id="modalTerminalLabel">
+                        <i class="bi bi-pc-display-horizontal me-2 text-primary"></i>
+                        <span id="modalTitulo">Terminal</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <form id="formTerminal">
                         <input type="hidden" id="terminalId">
 
-                        <div class="mb-3">
-                            <label class="form-label">Sucursal</label>
-                            <select class="form-select" id="branchId" required>
+                        <div class="mb-4">
+                            <label for="branchId" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                <i class="bi bi-building me-2 text-primary"></i>Sucursal
+                            </label>
+                            <select class="form-select glass-effect border-opacity-10 text-white p-3" id="branchId" required>
                                 <% branches.forEach(function(branch) { %>
-                                    <option value="<%= branch.id %>">
+                                    <option value="<%= branch.id %>" class="bg-dark text-white">
                                         <%= branch.name %>
                                     </option>
-                                    <% }); %>
+                                <% }); %>
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Nombre de la Terminal</label>
-                            <input type="text" class="form-control" id="name" required
+
+                        <div class="mb-4">
+                            <label for="name" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                <i class="bi bi-tag-fill me-2 text-primary"></i>Nombre de la Terminal
+                            </label>
+                            <input type="text" class="form-control glass-effect border-opacity-10 text-white p-3" id="name" required
                                 placeholder="Ej: Caja 01 - Tienda Centro">
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Tipo de Terminal</label>
-                            <select class="form-select" id="type">
-                                <option value="0">Caja</option>
-                                <option value="1">Servidor</option>
-                            </select>
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-4">
+                                <label for="type" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                    <i class="bi bi-layers me-2 text-primary"></i>Tipo
+                                </label>
+                                <select class="form-select glass-effect border-opacity-10 text-white p-3" id="type">
+                                    <option value="0" class="bg-dark text-white">Caja</option>
+                                    <option value="1" class="bg-dark text-white">Servidor</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="is_active" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                    <i class="bi bi-toggle-on me-2 text-primary"></i>Estado
+                                </label>
+                                <select class="form-select glass-effect border-opacity-10 text-white p-3" id="is_active">
+                                    <option value="1" class="bg-dark text-white">Activa</option>
+                                    <option value="0" class="bg-dark text-white">Inactiva</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Estado</label>
-                            <select class="form-select" id="is_active">
-                                <option value="1">Activa</option>
-                                <option value="0">Inactiva</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Dirección IP</label>
-                            <input type="text" class="form-control" id="ip_address" required
+                        <div class="mb-4">
+                            <label for="ip_address" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                <i class="bi bi-hdd-network me-2 text-primary"></i>Dirección IP
+                            </label>
+                            <input type="text" class="form-control glass-effect border-opacity-10 text-white p-3 font-monospace" id="ip_address" required
                                 placeholder="Ej: 192.168.1.50">
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Usuario de Base de Datos</label>
-                            <input type="text" class="form-control" id="db_user" required placeholder="Ej: sa">
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-4">
+                                <label for="db_user" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                    <i class="bi bi-person-fill-lock me-2 text-primary"></i>Usuario BD
+                                </label>
+                                <input type="text" class="form-control glass-effect border-opacity-10 text-white p-3" id="db_user" required placeholder="Ej: sa">
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="db_pass" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                    <i class="bi bi-key-fill me-2 text-primary"></i>Contraseña BD
+                                </label>
+                                <input type="password" class="form-control glass-effect border-opacity-10 text-white p-3" id="db_pass"
+                                    placeholder="••••••••">
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Contraseña de Base de Datos</label>
-                            <input type="password" class="form-control" id="db_pass"
-                                placeholder="Dejar vacío para no cambiar">
-                            <div class="form-check mt-2" id="divForceBlank">
+                        <div class="mb-3 px-3 py-2 glass-effect border-opacity-5 rounded-3">
+                            <div class="form-check form-switch mb-0" id="divForceBlank">
                                 <input class="form-check-input" type="checkbox" id="forceBlankPassword">
-                                <label class="form-check-label" for="forceBlankPassword">
-                                    Borrar contraseña (dejar vacía)
+                                <label class="form-check-label text-white-50 small" for="forceBlankPassword">
+                                    Forzar limpieza de contraseña (dejar vacía)
                                 </label>
                             </div>
-                            <div class="form-text" id="passHelp">Opcional (puede dejarse vacío).</div>
+                            <div class="form-text text-white-50 x-small mt-1" id="passHelp">Opcional. Dejar vacío para no cambiar la actual.</div>
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-frosted" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-cerulean" id="btnSaveTerminal">Guardar</button>
+                <div class="modal-footer border-top-0 p-4">
+                    <button type="button" class="btn btn-frosted border border-white border-opacity-10 text-white px-4" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-action-premium btn-ping-premium px-5" id="btnSaveTerminal" style="width: auto;">
+                        <i class="bi bi-save me-2"></i>Guardar Terminal
+                    </button>
                 </div>
             </div>
         </div>

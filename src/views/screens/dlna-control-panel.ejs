@@ -1,182 +1,183 @@
-<!-- DLNA Control Panel -->
-<div class="card mb-2">
-    <div class="card-header py-1">
-        <strong>Control Remoto</strong>
-    </div>
-    <div class="card-body p-2">
-        <!-- Power Controls -->
+<!-- DLNA Control Panel Premium -->
+<div class="dlna-panel">
+    <!-- Power Controls -->
+    <div class="row g-2 mb-4">
         <% if (screen.mac_address) { %>
-            <div class="btn-group w-100 mb-2" role="group">
-                <button class="btn btn-sm btn-success" data-action="power-on" data-id="<%= screen.id %>"
-                    title="Encender con Wake-on-LAN">
-                    <i class="bi bi-power"></i> Encender
-                </button>
-                <button class="btn btn-sm btn-danger" data-action="power-off" data-id="<%= screen.id %>"
-                    title="Apagar pantalla">
-                    <i class="bi bi-power"></i> Apagar
+            <div class="col-6">
+                <button class="btn btn-frosted border-success border-opacity-25 text-success w-100 py-2" 
+                    data-action="power-on" data-id="<%= screen.id %>">
+                    <i class="bi bi-lightning-charge-fill me-2"></i>Encender
                 </button>
             </div>
-            <% } else { %>
-                <div class="alert alert-warning alert-sm p-2 mb-2" role="alert">
-                    <small><i class="bi bi-exclamation-triangle me-1"></i>Configura MAC address para usar
-                        Wake-on-LAN</small>
+            <div class="col-6">
+                <button class="btn btn-frosted border-danger border-opacity-25 text-danger w-100 py-2" 
+                    data-action="power-off" data-id="<%= screen.id %>">
+                    <i class="bi bi-power me-2"></i>Apagar
+                </button>
+            </div>
+        <% } else { %>
+            <div class="col-12">
+                <div class="alert glass-effect border-warning border-opacity-20 text-warning d-flex align-items-center mb-0 p-3" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-3 fs-5"></i>
+                    <small>Configura la dirección MAC en los detalles de la pantalla para habilitar el Encendido Remoto (Wake-on-LAN).</small>
                 </div>
-                <% } %>
+            </div>
+        <% } %>
+    </div>
 
-                    <!-- LG Pairing -->
-                    <div class="mb-2">
-                        <button class="btn btn-sm btn-outline-secondary w-100"
-                            onclick="validateLGConnection('<%= screen.id %>')">
-                            <i class="bi bi-link"></i> Emparejar LG TV
-                        </button>
-                    </div>
+    <!-- Main Actions -->
+    <div class="row g-2 mb-4">
+        <div class="col-6">
+            <a href="/screens/player-viewer/<%= screen.id %>" target="_blank" 
+                class="btn btn-frosted border-info border-opacity-25 text-info w-100 py-3 text-decoration-none d-flex flex-column align-items-center">
+                <i class="bi bi-eye fs-4 mb-1"></i>
+                <small class="fw-bold">Ver Reproductor</small>
+            </a>
+        </div>
+        <div class="col-6">
+            <button class="btn btn-frosted border-primary border-opacity-25 text-primary w-100 py-3 d-flex flex-column align-items-center"
+                onclick="openPlayerOnTV('<%= screen.id %>', '<%= screen.ip_address %>')"
+                <%=!screen.ip_address ? 'disabled' : '' %>>
+                <i class="bi bi-tv fs-4 mb-1"></i>
+                <small class="fw-bold">Abrir en TV</small>
+            </button>
+        </div>
+    </div>
 
-                    <!-- Player Actions -->
-                    <div class="d-grid gap-2 mb-2">
-                        <a href="/screens/player-viewer/<%= screen.id %>" target="_blank" class="btn btn-info btn-sm"
-                            title="Ver reproductor en tiempo real">
-                            <i class="bi bi-eye me-1"></i> Ver Reproductor
-                        </a>
-                        <button class="btn btn-primary btn-sm"
-                            onclick="openPlayerOnTV('<%= screen.id %>', '<%= screen.ip_address %>')"
-                            <%=!screen.ip_address ? 'disabled' : '' %>
-                            title="<%= !screen.ip_address ? 'Configura IP primero' : 'Abrir reproductor en el televisor'
-                                %>">
-                                <i class="bi bi-tv me-1"></i> Abrir en TV
-                        </button>
-                    </div>
+    <!-- Media Library -->
+    <div class="glass-effect rounded-4 p-4 border border-white border-opacity-5 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h6 class="text-white font-display mb-0">Biblioteca de Medios</h6>
+            <button class="btn btn-action-premium btn-ping-premium px-3 py-1" onclick="uploadMedia('<%= screen.id %>')" style="width: auto;">
+                <i class="bi bi-cloud-upload me-2"></i>Subir
+            </button>
+        </div>
 
-                    <!-- Media Library -->
-                    <div class="border-top pt-2 mt-2">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label class="form-label small mb-0">Biblioteca de Medios:</label>
-                            <button class="btn btn-sm btn-outline-success" onclick="uploadMedia('<%= screen.id %>')"
-                                title="Subir video">
-                                <i class="bi bi-cloud-upload"></i>
+        <div id="mediaGrid-<%= screen.id %>" class="media-premium-grid">
+            <% if (mediaFiles.length===0) { %>
+                <div class="text-center py-5 text-white-50 opacity-50 border border-white border-opacity-5 border-dashed rounded-4">
+                    <i class="bi bi-film fs-1 mb-2 d-block"></i>
+                    <p class="small mb-0">No se encontraron videos disponibles</p>
+                </div>
+            <% } else { %>
+                <% mediaFiles.forEach(file=> { %>
+                    <div class="media-glass-card">
+                        <div class="media-icon-container">
+                            <i class="bi bi-play-circle-fill"></i>
+                        </div>
+                        <div class="media-body">
+                            <span class="media-filename" title="<%= file %>"><%= file %></span>
+                        </div>
+                        <div class="media-btns">
+                            <button class="btn-play-action"
+                                onclick="playDLNAMedia('<%= screen.id %>', '<%= screen.ip_address %>', '<%= file %>')">
+                                <i class="bi bi-play-fill"></i>
                             </button>
-                        </div>
-
-                        <!-- Media Grid -->
-                        <div id="mediaGrid-<%= screen.id %>" class="media-grid mb-2">
-                            <% if (mediaFiles.length===0) { %>
-                                <div class="text-center text-muted py-3">
-                                    <i class="bi bi-film"></i>
-                                    <small class="d-block">No hay videos</small>
-                                </div>
-                                <% } else { %>
-                                    <% mediaFiles.forEach(file=> { %>
-                                        <div class="media-card" data-file="<%= file %>">
-                                            <div class="media-thumbnail">
-                                                <i class="bi bi-play-circle-fill"></i>
-                                            </div>
-                                            <div class="media-info">
-                                                <small class="media-name" title="<%= file %>">
-                                                    <%= file %>
-                                                </small>
-                                                <div class="media-actions">
-                                                    <button class="btn btn-xs btn-success"
-                                                        onclick="playDLNAMedia('<%= screen.id %>', '<%= screen.ip_address %>', '<%= file %>')"
-                                                        title="Reproducir">
-                                                        <i class="bi bi-play-fill"></i>
-                                                    </button>
-                                                    <button class="btn btn-xs btn-danger"
-                                                        onclick="deleteMedia('<%= file %>')" title="Eliminar">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <% }) %>
-                                            <% } %>
-                        </div>
-                    </div>
-
-                    <!-- Custom URL -->
-                    <div class="border-top pt-2 mt-2">
-                        <label class="form-label small mb-1">URL Personalizada:</label>
-                        <div class="input-group input-group-sm">
-                            <input type="url" class="form-control form-control-sm" id="customUrl-<%= screen.id %>"
-                                placeholder="http://ejemplo.com/video.mp4">
-                            <button class="btn btn-outline-primary btn-sm" onclick="playCustomUrl('<%= screen.id %>')"
-                                <%=!screen.ip_address ? 'disabled' : '' %>>
-                                <i class="bi bi-play"></i>
+                            <button class="btn-delete-action" onclick="deleteMedia('<%= file %>')">
+                                <i class="bi bi-trash-fill"></i>
                             </button>
                         </div>
                     </div>
+                <% }) %>
+            <% } %>
+        </div>
+    </div>
 
-                    <!-- Stop Button -->
-                    <button class="btn btn-outline-danger btn-sm w-100 mt-2"
-                        onclick="stopDLNA('<%= screen.id %>','<%= screen.ip_address %>')" <%=!screen.ip_address
-                        ? 'disabled' : '' %>
-                        title="Detener reproducción">
-                        <i class="bi bi-stop-fill me-1"></i> Detener
-                    </button>
+    <!-- Custom URL & Control -->
+    <div class="glass-effect rounded-4 p-3 border border-white border-opacity-5">
+        <label class="form-label small text-white-50 fw-bold mb-2">Reproducir desde URL:</label>
+        <div class="input-group mb-3">
+            <input type="url" class="form-control glass-effect border-opacity-10 text-white" id="customUrl-<%= screen.id %>"
+                placeholder="http://servidor.com/video.mp4">
+            <button class="btn btn-action-premium px-3" onclick="playCustomUrl('<%= screen.id %>')" style="width: auto;">
+                <i class="bi bi-play-fill fs-5"></i>
+            </button>
+        </div>
+
+        <button class="btn btn-frosted border-danger border-opacity-25 text-danger w-100 py-2 d-flex align-items-center justify-content-center"
+            onclick="stopDLNA('<%= screen.id %>','<%= screen.ip_address %>')" <%=!screen.ip_address ? 'disabled' : '' %>>
+            <i class="bi bi-stop-circle me-2"></i> Detener Reproducción Activa
+        </button>
     </div>
 </div>
 
 <style>
-    .media-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 8px;
-        max-height: 300px;
+    .media-premium-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-height: 250px;
         overflow-y: auto;
+        padding-right: 5px;
     }
 
-    .media-card {
+    .media-glass-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
         display: flex;
         align-items: center;
-        padding: 8px;
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-        transition: all 0.2s;
-        background: white;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
     }
 
-    .media-card:hover {
-        border-color: #0d6efd;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    .media-glass-card:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--neon-blue);
+        transform: translateX(5px);
     }
 
-    .media-thumbnail {
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 4px;
+    .media-icon-container {
+        font-size: 1.5rem;
+        color: var(--success-mint);
+        margin-right: 15px;
         display: flex;
         align-items: center;
-        justify-content: center;
-        margin-right: 10px;
-        flex-shrink: 0;
     }
 
-    .media-thumbnail i {
-        font-size: 24px;
-        color: white;
-    }
-
-    .media-info {
+    .media-body {
         flex: 1;
         min-width: 0;
     }
 
-    .media-name {
+    .media-filename {
         display: block;
-        font-weight: 500;
+        color: white;
+        font-size: 0.85rem;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        margin-bottom: 4px;
     }
 
-    .media-actions {
+    .media-btns {
         display: flex;
-        gap: 4px;
+        gap: 8px;
     }
 
-    .btn-xs {
-        padding: 2px 6px;
-        font-size: 11px;
-        line-height: 1.2;
+    .btn-play-action, .btn-delete-action {
+        border: none;
+        background: transparent;
+        padding: 5px;
+        transition: transform 0.2s;
+        font-size: 1.1rem;
+    }
+
+    .btn-play-action { color: var(--success-mint); }
+    .btn-delete-action { color: var(--punch-red); }
+
+    .btn-play-action:hover, .btn-delete-action:hover {
+        transform: scale(1.2);
+    }
+
+    /* Scrollbar minimalista */
+    .media-premium-grid::-webkit-scrollbar {
+        width: 4px;
+    }
+    .media-premium-grid::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .media-premium-grid::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
     }
 </style>

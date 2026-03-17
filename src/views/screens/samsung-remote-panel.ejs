@@ -1,99 +1,108 @@
-<!-- Indicador de Token -->
-<% if (screen.client_token) { %>
-    <span class="badge bg-success mb-2">✅ Validado</span>
-    <% } else { %>
-        <span class="badge bg-warning mb-2">⚠️ Sin validar</span>
-        <% } %>
+<!-- Samsung Remote Panel Premium -->
+<div class="remote-panel">
+    <!-- Validar/Re-validar -->
+    <button class="btn btn-action-premium btn-ping-premium w-100 mb-4 py-2" 
+        data-action="validate" data-id="<%= screen.id %>" style="background: var(--gradient-neon); border: none;">
+        <i class="bi bi-shield-check me-2"></i>
+        <%= screen.client_token ? 'Re-validar Conexión' : 'Emparejar con TV' %>
+    </button>
 
-            <!-- Botón Validar/Re-validar -->
-            <button class="btn btn-primary btn-sm w-100 mb-2" data-action="validate" data-id="<%= screen.id %>">
-                <i class="bi bi-check-circle me-1"></i>
-                <%= screen.client_token ? 'Re-validar' : 'Validar Conexión' %>
-            </button>
-
-            <!-- Panel de Control Remoto -->
-            <div class="card mb-2">
-                <div class="card-header py-1">
-                    <strong>Control Remoto</strong>
-                </div>
-                <div class="card-body p-2">
-                    <!-- Fila 1: Power On/Off, Mute -->
-                    <div class="btn-group w-100 mb-1" role="group">
-                        <button class="btn btn-sm btn-outline-success" data-action="power-on" data-id="<%= screen.id %>"
-                            title="Encender (WoL)">
-                            <i class="bi bi-power"></i> On
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" data-action="power-off" data-id="<%= screen.id %>"
-                            title="Apagar">
-                            <i class="bi bi-power"></i> Off
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" data-action="send-key"
-                            data-id="<%= screen.id %>" data-key="KEY_MUTE" data-label="Mute" title="Mute">
-                            <i class="bi bi-volume-mute"></i>
-                        </button>
-                    </div>
-
-                    <!-- Fila 2: Volumen -->
-                    <div class="btn-group w-100 mb-1" role="group">
-                        <button class="btn btn-sm btn-outline-primary" data-action="send-key" data-id="<%= screen.id %>"
-                            data-key="KEY_VOLUP" data-label="Vol+" title="Volumen +">
-                            Vol+
-                        </button>
-                        <button class="btn btn-sm btn-outline-primary" data-action="send-key" data-id="<%= screen.id %>"
-                            data-key="KEY_VOLDOWN" data-label="Vol-" title="Volumen -">
-                            Vol-
-                        </button>
-                    </div>
-
-                    <!-- Fila 3: Navegación -->
-                    <div class="text-center mb-1">
-                        <button class="btn btn-sm btn-outline-dark" data-action="send-key" data-id="<%= screen.id %>"
-                            data-key="KEY_UP" data-label="Arriba" title="Arriba">
-                            <i class="bi bi-arrow-up"></i>
-                        </button>
-                    </div>
-                    <div class="btn-group w-100 mb-1" role="group">
-                        <button class="btn btn-sm btn-outline-dark" data-action="send-key" data-id="<%= screen.id %>"
-                            data-key="KEY_LEFT" data-label="Izquierda" title="Izquierda">
-                            <i class="bi bi-arrow-left"></i>
-                        </button>
-                        <button class="btn btn-sm btn-dark" data-action="send-key" data-id="<%= screen.id %>"
-                            data-key="KEY_ENTER" data-label="Enter" title="Enter">
-                            OK
-                        </button>
-                        <button class="btn btn-sm btn-outline-dark" data-action="send-key" data-id="<%= screen.id %>"
-                            data-key="KEY_RIGHT" data-label="Derecha" title="Derecha">
-                            <i class="bi bi-arrow-right"></i>
-                        </button>
-                    </div>
-                    <div class="text-center mb-1">
-                        <button class="btn btn-sm btn-outline-dark" data-action="send-key" data-id="<%= screen.id %>"
-                            data-key="KEY_DOWN" data-label="Abajo" title="Abajo">
-                            <i class="bi bi-arrow-down"></i>
-                        </button>
-                    </div>
-
-                    <!-- Fila 4: Funciones -->
-                    <div class="btn-group w-100" role="group">
-                        <button class="btn btn-sm btn-outline-info" data-action="send-key" data-id="<%= screen.id %>"
-                            data-key="KEY_HOME" data-label="Home" title="Home">
-                            <i class="bi bi-house"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-info" data-action="send-key" data-id="<%= screen.id %>"
-                            data-key="KEY_RETURN" data-label="Return" title="Return">
-                            <i class="bi bi-arrow-return-left"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-info" data-action="send-key" data-id="<%= screen.id %>"
-                            data-key="KEY_MENU" data-label="Menu" title="Menu">
-                            <i class="bi bi-list"></i>
-                        </button>
-                    </div>
-                </div>
+    <!-- Control Remoto Layout -->
+    <div class="remote-layout glass-effect p-3 rounded-4 border border-white border-opacity-5">
+        <h6 class="text-white-50 small text-uppercase fw-bold mb-3 ls-1 text-center">Pad de Navegación</h6>
+        
+        <!-- Power Controls -->
+        <div class="row g-2 mb-4">
+            <div class="col-6">
+                <button class="btn btn-frosted border-success border-opacity-25 text-success w-100 py-2" 
+                    data-action="power-on" data-id="<%= screen.id %>">
+                    <i class="bi bi-lightning-charge-fill me-1"></i> ON
+                </button>
             </div>
+            <div class="col-6">
+                <button class="btn btn-frosted border-danger border-opacity-25 text-danger w-100 py-2" 
+                    data-action="power-off" data-id="<%= screen.id %>">
+                    <i class="bi bi-power me-1"></i> OFF
+                </button>
+            </div>
+        </div>
 
-            <!-- Botones de Navegador -->
-            <button class="btn btn-info btn-sm w-100 mb-2" data-action="open-browser" data-id="<%= screen.id %>"
-                <%=!screen.client_token ? 'disabled' : '' %>
-                title="<%= !screen.client_token ? 'Valida la conexión primero' : 'Abrir navegador' %>">
-                    <i class="bi bi-globe me-1"></i> Abrir Navegador
+        <!-- Volume & Mute -->
+        <div class="row g-2 mb-4">
+            <div class="col-4">
+                <button class="btn btn-frosted border-white border-opacity-10 text-white w-100" 
+                    data-action="send-key" data-id="<%= screen.id %>" data-key="KEY_VOLUP" data-label="Vol+">
+                    <i class="bi bi-volume-up"></i>
+                </button>
+            </div>
+            <div class="col-4">
+                <button class="btn btn-frosted border-white border-opacity-10 text-white w-100" 
+                    data-action="send-key" data-id="<%= screen.id %>" data-key="KEY_VOLDOWN" data-label="Vol-">
+                    <i class="bi bi-volume-down"></i>
+                </button>
+            </div>
+            <div class="col-4">
+                <button class="btn btn-frosted border-warning border-opacity-25 text-warning w-100" 
+                    data-action="send-key" data-id="<%= screen.id %>" data-key="KEY_MUTE" data-label="Mute">
+                    <i class="bi bi-volume-mute"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Keys -->
+        <div class="d-flex flex-column align-items-center mb-4">
+            <button class="btn btn-frosted border-white border-opacity-10 text-white mb-2" 
+                data-action="send-key" data-id="<%= screen.id %>" data-key="KEY_UP" data-label="Arriba" style="width: 50px; height: 50px;">
+                <i class="bi bi-chevron-up"></i>
             </button>
+            <div class="d-flex gap-2 mb-2">
+                <button class="btn btn-frosted border-white border-opacity-10 text-white" 
+                    data-action="send-key" data-id="<%= screen.id %>" data-key="KEY_LEFT" data-label="Izquierda" style="width: 50px; height: 50px;">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <button class="btn btn-primary shadow-lg border-0 fw-bold" 
+                    data-action="send-key" data-id="<%= screen.id %>" data-key="KEY_ENTER" data-label="Enter" 
+                    style="width: 50px; height: 50px; background: var(--gradient-neon);">
+                    OK
+                </button>
+                <button class="btn btn-frosted border-white border-opacity-10 text-white" 
+                    data-action="send-key" data-id="<%= screen.id %>" data-key="KEY_RIGHT" data-label="Derecha" style="width: 50px; height: 50px;">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+            <button class="btn btn-frosted border-white border-opacity-10 text-white" 
+                data-action="send-key" data-id="<%= screen.id %>" data-key="KEY_DOWN" data-label="Abajo" style="width: 50px; height: 50px;">
+                <i class="bi bi-chevron-down"></i>
+            </button>
+        </div>
+
+        <!-- Function Keys -->
+        <div class="row g-2">
+            <div class="col-4">
+                <button class="btn btn-frosted border-info border-opacity-25 text-info w-100 py-2" 
+                    data-action="send-key" data-id="<%= screen.id %>" data-key="KEY_HOME" data-label="Home">
+                    <i class="bi bi-house"></i>
+                </button>
+            </div>
+            <div class="col-4">
+                <button class="btn btn-frosted border-info border-opacity-25 text-info w-100 py-2" 
+                    data-action="send-key" data-id="<%= screen.id %>" data-key="KEY_RETURN" data-label="Return">
+                    <i class="bi bi-arrow-return-left"></i>
+                </button>
+            </div>
+            <div class="col-4">
+                <button class="btn btn-frosted border-info border-opacity-25 text-info w-100 py-2" 
+                    data-action="send-key" data-id="<%= screen.id %>" data-key="KEY_MENU" data-label="Menu">
+                    <i class="bi bi-list"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Browser Action -->
+    <button class="btn btn-frosted border-info border-opacity-25 text-info w-100 mt-4 py-2" 
+        data-action="open-browser" data-id="<%= screen.id %>"
+        <%=!screen.client_token ? 'disabled' : '' %>>
+        <i class="bi bi-globe2 me-2"></i> Abrir Navegador en TV
+    </button>
+</div>

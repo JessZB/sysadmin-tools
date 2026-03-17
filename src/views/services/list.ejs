@@ -1,10 +1,10 @@
 <%- include('../layout/header') %>
 
     <style>
-        /* =========================================
-       SERVICES VIEW - SPECIFIC STYLES
-       (Variables globales definidas en /css/styles.css)
-       ========================================= */
+        .services-container {
+            padding: 20px;
+            position: relative;
+        }
 
         /* Dashboard Header */
         .services-header {
@@ -12,21 +12,24 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
-            background: white;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
             padding: 1.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--glass-shadow);
         }
 
         .title-section h2 {
             font-size: 1.75rem;
             font-weight: 700;
-            color: var(--text-primary);
+            color: #fff;
             margin: 0;
+            font-family: var(--font-display);
         }
 
         .title-section p {
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.6);
             font-size: 0.95rem;
             margin: 0;
         }
@@ -38,7 +41,7 @@
 
         .btn-action {
             padding: 0.6rem 1.2rem;
-            border-radius: 8px;
+            border-radius: 12px;
             font-weight: 600;
             font-size: 0.9rem;
             border: none;
@@ -47,318 +50,482 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            font-family: var(--font-display);
         }
 
         .btn-primary-custom {
-            background: linear-gradient(135deg, var(--cerulean) 0%, var(--cerulean-dark) 100%);
+            background: var(--gradient-neon);
             color: white;
+            box-shadow: var(--shadow-neon);
         }
 
         .btn-primary-custom:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(69, 123, 157, 0.3);
+            box-shadow: 0 8px 20px rgba(0, 210, 255, 0.4);
         }
 
         .btn-success-custom {
-            background: linear-gradient(135deg, var(--success-color) 0%, #1b5e20 100%);
+            background: var(--gradient-success);
             color: white;
+            box-shadow: 0 4px 10px rgba(0, 255, 204, 0.3);
         }
 
         .btn-success-custom:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+            box-shadow: 0 8px 20px rgba(0, 255, 204, 0.4);
         }
 
         .btn-info-custom {
-            background: linear-gradient(135deg, #0dcaf0 0%, #0891b2 100%);
+            background: var(--gradient-info);
             color: white;
+            box-shadow: 0 4px 10px rgba(13, 202, 240, 0.3);
         }
 
         .btn-info-custom:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(13, 202, 240, 0.3);
+            box-shadow: 0 8px 20px rgba(13, 202, 240, 0.4);
         }
 
-        /* Stats Container */
+        .btn-danger {
+            background: var(--gradient-danger);
+            color: white;
+            box-shadow: 0 4px 10px rgba(255, 77, 109, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 77, 109, 0.4);
+        }
+
+        /* Stats Container Glass */
         .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-sm);
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: var(--glass-shadow);
             display: flex;
-            flex-direction: column;
-            border-left: 4px solid var(--cerulean);
+            justify-content: space-around;
+            align-items: center;
         }
 
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.5rem;
+        .stat-item {
+            text-align: center;
         }
 
         .stat-value {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--text-primary);
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1;
         }
 
-        /* Services Grid */
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1.5rem;
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 5px;
         }
 
+        /* Service Cards Premium */
         .service-card {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            padding-top: 2.5rem;
-            /* Extra space for status line */
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition);
-            border: 1px solid transparent;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 25px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
             overflow: hidden;
+            box-shadow: var(--glass-shadow);
+            height: 100%;
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
         }
 
         .service-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-md);
+            transform: translateY(-8px);
+            border-color: var(--neon-blue);
+            box-shadow: 0 20px 40px rgba(0, 210, 255, 0.1);
         }
 
-        /* Status Line - FIXED with higher specificity */
-        .service-card .card-status-line {
+        .card-status-line {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 6px;
-            z-index: 1;
-            border-top-left-radius: var(--border-radius);
-            border-top-right-radius: var(--border-radius);
+            height: 4px;
+            z-index: 2;
         }
 
-        .service-card.status-up .card-status-line {
-            background-color: #2e7d32 !important;
-            box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
-        }
+        .line-online { background: var(--success-mint); box-shadow: 0 0 10px var(--success-mint); }
+        .line-offline { background: var(--punch-red); box-shadow: 0 0 10px var(--punch-red); }
 
-        .service-card.status-down .card-status-line {
-            background-color: #e63946 !important;
-            box-shadow: 0 2px 8px rgba(230, 57, 70, 0.3);
-        }
-
-        .service-card.status-slow .card-status-line {
-            background-color: #f57c00 !important;
-            box-shadow: 0 2px 8px rgba(245, 124, 0, 0.3);
-        }
-
-        .service-card.status-unknown .card-status-line {
-            background-color: #718096 !important;
-        }
-
-        .service-card.status-loading .card-status-line {
-            background: linear-gradient(90deg, #457b9d, #a8dadc, #457b9d) !important;
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-        }
-
-        @keyframes shimmer {
-            0% {
-                background-position: -200% 0;
-            }
-
-            100% {
-                background-position: 200% 0;
-            }
-        }
-
-        .card-header {
+        .service-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 1rem;
+            margin-bottom: 15px;
         }
 
-        .service-info h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 0.3rem;
-            color: var(--text-primary);
+        .service-name {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 5px;
         }
 
         .service-url {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            font-family: 'Courier New', monospace;
-            background: #f7fafc;
-            padding: 3px 8px;
-            border-radius: 4px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.4);
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 2px 8px;
+            border-radius: 6px;
             display: inline-block;
+            margin-bottom: 1rem;
         }
 
-        /* Status Pills - FIXED with !important */
-        .service-card .status-pill {
-            padding: 0.4rem 1rem !important;
-            border-radius: 20px !important;
-            font-size: 0.8rem !important;
-            font-weight: 700 !important;
-            text-transform: uppercase !important;
-            white-space: nowrap !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            gap: 6px !important;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-            border: none !important;
+        .status-pill {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border: 1px solid transparent;
         }
 
-        .service-card.status-up .status-pill {
-            background-color: #2e7d32 !important;
-            color: white !important;
-        }
-
-        .service-card.status-down .status-pill {
-            background-color: #e63946 !important;
-            color: white !important;
-        }
-
-        .service-card.status-slow .status-pill {
-            background-color: #f57c00 !important;
-            color: white !important;
-        }
-
-        .service-card.status-unknown .status-pill {
-            background-color: #718096 !important;
-            color: white !important;
-        }
-
-        .service-card.status-loading .status-pill {
-            background-color: #457b9d !important;
-            color: white !important;
-        }
-
-        .status-pill i {
-            font-size: 0.9rem;
-        }
+        .pill-online { background: rgba(0, 255, 204, 0.1); color: var(--success-mint); border-color: var(--success-mint); }
+        .pill-offline { background: rgba(255, 77, 109, 0.1); color: var(--punch-red); border-color: var(--punch-red); }
 
         .service-description {
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.5);
             font-size: 0.9rem;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             min-height: 40px;
+            flex-grow: 1;
         }
 
-        .card-metrics {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 1rem;
-            border-top: 1px solid #edf2f7;
-        }
-
-        .metric {
+        .metric-item {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
+            color: rgba(255, 255, 255, 0.7);
             font-size: 0.9rem;
-            color: var(--text-secondary);
+            margin-bottom: 8px;
         }
 
-        .metric i {
-            font-size: 0.85rem;
-            opacity: 0.7;
-        }
+        .metric-icon { color: var(--neon-blue); width: 20px; text-align: center; }
 
         .card-actions {
             display: flex;
-            gap: 6px;
-            margin-top: 1rem;
+            gap: 10px;
+            margin-top: 20px;
         }
 
+        /* Estilos para botones de tarjetas (JS classes) */
         .action-btn-small {
-            background-color: white;
-            border: 1px solid #e2e8f0;
-            padding: 0.4rem 0.7rem;
-            border-radius: 6px;
-            cursor: pointer;
-            color: var(--text-secondary);
-            transition: all 0.2s;
-            font-size: 0.85rem;
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            justify-content: center;
+            gap: 6px;
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.03);
+            color: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(4px);
         }
 
-        .action-btn-small:hover {
-            background-color: #edf2f7;
-            color: var(--text-primary);
-            border-color: var(--cerulean);
+        .action-btn-small:hover:not(:disabled) {
+            transform: translateY(-3px) scale(1.02);
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
-        .action-btn-small.btn-ping {
-            background: linear-gradient(135deg, var(--success-color) 0%, #1b5e20 100%) !important;
-            color: white;
+        .btn-ping {
+            background: rgba(0, 210, 255, 0.05);
+            color: var(--neon-blue);
+            border-color: rgba(0, 210, 255, 0.2);
+            flex: 2; /* Más ancho para el botón principal */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-ping:hover:not(:disabled) {
+            background: var(--gradient-neon);
+            color: #fff !important;
+            box-shadow: var(--shadow-neon);
+            border-color: transparent;
+        }
+
+        .btn-history:hover:not(:disabled) {
+            color: var(--neon-indigo) !important;
+            border-color: var(--neon-indigo);
+            background: rgba(110, 64, 255, 0.1);
+            box-shadow: 0 0 15px rgba(110, 64, 255, 0.3);
+        }
+
+        .btn-edit:hover:not(:disabled) {
+            color: var(--warning-amber) !important;
+            border-color: var(--warning-amber);
+            background: rgba(255, 183, 3, 0.1);
+            box-shadow: 0 0 15px rgba(255, 183, 3, 0.3);
+        }
+
+        .btn-delete:hover:not(:disabled) {
+            color: var(--punch-red) !important;
+            border-color: var(--punch-red);
+            background: rgba(255, 77, 109, 0.1);
+            box-shadow: 0 0 15px rgba(255, 77, 109, 0.3);
+        }
+
+        .action-btn-small:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+
+        /* Status Colors and Glows */
+        .status-up {
+            border-color: rgba(0, 255, 204, 0.3) !important;
+        }
+        .status-up .card-status-line {
+            background: var(--success-mint);
+            box-shadow: 0 0 15px var(--success-mint);
+        }
+        .status-up .status-pill {
+            background: rgba(0, 255, 204, 0.1);
+            color: var(--success-mint);
+            border-color: rgba(0, 255, 204, 0.2);
+        }
+
+        .status-down {
+            border-color: rgba(255, 77, 109, 0.3) !important;
+        }
+        .status-down .card-status-line {
+            background: var(--punch-red);
+            box-shadow: 0 0 15px var(--punch-red);
+        }
+        .status-down .status-pill {
+            background: rgba(255, 77, 109, 0.1);
+            color: var(--punch-red);
+            border-color: rgba(255, 77, 109, 0.2);
+        }
+
+        .status-slow {
+            border-color: rgba(255, 183, 3, 0.3) !important;
+        }
+        .status-slow .card-status-line {
+            background: var(--warning-amber);
+            box-shadow: 0 0 15px var(--warning-amber);
+        }
+        .status-slow .status-pill {
+            background: rgba(255, 183, 3, 0.1);
+            color: var(--warning-amber);
+            border-color: rgba(255, 183, 3, 0.2);
+        }
+
+        .status-unknown {
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        .status-unknown .card-status-line {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .status-unknown .status-pill {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.4);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .service-card.inactive-service {
+            opacity: 0.6;
+            filter: grayscale(0.5);
+            border-style: dashed;
+        }
+        .service-card.inactive-service .card-status-line {
+            background: #444;
+            box-shadow: none;
+        }
+
+        /* Mantener compatibilidad con botones de cabecera */
+        .btn-action-premium {
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             border: none;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
         }
 
-        .action-btn-small.btn-ping:hover {
-            transform: scale(1.05);
-            box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+        .btn-ping-premium { background: var(--gradient-neon); color: #fff; }
+        .btn-ping-premium:hover { transform: translateY(-2px); box-shadow: var(--shadow-neon); }
+
+        /* Categoría Tab / Layout */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
         }
 
-        .action-btn-small.btn-delete {
-            background: linear-gradient(135deg, var(--danger-color) 0%, #c62828 100%) !important;
-            color: white;
+        /* Buscador / Filtros */
+        .filter-section-premium {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .form-control-premium {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            border-radius: 14px;
+            padding: 12px 20px 12px 45px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .form-control-premium:focus {
+            outline: none;
+            background: rgba(0, 0, 0, 0.3);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Nav Tabs Glass */
+        .nav-tabs-premium {
             border: none;
+            gap: 10px;
+            margin-bottom: 30px;
         }
 
-        .action-btn-small.btn-delete:hover {
-            transform: scale(1.05);
-            box-shadow: 0 2px 8px rgba(230, 57, 70, 0.3) !important;
+        .nav-tabs-premium .nav-link {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            color: rgba(255, 255, 255, 0.5);
+            border-radius: 14px;
+            padding: 12px 20px;
+            font-family: var(--font-display);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs-premium .nav-link.active {
+            background: var(--gradient-neon);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: var(--shadow-neon);
+        }
+
+        /* Modal Styles Refined */
+        .modal-content-premium {
+            background: var(--space-surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            color: #fff;
+        }
+
+        /* Loading Animation Shimmer */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .status-loading .card-status-line {
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-indigo), var(--neon-blue));
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear;
+        }
+
+        @media (max-width: 768px) {
+            .stats-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .filter-section-premium {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-wrapper {
+                min-width: 100%;
+            }
         }
 
         /* Add New Card */
         .add-service-card {
-            border: 2px dashed #cbd5e0;
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: transparent;
+            background: rgba(255, 255, 255, 0.03);
             cursor: pointer;
             min-height: 200px;
-            transition: var(--transition);
+            transition: all 0.3s ease;
+            height: 100%;
         }
 
         .add-service-card:hover {
-            border-color: var(--cerulean);
-            background: rgba(69, 123, 157, 0.05);
+            border-color: var(--neon-blue);
+            background: rgba(0, 210, 255, 0.05);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
         }
 
         .add-content {
             text-align: center;
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .add-content i {
             font-size: 2.5rem;
             margin-bottom: 0.5rem;
-            opacity: 0.5;
+            opacity: 0.7;
+            color: var(--neon-blue);
         }
 
         .add-content p {
             font-size: 0.9rem;
             margin: 0;
+            font-weight: 600;
         }
 
         /* Loading Overlay */
@@ -368,27 +535,27 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(25, 25, 35, 0.95); /* Darker overlay for premium theme */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 10;
-            border-radius: var(--border-radius);
+            border-radius: 24px; /* Match card border-radius */
         }
 
         .card-loading-overlay .spinner {
             width: 40px;
             height: 40px;
-            border: 4px solid rgba(69, 123, 157, 0.2);
-            border-top-color: var(--cerulean);
+            border: 4px solid rgba(0, 210, 255, 0.2); /* Neon blue spinner */
+            border-top-color: var(--neon-blue);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
 
         .card-loading-overlay p {
             margin-top: 1rem;
-            color: var(--cerulean);
+            color: var(--neon-blue);
             font-weight: 600;
             font-size: 0.9rem;
         }
@@ -422,40 +589,6 @@
             }
         }
 
-        /* =========================================
-           BOOTSTRAP TABS CUSTOMIZATION
-           ========================================= */
-        .nav-tabs {
-            border-bottom: 2px solid #e2e8f0;
-            margin-bottom: 2rem;
-        }
-
-        .nav-tabs .nav-link {
-            color: var(--text-secondary);
-            font-weight: 600;
-            padding: 0.75rem 1.25rem;
-            border: none;
-            border-bottom: 3px solid transparent;
-            transition: var(--transition);
-            background: transparent;
-        }
-
-        .nav-tabs .nav-link:hover {
-            border-bottom-color: rgba(69, 123, 157, 0.3);
-            color: var(--cerulean);
-            background: transparent;
-        }
-
-        .nav-tabs .nav-link.active {
-            color: var(--cerulean);
-            border-bottom-color: var(--cerulean);
-            background-color: transparent;
-        }
-
-        .nav-tabs .nav-link i {
-            margin-right: 0.5rem;
-        }
-
         /* Category Badges (para vista "Todos") */
         .category-badge {
             position: absolute;
@@ -467,40 +600,61 @@
             font-weight: 600;
             text-transform: uppercase;
             z-index: 2;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
         .category-servicios {
-            background-color: #457b9d;
-            color: white;
+            background-color: var(--neon-blue);
         }
 
         .category-terminales {
-            background-color: #6c2e7d;
-            color: white;
+            background-color: var(--neon-indigo);
         }
 
         .category-balanzas {
-            background-color: #f57c00;
-            color: white;
+            background-color: var(--punch-red);
         }
 
         .category-otros {
-            background-color: #718096;
-            color: white;
+            background-color: var(--text-secondary);
         }
 
         /* Branch Selector */
         .branch-selector {
-            background: white;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
             padding: 1rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--glass-shadow);
+            margin-bottom: 20px;
         }
 
         .branch-selector label {
             font-weight: 600;
-            color: var(--text-primary);
+            color: #fff;
             margin-bottom: 0.5rem;
+            font-family: var(--font-display);
+        }
+
+        .branch-selector .form-select {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            border-radius: 12px;
+            padding: 0.6rem 1rem;
+            appearance: none; /* Remove default arrow */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+        }
+
+        .branch-selector .form-select option {
+            background-color: var(--space-surface); /* Darker background for options */
+            color: #fff;
         }
 
         /* Section Headers */
@@ -508,20 +662,23 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: white;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
             padding: 1rem 1.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--glass-shadow);
+            margin-bottom: 20px;
         }
 
         .section-header h4 {
             margin: 0;
             font-size: 1.1rem;
             font-weight: 700;
-            color: var(--text-primary);
+            color: #fff;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            font-family: var(--font-display);
         }
 
         .section-actions {
@@ -530,111 +687,146 @@
         }
 
         .btn-cancel-ping {
-            background: linear-gradient(135deg, var(--danger-color) 0%, #c62828 100%);
+            background: var(--gradient-danger);
             color: white;
             border: none;
             padding: 0.5rem 1rem;
-            border-radius: 6px;
+            border-radius: 12px;
             font-weight: 600;
             font-size: 0.85rem;
             transition: var(--transition);
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            font-family: var(--font-display);
+            box-shadow: 0 4px 10px rgba(255, 77, 109, 0.3);
         }
 
         .btn-cancel-ping:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+            box-shadow: 0 8px 20px rgba(255, 77, 109, 0.4);
+        }
+
+        /* Input Group for Search */
+        .input-group-premium {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .input-group-premium .form-control {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            border-radius: 12px;
+            padding: 0.6rem 1rem 0.6rem 2.5rem; /* Adjust padding for icon */
+            transition: all 0.3s ease;
+        }
+
+
+        .input-group-premium .form-control:focus {
+            outline: none;
+            background: rgba(0, 0, 0, 0.3);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
+        }
+
+        .input-group-premium .input-group-text {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            z-index: 1;
         }
     </style>
 
-    <!-- Header -->
-    <header class="services-header">
-        <div class="title-section">
-            <h2><i class="fa-solid fa-heartbeat text-danger me-2"></i>Monitoreo de Servicios</h2>
-            <p>Verificación de disponibilidad mediante ping</p>
-        </div>
-        <div class="header-actions">
-            <button class="btn-action btn-info-custom" id="btnPingAll">
-                <i class="bi bi-broadcast-pin"></i> Ping Todos
-            </button>
-            <button class="btn-action btn-danger d-none" id="btnCancelAll">
-                <i class="bi bi-x-circle"></i> Cancelar Todos
-            </button>
-            <button class="btn-action btn-primary-custom" id="btnNewService">
-                <i class="bi bi-plus-circle"></i> Nuevo Servicio
-            </button>
-        </div>
-    </header>
+    <div class="services-container">
+        <!-- Dashboard Header Premium -->
+        <header class="filter-section-premium">
+            <div class="title-section">
+                <h2 class="text-white"><i class="fa-solid fa-heartbeat text-danger me-2"></i>Monitoreo</h2>
+                <p class="mb-0">Control de disponibilidad en tiempo real</p>
+            </div>
+            
+            <div class="search-wrapper">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="serviceSearch" class="form-control-premium" placeholder="Buscar IP, nombre o dominio...">
+            </div>
 
-    <!-- Stats -->
-    <section class="stats-container" id="statsContainer">
-        <div class="stat-card">
-            <span class="stat-label">Total Servicios</span>
-            <span class="stat-value" id="statTotal">0</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-label">Disponibles</span>
-            <span class="stat-value" style="color: var(--success-color);" id="statOnline">0</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-label">No Disponibles</span>
-            <span class="stat-value" style="color: var(--danger-color);" id="statOffline">0</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-label">Sin Verificar</span>
-            <span class="stat-value" style="color: var(--text-secondary);" id="statUnknown">0</span>
-        </div>
-    </section>
+            <div class="header-actions d-flex gap-2">
+                <button class="btn-action-premium btn-ping-premium" id="btnPingAll">
+                    <i class="fa-solid fa-tower-broadcast"></i> Ping Todos
+                </button>
+                <button class="btn-action-premium btn-ping-premium" id="btnNewService" style="background: var(--gradient-neon); color: #fff;">
+                    <i class="fa-solid fa-plus-circle"></i> Nuevo
+                </button>
+            </div>
+        </header>
 
-    <!-- Category Tabs (Bootstrap Native) -->
-    <ul class="nav nav-tabs" id="categoryTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="todos-tab" data-bs-toggle="tab" data-bs-target="#todos-pane"
-                data-category="todos" type="button" role="tab" aria-controls="todos-pane" aria-selected="true">
-                <i class="bi bi-grid-3x3-gap"></i> Todos
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="servicios-tab" data-bs-toggle="tab" data-bs-target="#servicios-pane"
-                data-category="servicios" type="button" role="tab" aria-controls="servicios-pane" aria-selected="false">
-                <i class="bi bi-hdd-network"></i> Servicios
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="terminales-tab" data-bs-toggle="tab" data-bs-target="#terminales-pane"
-                data-category="terminales" type="button" role="tab" aria-controls="terminales-pane"
-                aria-selected="false">
-                <i class="bi bi-pc-display"></i> Terminales
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="balanzas-tab" data-bs-toggle="tab" data-bs-target="#balanzas-pane"
-                data-category="balanzas" type="button" role="tab" aria-controls="balanzas-pane" aria-selected="false">
-                <i class="bi bi-speedometer2"></i> Balanzas
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="otros-tab" data-bs-toggle="tab" data-bs-target="#otros-pane"
-                data-category="otros" type="button" role="tab" aria-controls="otros-pane" aria-selected="false">
-                <i class="bi bi-gear"></i> Otros
-            </button>
-        </li>
-    </ul>
+        <!-- Stats Grid Premium -->
+        <section class="stats-container" id="statsContainer">
+            <div class="stat-item">
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value text-success" id="statOnline">0</div>
+                <div class="stat-label">Online</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value text-danger" id="statOffline">0</div>
+                <div class="stat-label">Offline</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value text-muted" id="statUnknown">0</div>
+                <div class="stat-label">Pendiente</div>
+            </div>
+        </section>
+
+        <!-- Category Tabs Premium -->
+        <ul class="nav nav-tabs-premium" id="categoryTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" id="todos-tab" data-bs-toggle="tab" data-bs-target="#todos-pane" data-category="todos">
+                    <i class="fa-solid fa-border-all me-2"></i>Todos
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="servicios-tab" data-bs-toggle="tab" data-bs-target="#servicios-pane" data-category="servicios">
+                    <i class="fa-solid fa-server me-2"></i>Servicios
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="terminales-tab" data-bs-toggle="tab" data-bs-target="#terminales-pane" data-category="terminales">
+                    <i class="fa-solid fa-desktop me-2"></i>Terminales
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="balanzas-tab" data-bs-toggle="tab" data-bs-target="#balanzas-pane" data-category="balanzas">
+                    <i class="fa-solid fa-scale-balanced me-2"></i>Balanzas
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="otros-tab" data-bs-toggle="tab" data-bs-target="#otros-pane" data-category="otros">
+                    <i class="fa-solid fa-microchip me-2"></i>Otros
+                </button>
+            </li>
+        </ul>
 
     <!-- Tab Content -->
     <div class="tab-content" id="categoryTabContent">
         <!-- Todos Tab -->
         <div class="tab-pane fade show active" id="todos-pane" role="tabpanel" aria-labelledby="todos-tab">
             <div class="section-header mb-3">
-                <h4><i class="bi bi-grid-3x3-gap"></i> Todos los Servicios</h4>
+                <h4><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i> Todos los Servicios</h4>
                 <div class="section-actions">
                     <button class="btn btn-sm btn-success-custom btn-ping-section" data-category="todos">
-                        <i class="bi bi-broadcast-pin"></i> Ping Esta Sección
+                        <i class="bi bi-broadcast-pin" aria-hidden="true"></i> Ping Sección
                     </button>
                     <button class="btn btn-sm btn-danger btn-cancel-ping d-none" data-category="todos">
-                        <i class="bi bi-x-circle"></i> Cancelar
+                        <i class="bi bi-x-circle" aria-hidden="true"></i> Cancelar
                     </button>
                 </div>
             </div>
@@ -723,110 +915,90 @@
         </div>
     </div>
 
-    <!-- Pasar datos del usuario al JavaScript -->
-    <script>
-        window.currentUser = {
-            role: '<%= user.role %>',
-            branch_id: Number("<%= user.branch_id || 'null' %>")
-        };
-    </script>
+    </div><!-- Fin .services-container -->
 
-    <!-- Modal Crear/Editar Servicio -->
+    <!-- Modal Crear/Editar Servicio Premium -->
     <div class="modal fade" id="modalServicio" tabindex="-1">
         <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header"
-                    style="background: linear-gradient(135deg, var(--cerulean) 0%, var(--cerulean-dark) 100%); color: white;">
-                    <h5 class="modal-title" id="modalTitulo">Servicio</h5>
+            <div class="modal-content modal-content-premium">
+                <div class="modal-header border-bottom-0 p-4">
+                    <h5 class="modal-title font-display fw-bold" id="modalTitulo">Configurar Servicio</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-4 pt-0">
                     <form id="formServicio">
                         <input type="hidden" id="servicioId">
-
                         <div class="mb-3">
-                            <label class="form-label">Nombre del Servicio <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="nombre" placeholder="Ej: Servidor Web Principal"
-                                required>
+                            <label class="form-label small text-muted text-uppercase fw-bold">Nombre</label>
+                            <input type="text" class="form-control form-control-premium" id="nombre" placeholder="Ej: Servidor Web" required>
                         </div>
-
                         <div class="mb-3">
-                            <label class="form-label">Host (IP o URL) <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="host"
-                                placeholder="Ej: 192.168.1.100 o google.com" required>
-                            <small class="text-muted">Ingrese una dirección IP o nombre de dominio</small>
+                            <label class="form-label small text-muted text-uppercase fw-bold">Host / IP</label>
+                            <input type="text" class="form-control form-control-premium" id="host" placeholder="Ej: 192.168.1.1" required>
                         </div>
-
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small text-muted text-uppercase fw-bold">Tipo</label>
+                                <select class="form-select form-control-premium" id="tipo" required>
+                                    <option value="ip">Dirección IP</option>
+                                    <option value="url">URL/Dominio</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small text-muted text-uppercase fw-bold">Categoría</label>
+                                <select class="form-select form-control-premium" id="categoria" required>
+                                    <option value="servicios">Servicios</option>
+                                    <option value="balanzas">Balanzas</option>
+                                    <option value="otros">Otros</option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="mb-3">
-                            <label class="form-label">Tipo <span class="text-danger">*</span></label>
-                            <select class="form-select" id="tipo" required>
-                                <option value="ip">Dirección IP</option>
-                                <option value="url">URL/Dominio</option>
-                            </select>
+                            <label class="form-label small text-muted text-uppercase fw-bold">Descripción</label>
+                            <textarea class="form-control form-control-premium" id="descripcion" rows="2"></textarea>
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Categoría <span class="text-danger">*</span></label>
-                            <select class="form-select" id="categoria" required>
-                                <option value="servicios">Servicios</option>
-                                <option value="balanzas">Balanzas</option>
-                                <option value="otros">Otros</option>
-                            </select>
-                            <small class="text-muted">
-                                <i class="bi bi-info-circle"></i>
-                                La categoría "Terminales" se gestiona automáticamente desde el módulo de Terminales
-                            </small>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Descripción</label>
-                            <textarea class="form-control" id="descripcion" rows="3"
-                                placeholder="Descripción opcional del servicio"></textarea>
-                        </div>
-
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="activo" checked>
-                            <label class="form-check-label" for="activo">Servicio Activo</label>
+                        <div class="form-check form-switch mt-3">
+                            <input class="form-check-input" type="checkbox" id="activo" checked>
+                            <label class="form-check-label text-white-50" for="activo">Monitoreo Activo</label>
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="btnSaveService">
-                        <i class="bi bi-save"></i> Guardar
+                <div class="modal-footer border-top-0 p-4">
+                    <button type="button" class="btn btn-link text-white-50 text-decoration-none" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn-action-premium btn-ping-premium" id="btnSaveService" style="background: var(--gradient-neon); color: #fff; width: auto; padding-left: 30px; padding-right: 30px;">
+                        <i class="fa-solid fa-save"></i> Guardar
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Historial -->
+    <!-- Modal Historial Premium -->
     <div class="modal fade" id="modalHistorial" tabindex="-1">
         <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header"
-                    style="background: linear-gradient(135deg, #0dcaf0 0%, #0891b2 100%); color: white;">
-                    <h5 class="modal-title">
-                        <i class="bi bi-clock-history"></i> Historial de Verificaciones
+            <div class="modal-content modal-content-premium">
+                <div class="modal-header border-bottom-0 p-4">
+                    <h5 class="modal-title font-display fw-bold">
+                        <i class="fa-solid fa-clock-rotate-left me-2 text-info"></i>Historial de Verificaciones
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <h6 id="historialNombre" class="mb-3"></h6>
+                <div class="modal-body p-4 pt-0">
+                    <h6 id="historialNombre" class="mb-4 text-white-50"></h6>
                     <div class="table-responsive">
-                        <table class="table table-sm table-hover">
-                            <thead class="table-light">
+                        <table class="table table-frosted mb-0">
+                            <thead>
                                 <tr>
                                     <th>Fecha/Hora</th>
                                     <th>Estado</th>
                                     <th>Latencia</th>
-                                    <th>Packet Loss</th>
+                                    <th>Pérdida</th>
                                     <th>Min/Max/Avg</th>
                                 </tr>
                             </thead>
                             <tbody id="historialBody">
                                 <tr>
-                                    <td colspan="5" class="text-center">Cargando...</td>
+                                    <td colspan="5" class="text-center p-4">Cargando registros...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -835,6 +1007,14 @@
             </div>
         </div>
     </div>
+
+    <!-- Pasar datos del usuario al JavaScript -->
+    <script>
+        window.currentUser = {
+            role: '<%= user.role %>',
+            branch_id: Number("<%= user.branch_id || 'null' %>")
+        };
+    </script>
 
     <script src="/js/services.client.js"></script>
 

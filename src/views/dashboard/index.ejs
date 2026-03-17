@@ -1,222 +1,151 @@
 <%- include('../layout/header') %>
 
     <style>
-        /* --- TUS ESTILOS PERSONALIZADOS --- */
         .dashboard-header {
-            background-color: #fff;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            margin-bottom: 30px;
-            border-radius: 8px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 40px;
+            box-shadow: var(--glass-shadow);
         }
 
-        /* Tarjeta POS */
+        /* Tarjeta POS Premium */
         .pos-card {
-            height: 250px;
-            /* Un poco más alto para info */
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-height: 220px; /* Reducido para ser más dinámico */
+            padding: 20px;
+            border-radius: 24px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
             position: relative;
             overflow: hidden;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
             text-align: center;
-            background-color: white;
-            /* Default bg */
+            box-shadow: var(--glass-shadow);
         }
 
         .pos-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            transform: translateY(-8px);
+            border-color: var(--neon-blue);
+            box-shadow: 0 20px 40px rgba(0, 210, 255, 0.15);
         }
 
-        /* Estados */
+        /* Resplandor de Estados (Glow States) */
+        .status-success { border-bottom: 4px solid var(--success-mint); }
+        .status-success .pos-icon { color: var(--success-mint); filter: drop-shadow(0 0 8px var(--success-mint)); }
+
         .status-error {
-            background: linear-gradient(135deg, #e63946 0%, #c62828 100%);
-            color: white;
-            border: 2px solid #e63946;
+            border-bottom: 4px solid var(--punch-red);
+            animation: glow-error 2s infinite ease-in-out;
         }
+        .status-error .pos-icon { color: var(--punch-red); filter: drop-shadow(0 0 10px var(--punch-red)); }
 
-        .status-warning {
-            background: linear-gradient(135deg, #f57c00 0%, #e65100 100%);
-            color: white;
-            border: 2px solid #f57c00;
-        }
+        .status-warning { border-bottom: 4px solid var(--warning-amber); }
+        .status-warning .pos-icon { color: var(--warning-amber); filter: drop-shadow(0 0 8px var(--warning-amber)); }
 
-        .status-success {
-            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
-            color: white;
-            border: 2px solid #2e7d32;
-        }
-
-        .status-loading {
-            background: linear-gradient(135deg, #a8dadc 0%, #f1faee 100%);
-            color: #1d3557;
-            border: 2px solid #457b9d;
+        @keyframes glow-error {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 77, 109, 0.2); }
+            50% { box-shadow: 0 0 40px rgba(255, 77, 109, 0.4); }
         }
 
         .pos-icon {
             font-size: 3rem;
-            margin-bottom: 10px;
-            opacity: 0.8;
+            margin-bottom: 12px;
+            transition: transform 0.3s ease;
         }
 
-        /* Overlay Hover */
+        /* Botón Ver Detalles - Flujo Normal */
         .hover-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
             display: flex;
             justify-content: center;
-            align-items: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 10;
-        }
-
-        .pos-card:hover .hover-overlay {
-            opacity: 1;
+            margin-top: auto; /* Empuja el botón al fondo del contenedor flex */
+            padding-top: 15px;
+            transition: all 0.3s ease;
+            z-index: 5;
         }
 
         .view-details-btn {
-            background-color: white;
-            color: #333;
+            background: var(--gradient-neon);
+            color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
+            padding: 8px 18px;
+            border-radius: 12px;
+            font-family: var(--font-display);
             font-weight: 600;
-            transform: scale(0.9);
-            transition: transform 0.2s;
-            cursor: pointer;
-            text-decoration: none;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            box-shadow: var(--shadow-neon);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .view-details-btn:hover {
             transform: scale(1.05);
-            background-color: #f8f9fa;
-        }
-
-        /* Modal Styles */
-        .modal-header.header-error {
-            background-color: #dc3545;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.6);
             color: white;
         }
 
-        .modal-header.header-warning {
-            background-color: #ffc107;
-            color: #212529;
+        /* Densidad de Tablas */
+        .mini-job-table td, .mini-job-table th {
+            padding: 4px 8px !important;
+            line-height: 1.2 !important;
+            vertical-align: middle;
         }
 
-        .modal-header.header-success {
-            background-color: #198754;
-            color: white;
+        .mini-job-table .badge {
+            font-size: 0.7rem;
+            padding: 3px 6px;
         }
 
-        .modal-header.header-loading {
-            background-color: #6c757d;
-            color: white;
-        }
-
-        .legend-item {
-            display: inline-flex;
-            align-items: center;
-            margin-right: 15px;
-            font-size: 0.9rem;
-        }
-
-        .legend-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-
-        /* Estilos Nuevos */
-        .timer-badge {
-            font-size: 1.2rem;
-            font-family: monospace;
-            cursor: pointer;
-        }
-
-        /* Estilos para la Vista de Matriz (Tab 2) */
-        .mini-job-table {
-            font-size: 0.85rem;
-        }
-
-        /* Antes 0.85rem */
-        .mini-job-row td {
-            padding: 0px 6px;
-        }
-
-        /* Menos padding en celdas */
-
-        .mini-job-row {
-            transition: background 0.2s;
-        }
-
-        .mini-job-row:hover {
-            background-color: #f1f3f5;
-        }
-
-        .status-icon-lg {
-            font-size: 1.2rem;
-        }
-
-        /* Ajuste de Tabs */
-        .nav-tabs .nav-link {
-            color: #495057;
-            font-weight: 500;
-        }
-
-        .nav-tabs .nav-link.active {
-            color: #0d6efd;
-            border-bottom: 3px solid #0d6efd;
-        }
-
-        /* Estilos Específicos para la Tarjeta de Servidor */
+        /* Server Card Refinamiento */
         .server-card {
-            border-left: 5px solid #0d6efd;
-            /* Borde azul grueso a la izquierda */
-            background: linear-gradient(to right, #ffffff, #f8f9fa);
-            height: 180px;
-            /* Más alta */
+            background: linear-gradient(135deg, rgba(0, 210, 255, 0.08), transparent);
+            border-left: 4px solid var(--neon-blue);
+            min-height: 180px !important;
+            padding-bottom: 20px !important;
         }
 
-        /* Icono del servidor más prominente */
-        .server-icon-large {
-            font-size: 4rem;
-            color: #0d6efd;
-            opacity: 0.2;
-            position: absolute;
-            right: 20px;
-            bottom: 10px;
+        .server-card .hover-overlay {
+            justify-content: flex-end;
+            padding-top: 0;
+            margin-top: 5px;
         }
 
-        /* Títulos de sección */
-        .ls-1 {
-            letter-spacing: 1px;
+        /* Contenedor de Badges de Moneda */
+        .currency-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            margin-top: 12px;
+            margin-bottom: 5px;
+            width: 100%;
         }
 
-        /* Sticky header para la tabla de matriz */
-        .mini-job-table thead.sticky-top {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            background-color: #f8f9fa;
+        .currency-badges .badge {
+            font-family: var(--font-display);
+            font-weight: 500;
+            font-size: 0.75rem;
+            padding: 5px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
+
+        .ls-1 { letter-spacing: 0.1em; }
+        
+        /* Contraste Global de Textos */
+        .text-muted { color: rgba(255, 255, 255, 0.5) !important; }
     </style>
 
 
 
     <div class="dashboard-header d-flex justify-content-between align-items-center sticky-top" style="z-index: 1000;">
         <div>
-            <h3 class="m-0"><i class="fa-solid fa-server me-2"></i>Monitor POS</h3>
+            <h3 class="m-0"><i class="fa-solid fa-server me-2" aria-hidden="true"></i>Monitor POS</h3>
 
             <% if (user.role==='admin' ) { %>
                 <div class="mt-2 d-flex align-items-center">
@@ -237,7 +166,7 @@
         <div class="d-flex align-items-center gap-3">
             <div class="text-end">
                 <small class="text-muted d-block" style="font-size: 0.7rem;">AUTO-REFRESH</small>
-                <span class="badge bg-light text-dark border timer-badge" id="countdownTimer"
+                <span class="badge btn-frosted border border-white border-opacity-10 text-neon-blue timer-badge" id="countdownTimer"
                     title="Click para pausar/reanudar">
                     05:00
                 </span>
@@ -248,17 +177,17 @@
         </div>
     </div>
 
-    <ul class="nav nav-tabs mb-4" id="viewTabs" role="tablist">
+    <ul class="nav nav-tabs mb-4 border-0 glass-effect p-1 rounded-pill" id="viewTabs" role="tablist" style="width: fit-content;">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="grid-tab" data-bs-toggle="tab" data-bs-target="#grid-view" type="button"
+            <button class="nav-link active border-0 rounded-pill px-4 py-2" id="grid-tab" data-bs-toggle="tab" data-bs-target="#grid-view" type="button"
                 role="tab">
                 <i class="fa-solid fa-border-all me-2"></i>Vista General (Cajas)
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="matrix-tab" data-bs-toggle="tab" data-bs-target="#matrix-view" type="button"
+            <button class="nav-link border-0 rounded-pill px-4 py-2" id="matrix-tab" data-bs-toggle="tab" data-bs-target="#matrix-view" type="button"
                 role="tab">
-                <i class="fa-solid fa-list-check me-2"></i>Vista Detallada (Todos los Jobs)
+                <i class="fa-solid fa-list-check me-2" aria-hidden="true"></i>Vista Detallada (Jobs)
             </button>
         </li>
     </ul>
@@ -296,11 +225,11 @@
 
                 <div class="col-xl-6">
                     <h6 class="text-uppercase text-muted fw-bold small ls-1">Detalle POS</h6>
-                    <div class="card shadow-sm">
+                    <div class="card glass-effect border-opacity-10 rounded-4 overflow-hidden border border-white border-opacity-5">
                         <div class="card-body p-0">
                             <div class="table-responsive">
-                                <table class="table table-sm mb-0 mini-job-table table-bordered table-hover">
-                                    <thead class="table-light small text-muted text-center sticky-top">
+                                <table class="table table-sm mb-0 mini-job-table table-frosted align-middle">
+                                    <thead class="text-center sticky-top">
                                         <tr>
                                             <th>Terminal</th>
                                             <th>Nombre</th>
@@ -313,7 +242,7 @@
                                     </thead>
                                     <tbody id="matrix-grid">
                                         <tr>
-                                            <td colspan="7" class="text-center py-3 text-muted">Cargando...</td>
+                                            <td colspan="7" class="text-center py-3 text-muted">Cargando…</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -346,19 +275,19 @@
     <div class="modal fade" id="detailsModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-header header-loading" id="modalHeader">
-                    <h5 class="modal-title" id="modalTitle">Cargando...</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header glass-effect border-bottom-0 p-4" id="modalHeader">
+                    <h5 class="modal-title font-display fw-bold" id="modalTitle">Cargando…</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
-                        <span id="modalIp" class="text-muted"></span>
-                        <span id="modalId" class="fw-bold"></span>
+                    <div class="d-flex justify-content-between mb-3 border-bottom border-white border-opacity-5 pb-2">
+                        <span id="modalIp" class="text-white-50 small"></span>
+                        <span id="modalId" class="fw-bold text-white small"></span>
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
+                        <table class="table table-frosted align-middle">
+                            <thead class="text-center">
                                 <tr>
                                     <th>Estado</th>
                                     <th>Job</th>
@@ -367,7 +296,7 @@
                                     <th>Acción</th>
                                 </tr>
                             </thead>
-                            <tbody id="jobsTableBody"></tbody>
+                            <tbody id="jobsTableBody" class="text-center"></tbody>
                         </table>
                     </div>
                 </div>
@@ -378,17 +307,17 @@
     <div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header bg-light">
+                <div class="modal-header glass-effect border-bottom-0 p-4">
                     <div>
-                        <h5 class="modal-title fw-bold" id="historyJobTitle">Historial</h5>
-                        <small class="text-muted" id="historyTerminalName">-</small>
+                        <h5 class="modal-title font-display fw-bold" id="historyJobTitle">Historial</h5>
+                        <small class="text-white-50" id="historyTerminalName">-</small>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-striped mb-0" style="font-size: 0.9rem;">
-                            <thead class="table-light sticky-top">
+                        <table class="table table-frosted mb-0" style="font-size: 0.9rem;">
+                            <thead class="sticky-top">
                                 <tr>
                                     <th>Fecha</th>
                                     <th>Estado</th>
@@ -404,8 +333,8 @@
                         </table>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+                <div class="modal-footer border-top-0 p-4">
+                    <button type="button" class="btn btn-frosted border border-white border-opacity-10 text-white" data-bs-dismiss="modal" style="width: auto; padding-left: 30px; padding-right: 30px;">Cerrar</button>
                 </div>
             </div>
         </div>

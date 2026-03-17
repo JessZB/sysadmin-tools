@@ -108,10 +108,45 @@ d.addEventListener('DOMContentLoaded', function() {
             loadServicesByCategory('terminales');
         });
     }
+
+    // 7. Buscador reactivo
+    const serviceSearch = d.getElementById('serviceSearch');
+    if (serviceSearch) {
+        serviceSearch.addEventListener('input', function() {
+            filterServices(this.value.toLowerCase());
+        });
+    }
     
     // Cargar categoría inicial
     loadServicesByCategory('todos');
 });
+
+/**
+ * Filtra los servicios en el grid actual basándose en un término de búsqueda
+ */
+function filterServices(query) {
+    const grid = d.getElementById(`servicesGrid-${currentCategory}`);
+    if (!grid) return;
+
+    const cards = grid.querySelectorAll('.service-card:not(.add-service-card)');
+    cards.forEach(card => {
+        const name = card.querySelector('h3').textContent.toLowerCase();
+        const host = card.querySelector('.service-url').textContent.toLowerCase();
+        const desc = card.querySelector('.service-description').textContent.toLowerCase();
+        
+        if (name.includes(query) || host.includes(query) || desc.includes(query)) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    // Manejar visibilidad de la tarjeta "Añadir"
+    const addCard = grid.querySelector('.add-service-card');
+    if (addCard) {
+        addCard.style.display = query === '' ? '' : 'none';
+    }
+}
 
 /* =========================================
    SECTION PING AND CANCEL
@@ -151,6 +186,12 @@ async function pingSection(category) {
             if (controller.signal.aborted) {
                 showInfoToast(`Ping cancelado (${completedCount}/${services.length} completados)`);
                 break;
+            }
+            
+            // Skip inactive services
+            if (service.is_active === 0) {
+                completedCount++;
+                continue;
             }
             
             try {
@@ -263,7 +304,7 @@ function cancelAll() {
    TAB CHANGE HANDLER
    ========================================= */
 
-function onTabChange(category) {
+async function onTabChange(category) {
     currentCategory = category;
     
     // Mostrar/ocultar selector de sucursales
@@ -294,7 +335,13 @@ function onTabChange(category) {
     
     // Cargar servicios si no están cargados
     if (servicesDataByCategory[category].length === 0) {
-        loadServicesByCategory(category);
+        await loadServicesByCategory(category);
+    }
+    
+    // Re-aplicar búsqueda si existe
+    const serviceSearch = d.getElementById('serviceSearch');
+    if (serviceSearch && serviceSearch.value) {
+        filterServices(serviceSearch.value.toLowerCase());
     }
 }
 
@@ -364,6 +411,8 @@ function showEmptyMessage(grid, category) {
 function createServiceCard(service, viewCategory) {
     const status = getServiceStatus(service);
     const latency = service.last_response_time || 0;
+    const isInactive = service.is_active === 0;
+    
     const lastChecked = service.last_checked_at 
         ? new Date(service.last_checked_at).toLocaleString('es-VE', {
             year: 'numeric',
@@ -396,15 +445,18 @@ function createServiceCard(service, viewCategory) {
         </span>
     ` : '';
     
+    const inactiveClass = isInactive ? 'inactive-service' : '';
+    const inactiveBadge = isInactive ? '<span class="badge bg-secondary ms-2 small" style="font-size: 0.6rem;">INACTIVO</span>' : '';
+    
     return `
-        <article class="service-card ${status.class}" id="service-card-${service.id}">
+        <article class="service-card ${status.class} ${inactiveClass}" id="service-card-${service.id}">
             <div class="card-status-line"></div>
             ${loadingOverlay}
             ${categoryBadge}
             
             <div class="card-header">
                 <div class="service-info">
-                    <h3>${escapeHtml(service.name)}</h3>
+                    <h3>${escapeHtml(service.name)}${inactiveBadge}</h3>
                     <span class="service-url">${escapeHtml(service.host)}</span>
                 </div>
                 <span class="status-pill">
@@ -695,6 +747,23 @@ async function pingServiceAsync(id, signal = null) {
     if (pingInProgress.has(id)) {
         return;
     }
+
+    // Validar si el servicio está activo antes de proceder
+    let servicio = null;
+    for (const services of Object.values(servicesDataByCategory)) {
+        servicio = services.find(s => s.id === id);
+        if (servicio) break;
+    }
+
+    if (servicio && servicio.is_active === 0) {
+        Swal.fire({
+            title: 'Servicio Inactivo',
+            text: `El servicio "${servicio.name}" se encuentra marcado como inactivo. Active el monitoreo en la configuración antes de realizar un ping.`,
+            icon: 'warning',
+            confirmButtonColor: 'var(--neon-blue)'
+        });
+        return;
+    }
     
     // Create AbortController for individual ping if no signal provided
     let controller = null;
@@ -794,6 +863,13 @@ async function pingAll() {
                 showInfoToast('Ping global cancelado');
                 break;
             }
+
+            // Validar activo
+            const servicio = servicesDataByCategory.todos.find(s => s.id === id);
+            if (servicio && servicio.is_active === 0) {
+                continue; // Saltar inactivos en ping global
+            }
+
             try {
                 await pingServiceAsync(id, globalController.signal);
             } catch (error) {

@@ -1,300 +1,111 @@
 <%- include('../layout/header') %>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-tv me-2"></i>Gestión de Pantallas</h2>
-        <button class="btn btn-primary" data-action="create-screen">
-            <i class="bi bi-plus-lg me-2"></i>Nueva Pantalla
+    <div class="dashboard-header d-flex justify-content-between align-items-center mb-5 sticky-top" style="z-index: 1000; margin-top: -20px;">
+        <div>
+            <h2 class="text-white mb-0 font-display fw-bold">
+                <i class="bi bi-tv me-2 text-primary"></i>Gestión de Pantallas
+            </h2>
+            <p class="text-white-50 small mb-0 mt-1">Monitoreo y control remoto de dispositivos de visualización</p>
+        </div>
+        <button class="btn btn-action-premium btn-ping-premium px-4" data-action="create-screen">
+            <i class="bi bi-plus-lg me-2"></i>Añadir Pantalla
         </button>
     </div>
 
     <% if (screens.length===0) { %>
-        <div class="alert alert-info text-center">
-            <i class="bi bi-info-circle me-2"></i>
-            No hay pantallas registradas. ¡Agrega una nueva!
+        <div class="glass-effect rounded-4 p-5 text-center border border-white border-opacity-5">
+            <i class="bi bi-display fs-1 text-white-50 opacity-25 mb-3 d-block"></i>
+            <h4 class="text-white">No hay pantallas registradas</h4>
+            <p class="text-white-50">Comienza agregando un televisor LG, Samsung o dispositivo DLNA.</p>
+            <button class="btn btn-action-premium btn-ping-premium mt-3" data-action="create-screen">
+                <i class="bi bi-plus-lg me-2"></i>Configurar Primera Pantalla
+            </button>
         </div>
-        <% } else { %>
-            <!-- Separate LG and Samsung TVs -->
-            <% const lgScreens=screens.filter(s=> s.device_type === 'browser' && s.name.toLowerCase().includes('lg'));
-                const samsungScreens = screens.filter(s => s.device_type === 'browser' &&
-                !s.name.toLowerCase().includes('lg'));
-                const dlnaScreens = screens.filter(s => s.device_type === 'dlna');
-                %>
+    <% } else { %>
+        <!-- Categorización de Pantallas -->
+        <% 
+            const lgScreens = screens.filter(s => s.device_type === 'browser' && s.name.toLowerCase().includes('lg'));
+            const samsungScreens = screens.filter(s => s.device_type === 'browser' && !s.name.toLowerCase().includes('lg'));
+            const dlnaScreens = screens.filter(s => s.device_type === 'dlna');
+        %>
 
-                <!-- LG TVs Section -->
-                <% if (lgScreens.length> 0) { %>
-                    <h4 class="mb-3"><i class="bi bi-tv-fill text-primary me-2"></i>Televisores LG</h4>
-                    <div class="row mb-4">
-                        <% lgScreens.forEach(screen=> { %>
-                            <div class="col-md-6 col-lg-4 mb-4">
-                                <div class="card h-100 shadow-sm hover-card">
-                                    <div
-                                        class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                                        <h5 class="mb-0">
-                                            <i class="bi bi-tv me-2"></i>
-                                            <%= screen.name %>
-                                        </h5>
-                                        <span class="badge bg-<%= screen.client_token ? 'success' : 'warning' %>">
-                                            <%= screen.client_token ? 'Emparejado' : 'Sin emparejar' %>
-                                        </span>
-                                    </div>
-                                    <div class="card-body">
-                                        <!-- IP Address -->
-                                        <p class="text-muted mb-2">
-                                            <i class="bi bi-hdd-network me-2"></i>
-                                            <strong>IP:</strong>
-                                            <%= screen.ip_address || 'Sin IP' %>
-                                        </p>
+        <!-- Sección LG -->
+        <% if (lgScreens.length > 0) { %>
+            <div class="mb-5">
+                <h6 class="text-uppercase text-muted fw-bold small ls-1 mb-4">
+                    <i class="bi bi-app-indicator text-primary me-2"></i>Televisores LG WebOS
+                </h6>
+                <div class="row g-4">
+                    <% lgScreens.forEach(screen => { %>
+                        <div class="col-md-6 col-lg-4">
+                            <%- include('screen-card-component', { screen, type: 'lg', color: 'primary' }) %>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        <% } %>
 
-                                        <!-- MAC Address -->
-                                        <% if (!screen.mac_address) { %>
-                                            <div class="input-group input-group-sm mb-3">
-                                                <span class="input-group-text"><i class="bi bi-ethernet"></i></span>
-                                                <input type="text" class="form-control"
-                                                    placeholder="MAC: AA:BB:CC:DD:EE:FF"
-                                                    id="mac-input-<%= screen.id %>">
-                                                <button class="btn btn-outline-secondary" data-action="save-mac"
-                                                    data-id="<%= screen.id %>">
-                                                    <i class="bi bi-save"></i>
-                                                </button>
-                                            </div>
-                                            <% } else { %>
-                                                <p class="text-muted mb-3">
-                                                    <i class="bi bi-ethernet me-2"></i>
-                                                    <strong>MAC:</strong>
-                                                    <%= screen.mac_address %>
-                                                </p>
-                                                <% } %>
+        <!-- Sección Samsung -->
+        <% if (samsungScreens.length > 0) { %>
+            <div class="mb-5">
+                <h6 class="text-uppercase text-muted fw-bold small ls-1 mb-4">
+                    <i class="bi bi-app-indicator text-info me-2"></i>Televisores Samsung Tizen
+                </h6>
+                <div class="row g-4">
+                    <% samsungScreens.forEach(screen => { %>
+                        <div class="col-md-6 col-lg-4">
+                            <%- include('screen-card-component', { screen, type: 'samsung', color: 'info' }) %>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        <% } %>
 
-                                                    <!-- Open Control Button -->
-                                                    <button class="btn btn-lg btn-primary w-100 mb-2"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#lgControlModal<%= screen.id %>">
-                                                        <i class="bi bi-controller me-2"></i>
-                                                        Abrir Control
-                                                    </button>
+        <!-- Sección DLNA -->
+        <% if (dlnaScreens.length > 0) { %>
+            <div class="mb-5">
+                <h6 class="text-uppercase text-muted fw-bold small ls-1 mb-4">
+                    <i class="bi bi-app-indicator text-success me-2"></i>Dispositivos DLNA / Cast
+                </h6>
+                <div class="row g-4">
+                    <% dlnaScreens.forEach(screen => { %>
+                        <div class="col-md-6 col-lg-4">
+                            <%- include('screen-card-component', { screen, type: 'dlna', color: 'success' }) %>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        <% } %>
 
-                                                    <!-- Quick Actions -->
-                                                    <div class="btn-group w-100" role="group">
-                                                        <button class="btn btn-outline-secondary btn-sm"
-                                                            data-action="edit" data-id="<%= screen.id %>">
-                                                            <i class="bi bi-pencil"></i> Editar
-                                                        </button>
-                                                        <button class="btn btn-outline-danger btn-sm"
-                                                            data-action="delete" data-id="<%= screen.id %>">
-                                                            <i class="bi bi-trash"></i> Eliminar
-                                                        </button>
-                                                    </div>
-                                    </div>
-                                </div>
-                            </div>
+        <!-- Modales de Control (Fuera de la cuadrícula para evitar problemas de interacción) -->
+        <% lgScreens.forEach(screen => { %>
+            <%- include('lg-control-modal', { screen }) %>
+        <% }) %>
 
-                            <!-- Include LG Control Modal -->
-                            <%- include('lg-control-modal', { screen }) %>
-                                <% }) %>
-                    </div>
-                    <% } %>
+        <% samsungScreens.forEach(screen => { %>
+            <%- include('samsung-control-modal', { screen }) %>
+        <% }) %>
 
-                        <!-- Samsung TVs Section -->
-                        <% if (samsungScreens.length> 0) { %>
-                            <h4 class="mb-3"><i class="bi bi-tv-fill text-info me-2"></i>Televisores Samsung</h4>
-                            <div class="row mb-4">
-                                <% samsungScreens.forEach(screen=> { %>
-                                    <div class="col-md-6 col-lg-4 mb-4">
-                                        <div class="card h-100 shadow-sm hover-card">
-                                            <div
-                                                class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-                                                <h5 class="mb-0">
-                                                    <i class="bi bi-tv me-2"></i>
-                                                    <%= screen.name %>
-                                                </h5>
-                                                <span
-                                                    class="badge bg-<%= screen.client_token ? 'success' : 'warning' %>">
-                                                    <%= screen.client_token ? 'Emparejado' : 'Sin emparejar' %>
-                                                </span>
-                                            </div>
-                                            <div class="card-body">
-                                                <!-- IP Address -->
-                                                <p class="text-muted mb-2">
-                                                    <i class="bi bi-hdd-network me-2"></i>
-                                                    <strong>IP:</strong>
-                                                    <%= screen.ip_address || 'Sin IP' %>
-                                                </p>
+        <% dlnaScreens.forEach(screen => { %>
+            <%- include('dlna-control-modal', { screen: screen, mediaFiles: (typeof mediaFiles !== 'undefined' ? mediaFiles : []) }) %>
+        <% }) %>
+    <% } %>
 
-                                                <!-- MAC Address -->
-                                                <% if (!screen.mac_address) { %>
-                                                    <div class="input-group input-group-sm mb-3">
-                                                        <span class="input-group-text"><i
-                                                                class="bi bi-ethernet"></i></span>
-                                                        <input type="text" class="form-control"
-                                                            placeholder="MAC: AA:BB:CC:DD:EE:FF"
-                                                            id="mac-input-<%= screen.id %>">
-                                                        <button class="btn btn-outline-secondary" data-action="save-mac"
-                                                            data-id="<%= screen.id %>">
-                                                            <i class="bi bi-save"></i>
-                                                        </button>
-                                                    </div>
-                                                    <% } else { %>
-                                                        <p class="text-muted mb-3">
-                                                            <i class="bi bi-ethernet me-2"></i>
-                                                            <strong>MAC:</strong>
-                                                            <%= screen.mac_address %>
-                                                        </p>
-                                                        <% } %>
-
-                                                            <!-- Samsung Control Panel (Collapsed by default) -->
-                                                            <div class="accordion mb-2"
-                                                                id="samsungControl<%= screen.id %>">
-                                                                <div class="accordion-item">
-                                                                    <h2 class="accordion-header">
-                                                                        <button class="accordion-button collapsed"
-                                                                            type="button" data-bs-toggle="collapse"
-                                                                            data-bs-target="#samsungPanel<%= screen.id %>">
-                                                                            <i class="bi bi-controller me-2"></i>
-                                                                            Control Samsung
-                                                                        </button>
-                                                                    </h2>
-                                                                    <div id="samsungPanel<%= screen.id %>"
-                                                                        class="accordion-collapse collapse"
-                                                                        data-bs-parent="#samsungControl<%= screen.id %>">
-                                                                        <div class="accordion-body">
-                                                                            <%- include('samsung-remote-panel', { screen
-                                                                                }) %>
+    <%- include('screen-form-modal') %>
 
 
-                                                                                <!-- Viewer Link -->
-                                                                                <a href="/screens/viewer/<%= screen.id %>"
-                                                                                    target="_blank"
-                                                                                    class="btn btn-outline-primary btn-sm w-100 mb-2">
-                                                                                    <i
-                                                                                        class="bi bi-box-arrow-up-right me-1"></i>
-                                                                                    Abrir Visor
-                                                                                </a>
+<style>
+    .ls-1 { letter-spacing: 0.1em; }
+    
+    /* Animación para cards al cargar */
+    .row {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
 
-                                                                                <!-- Reload Button -->
-                                                                                <button
-                                                                                    class="btn btn-primary btn-sm w-100"
-                                                                                    data-action="reload"
-                                                                                    data-id="<%= screen.id %>">
-                                                                                    <i
-                                                                                        class="bi bi-arrow-clockwise me-1"></i>
-                                                                                    Recargar Tasa
-                                                                                </button>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Quick Actions -->
-                                                            <div class="btn-group w-100" role="group">
-                                                                <button class="btn btn-outline-secondary btn-sm"
-                                                                    data-action="edit" data-id="<%= screen.id %>">
-                                                                    <i class="bi bi-pencil"></i> Editar
-                                                                </button>
-                                                                <button class="btn btn-outline-danger btn-sm"
-                                                                    data-action="delete" data-id="<%= screen.id %>">
-                                                                    <i class="bi bi-trash"></i> Eliminar
-                                                                </button>
-                                                            </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <% }) %>
-                            </div>
-                            <% } %>
-
-                                <!-- DLNA Screens Section -->
-                                <% if (dlnaScreens.length> 0) { %>
-                                    <h4 class="mb-3"><i class="bi bi-cast text-success me-2"></i>Pantallas DLNA</h4>
-                                    <div class="row">
-                                        <% dlnaScreens.forEach(screen=> { %>
-                                            <div class="col-md-6 col-lg-4 mb-4">
-                                                <div class="card h-100 shadow-sm hover-card">
-                                                    <div class="card-header bg-success text-white">
-                                                        <h5 class="mb-0">
-                                                            <i class="bi bi-cast me-2"></i>
-                                                            <%= screen.name %>
-                                                        </h5>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <!-- IP Address -->
-                                                        <p class="text-muted mb-3">
-                                                            <i class="bi bi-hdd-network me-2"></i>
-                                                            <strong>IP:</strong>
-                                                            <%= screen.ip_address || 'Sin IP' %>
-                                                        </p>
-
-                                                        <!-- DLNA Control Panel (Collapsed by default) -->
-                                                        <div class="accordion mb-2" id="dlnaControl<%= screen.id %>">
-                                                            <div class="accordion-item">
-                                                                <h2 class="accordion-header">
-                                                                    <button class="accordion-button collapsed"
-                                                                        type="button" data-bs-toggle="collapse"
-                                                                        data-bs-target="#dlnaPanel<%= screen.id %>">
-                                                                        <i class="bi bi-controller me-2"></i>
-                                                                        Control DLNA
-                                                                    </button>
-                                                                </h2>
-                                                                <div id="dlnaPanel<%= screen.id %>"
-                                                                    class="accordion-collapse collapse"
-                                                                    data-bs-parent="#dlnaControl<%= screen.id %>">
-                                                                    <div class="accordion-body">
-                                                                        <%- include('dlna-control-panel', { screen,
-                                                                            mediaFiles }) %>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Quick Actions -->
-                                                        <div class="btn-group w-100" role="group">
-                                                            <button class="btn btn-outline-secondary btn-sm"
-                                                                data-action="edit" data-id="<%= screen.id %>">
-                                                                <i class="bi bi-pencil"></i> Editar
-                                                            </button>
-                                                            <button class="btn btn-outline-danger btn-sm"
-                                                                data-action="delete" data-id="<%= screen.id %>">
-                                                                <i class="bi bi-trash"></i> Eliminar
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <% }) %>
-                                    </div>
-                                    <% } %>
-                                        <% } %>
-
-                                            <style>
-                                                .hover-card {
-                                                    transition: transform 0.2s, box-shadow 0.2s;
-                                                    border: none;
-                                                }
-
-                                                .hover-card:hover {
-                                                    transform: translateY(-5px);
-                                                    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
-                                                }
-
-                                                .card-header h5 {
-                                                    font-size: 1.1rem;
-                                                    font-weight: 600;
-                                                }
-
-                                                .btn {
-                                                    border-radius: 8px;
-                                                    font-weight: 500;
-                                                }
-
-                                                .accordion-button {
-                                                    font-weight: 500;
-                                                }
-
-                                                .accordion-button:not(.collapsed) {
-                                                    background-color: #e7f1ff;
-                                                    color: #0d6efd;
-                                                }
-                                            </style>
-                                            <%- include('screen-form-modal') %>
-
-
-                                                <%- include('../layout/footer') %>
+<%- include('../layout/footer') %>

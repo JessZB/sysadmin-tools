@@ -1,73 +1,81 @@
-<!-- Screen Create/Edit Modal -->
+<!-- Screen Create/Edit Modal Premium -->
 <div class="modal fade" id="screenFormModal" tabindex="-1" aria-labelledby="screenFormModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="screenFormModalLabel">
-                    <i class="bi bi-tv me-2"></i>
+        <div class="modal-content glass-effect border-opacity-10 border-white">
+            <div class="modal-header glass-effect border-bottom-0 p-4">
+                <h5 class="modal-title font-display fw-bold text-white" id="screenFormModalLabel">
+                    <i class="bi bi-display me-2 text-primary"></i>
                     <span id="modalTitle">Nueva Pantalla</span>
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-4">
                 <form id="screenForm">
                     <input type="hidden" id="screenId" name="id">
 
                     <!-- Name Field -->
-                    <div class="mb-3">
-                        <label for="screenName" class="form-label">
-                            <i class="bi bi-tag me-1"></i>Nombre de la Pantalla
+                    <div class="mb-4">
+                        <label for="screenName" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                            <i class="bi bi-tag me-2 text-primary"></i>Nombre de la Pantalla
                         </label>
-                        <input type="text" class="form-control" id="screenName" name="name"
-                            placeholder="Ej: LG TV Sala Principal" required>
-                        <div class="form-text">Nombre descriptivo para identificar la pantalla</div>
+                        <input type="text" class="form-control glass-effect border-opacity-10 text-white p-3" id="screenName" name="name"
+                            placeholder="Ej: Samsung Sala VIP" required>
                     </div>
 
                     <!-- Device Type Field -->
-                    <div class="mb-3">
-                        <label for="deviceType" class="form-label">
-                            <i class="bi bi-gear me-1"></i>Tipo de Dispositivo
+                    <div class="mb-4">
+                        <label for="deviceType" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                            <i class="bi bi-gear me-2 text-primary"></i>Tipo de Dispositivo
                         </label>
-                        <select class="form-select" id="deviceType" name="device_type" required>
-                            <option value="">Seleccionar tipo...</option>
-                            <option value="browser">Smart TV (Browser/WebSocket)</option>
-                            <option value="dlna">DLNA/Chromecast</option>
+                        <select class="form-select glass-effect border-opacity-10 text-white p-3" id="deviceType" name="device_type" required>
+                            <option value="" class="bg-dark">Seleccionar tipo...</option>
+                            <option value="browser" class="bg-dark">Smart TV (LG / Samsung)</option>
+                            <option value="dlna" class="bg-dark">Dispositivo DLNA / Cast</option>
                         </select>
-                        <div class="form-text">Tipo de conexión que usa la pantalla</div>
                     </div>
 
-                    <!-- IP Address Field -->
-                    <div class="mb-3">
-                        <label for="ipAddress" class="form-label">
-                            <i class="bi bi-hdd-network me-1"></i>Dirección IP
-                        </label>
-                        <input type="text" class="form-control" id="ipAddress" name="ip_address"
-                            placeholder="192.168.1.100" pattern="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$">
-                        <div class="form-text">Dirección IP local de la pantalla</div>
+                    <div class="row g-3">
+                        <!-- IP Address Field -->
+                        <div class="col-md-6 mb-4">
+                            <label for="ipAddress" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                <i class="bi bi-hdd-network me-2 text-primary"></i>Dirección IP
+                            </label>
+                            <input type="text" class="form-control glass-effect border-opacity-10 text-white p-3 font-monospace" id="ipAddress" name="ip_address"
+                                placeholder="192.168.x.x" pattern="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$">
+                        </div>
+
+                        <!-- MAC Address Field -->
+                        <div class="col-md-6 mb-4">
+                            <label for="macAddress" class="form-label text-white-50 small fw-bold text-uppercase ls-1">
+                                <i class="bi bi-ethernet me-2 text-primary"></i>Dirección MAC
+                            </label>
+                            <input type="text" class="form-control glass-effect border-opacity-10 text-white p-3 font-monospace" id="macAddress" name="mac_address"
+                                placeholder="AA:BB:CC..." pattern="^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$">
+                        </div>
                     </div>
 
-                    <!-- MAC Address Field -->
-                    <div class="mb-3">
-                        <label for="macAddress" class="form-label">
-                            <i class="bi bi-ethernet me-1"></i>Dirección MAC
-                        </label>
-                        <input type="text" class="form-control" id="macAddress" name="mac_address"
-                            placeholder="AA:BB:CC:DD:EE:FF" pattern="^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$">
-                        <div class="form-text">Necesaria para Wake-on-LAN (opcional)</div>
-                    </div>
-
-                    <!-- Branch ID (Hidden - will be set automatically) -->
                     <input type="hidden" id="branchId" name="branch_id" value="1">
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-lg me-1"></i>Cancelar
+            <div class="modal-footer border-top-0 p-4">
+                <button type="button" class="btn btn-frosted border border-white border-opacity-10 text-white px-4" data-bs-dismiss="modal">
+                    Cancelar
                 </button>
-                <button type="button" class="btn btn-primary" id="saveScreenBtn">
-                    <i class="bi bi-save me-1"></i>Guardar
+                <button type="button" class="btn btn-action-premium btn-ping-premium px-5" id="saveScreenBtn" style="width: auto;">
+                    <i class="bi bi-save me-2"></i>Guardar Cambios
                 </button>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    #screenFormModal .modal-content {
+        background: var(--space-deep);
+        border: 1px solid var(--glass-border);
+    }
+    
+    #screenFormModal .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+</style>

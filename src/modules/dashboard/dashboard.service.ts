@@ -47,7 +47,7 @@ export const getTerminalJobs = async (terminalId: number) => {
                 .execute('msdb.dbo.sp_help_job');
 
             const allJobs = jobsResult.recordset;
-            const enabledJobs = allJobs.filter((j: any) => j.enabled === 1 && j.name !== 'syspolicy_purge_history');
+            const enabledJobs = allJobs.filter((j: any) => j.enabled === 1 && j.name.toLowerCase() !== 'syspolicy_purge_history');
 
             const mappedJobs = [];
 
@@ -154,7 +154,7 @@ export const getTerminalJobs = async (terminalId: number) => {
                     WHERE jh.job_id = j.job_id
                     ORDER BY run_date DESC, run_time DESC
                 ) h
-                WHERE j.enabled = 1 AND j.name != 'syspolicy_purge_history'
+                WHERE j.enabled = 1 AND j.name != 'syspolicy_purge_history' AND j.name != 'limpieza_logs'
             `;
 
             try {

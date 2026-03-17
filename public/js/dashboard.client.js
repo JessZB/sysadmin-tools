@@ -97,8 +97,8 @@ function iniciarTemporizador() {
             const s = (timeLeft % 60).toString().padStart(2, '0');
             timerBadge.innerText = `${m}:${s}`;
             
-            if (timeLeft < 60) timerBadge.className = 'badge bg-warning text-dark border timer-badge';
-            else timerBadge.className = 'badge bg-light text-dark border timer-badge';
+            if (timeLeft < 60) timerBadge.className = 'badge btn-frosted border border-warning border-opacity-25 text-warning timer-badge';
+            else timerBadge.className = 'badge btn-frosted border border-white border-opacity-10 text-neon-blue timer-badge';
 
             if (timeLeft <= 0) {
                 forzarRefrescoTotal();
@@ -250,37 +250,42 @@ async function cargarDatos() {
 
 function crearTarjetaServidorHTML(term) {
     const col = d.createElement('div');
-    col.className = 'col-12 col-md-6 col-lg-4'; 
+    col.className = 'col-12 col-md-6 col-lg-5'; 
     col.innerHTML = `
         <div class="pos-card status-loading server-card" id="card-${term.id}">
-            <div class="d-flex w-100 h-100 align-items-center px-4 position-relative">
-                <div class="me-4" id="icon-${term.id}" style="font-size: 2.5rem;">
+            <div class="d-flex w-100 align-items-center px-2">
+                <div class="me-3" id="icon-${term.id}" style="font-size: 2.2rem;">
                     <i class="fa-solid fa-circle-notch fa-spin text-white opacity-75"></i>
                 </div>
-                <div class="flex-grow-1" style="z-index: 2;">
-                    <h5 class="fw-bold mb-1 text-white">${term.name}</h5>
-                    <div class="d-flex align-items-center mb-2 text-white opacity-90">
-                        <i class="fa-solid fa-network-wired me-2 small"></i>
+                <div class="flex-grow-1 text-start" style="z-index: 2;">
+                    <h5 class="fw-bold mb-0 text-white">${term.name}</h5>
+                    <div class="d-flex align-items-center mb-1 text-white opacity-90 small">
+                        <i class="fa-solid fa-network-wired me-2"></i>
                         <span class="font-monospace">${term.ip_address}</span>
                     </div>
-                    <span class="badge bg-white bg-opacity-25 text-white border border-white border-opacity-50 fw-semibold">
-                        MASTER NODE
+                </div>
+                <div class="ms-auto">
+                    <span class="badge bg-white bg-opacity-25 text-white border border-white border-opacity-20 fw-semibold x-small">
+                        MASTER
                     </span>
                 </div>
                 <i class="fa-solid fa-server server-icon-large text-white opacity-10"></i>
-                <div class="hover-overlay" style="border-radius: 10px;">
-                    <button class="view-details-btn shadow" 
-                        data-id="${term.id}" 
-                        data-name="${term.name}" 
-                        data-ip="${term.ip_address}">
-                        <i class="fa-solid fa-eye me-1"></i> Gestionar Jobs
-                    </button>
-                </div>
+            </div>
+            
+            <div class="currency-badges px-2"></div>
+
+            <div class="hover-overlay px-2">
+                <button class="view-details-btn shadow w-100" 
+                    data-id="${term.id}" 
+                    data-name="${term.name}" 
+                    data-ip="${term.ip_address}">
+                    <i class="fa-solid fa-eye me-1"></i> Gestionar Jobs
+                </button>
             </div>
         </div>
     `;
     
-    // Cargar tasas de cambio para esta terminal servidor
+    // Cargar tasas de cambio
     const cardElement = col.querySelector('.pos-card');
     loadCurrencyBadges(term.id, cardElement);
     
@@ -323,8 +328,11 @@ function crearTarjetaHTML(term) {
             <div class="pos-icon" id="icon-${term.id}"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
             <h5 class="m-0 fw-bold">${term.name}</h5>
             <small class="d-block opacity-75">${term.ip_address}</small>
+            
+            <div class="currency-badges"></div>
+
             <div class="hover-overlay">
-                <button class="view-details-btn shadow" 
+                <button class="view-details-btn shadow-sm" 
                     data-id="${term.id}" 
                     data-name="${term.name}" 
                     data-ip="${term.ip_address}">
@@ -334,7 +342,7 @@ function crearTarjetaHTML(term) {
         </div>
     `;
     
-    // Cargar tasas de cambio para esta terminal
+    // Cargar tasas de cambio
     const cardElement = col.querySelector('.pos-card');
     loadCurrencyBadges(term.id, cardElement);
     
@@ -360,16 +368,16 @@ function crearTablaMatrizHTML(term, colClass = 'col-12 col-md-6', cardClass = ''
     const col = d.createElement('div');
     col.className = colClass;
     col.innerHTML = `
-        <div class="card shadow-none border-0 h-100 ${cardClass}">
-            <div class="card-header d-flex justify-content-between align-items-center bg-light">
-                <strong>${term.name}</strong>
-                <button class="btn btn-sm btn-link text-decoration-none btn-refresh-single" data-id="${term.id}">
+        <div class="card glass-effect border-opacity-10 h-100 ${cardClass}">
+            <div class="card-header d-flex justify-content-between align-items-center bg-transparent border-bottom border-white border-opacity-5">
+                <strong class="text-white font-display">${term.name}</strong>
+                <button class="btn btn-sm btn-link text-white-50 text-decoration-none btn-refresh-single" data-id="${term.id}">
                     <i class="fa-solid fa-rotate-right"></i>
                 </button>
             </div>
             <div class="card-body p-0 table-responsive">
-                <table class="table table-sm mb-0 mini-job-table table-bordered table-hover">
-                    <thead class="table-light small text-muted text-center">
+                <table class="table table-sm mb-0 mini-job-table table-frosted">
+                    <thead class="small text-muted text-center">
                         <tr>
                             <th>Nombre</th>
                             <th>Estado</th>
@@ -423,7 +431,7 @@ function renderizarFilasMatriz(id, jobs, serverTime) {
     const newRows = [];
     jobs.sort((a, b) => a.JobName.localeCompare(b.JobName)).forEach((job, index) => {
         const terminalCell = index === 0 
-            ? `<td rowspan="${jobs.length}" class="align-middle fw-bold text-center bg-light">${terminalName}</td>`
+            ? `<td rowspan="${jobs.length}" class="align-middle fw-bold text-center text-white bg-white bg-opacity-5 border-white border-opacity-5">${terminalName}</td>`
             : '';
 
         // Pasamos isServer (0) para que use formatDateRaw
@@ -492,7 +500,7 @@ function crearFilaJob(job, serverTime, terminalCellHTML = '', isServer = false) 
     }
 
     const isOld = esFechaAntigua(job.LastRunDate, serverTime, isServer);
-    const rowClass = (isOld && job.ExecutionStatus !== 'Running') ? 'table-warning' : '';
+    const rowClass = (isOld && job.ExecutionStatus !== 'Running') ? 'row-warning-premium' : '';
     const dateWarningIcon = (isOld && job.ExecutionStatus !== 'Running') 
         ? '<i class="fa-solid fa-calendar-xmark text-danger me-1" title="Ejecutado en día distinto al actual"></i>' 
         : '';
@@ -595,9 +603,9 @@ async function llenarModalConFetch(id) {
                 const safeMsg = rawMsg.replace(/"/g, '&quot;'); 
                 const displayStatus = job.ExecutionStatus === 'Running' ? 'En Ejecución' : job.LastOutcome;
                 const isOld = esFechaAntigua(job.LastRunDate, serverTime, isServer);
-                const rowStyle = (isOld && job.ExecutionStatus !== 'Running') ? 'background-color: #fff3cd;' : '';
-                const dateStyle = (isOld && job.ExecutionStatus !== 'Running') ? 'color: #856404; font-weight: bold;' : 'color: #6c757d;';
-                const dateIcon = (isOld && job.ExecutionStatus !== 'Running') ? '<i class="fa-solid fa-triangle-exclamation"></i> ' : '';
+                const rowStyle = (isOld && job.ExecutionStatus !== 'Running') ? 'background: rgba(255, 193, 7, 0.05);' : '';
+                const dateStyle = (isOld && job.ExecutionStatus !== 'Running') ? 'color: var(--warning-amber); font-weight: bold;' : 'color: rgba(255, 255, 255, 0.5);';
+                const dateIcon = (isOld && job.ExecutionStatus !== 'Running') ? '<i class="fa-solid fa-triangle-exclamation text-warning"></i> ' : '';
 
                 let actionButtons = '';
                 const btnPlayDisabled = job.ExecutionStatus === 'Running' ? 'disabled' : '';
@@ -881,15 +889,11 @@ async function loadCurrencyBadges(terminalId, cardElement) {
             `;
         }).join('');
         
-        // Buscar o crear el contenedor de badges
-        let badgesContainer = cardElement.querySelector('.currency-badges');
-        if (!badgesContainer) {
-            badgesContainer = d.createElement('div');
-            badgesContainer.className = 'currency-badges';
-            cardElement.appendChild(badgesContainer);
+        // Cargar en el contenedor
+        const badgesContainer = cardElement.querySelector('.currency-badges');
+        if (badgesContainer) {
+            badgesContainer.innerHTML = badgesHTML;
         }
-        
-        badgesContainer.innerHTML = badgesHTML;
     } catch (error) {
         console.error('Error loading currencies:', error);
         // Mostrar mensaje de error discreto
