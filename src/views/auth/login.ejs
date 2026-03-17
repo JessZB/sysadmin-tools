@@ -4,59 +4,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión | SysAdmin Tool</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Acceso Seguro | SysAdmin Tool Suite</title>
+    <!-- Iconos y Fuentes -->
+    <link rel="icon" type="image/x-icon" href="/favicon.webp">
+    <link href="/css/lib/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/lib/bootstrap-icons.css">
+    <link href="/css/lib/font-awesome.css" rel="stylesheet">
+    <link href="/css/custom-theme.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f8f9fa;
+            background: radial-gradient(circle at center, #1a1f2b 0%, var(--space-dark) 100%);
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Luces de fondo ambientales */
+        .ambient-light {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: var(--neon-blue);
+            filter: blur(150px);
+            opacity: 0.05;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .light-1 { top: -10%; left: -10%; background: var(--neon-blue); }
+        .light-2 { bottom: -10%; right: -10%; background: var(--neon-indigo); }
+
+        .login-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 440px;
+            padding: 20px;
         }
 
         .login-card {
-            max-width: 400px;
+            background: rgba(22, 27, 34, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .login-card:hover {
+            border-color: rgba(0, 210, 255, 0.2);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 210, 255, 0.1);
+        }
+
+        .brand-logo {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--neon-blue);
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .brand-logo span {
+            color: #fff;
+            font-weight: 300;
+        }
+
+        .form-label-premium {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group-premium {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group-premium:focus-within {
+            border-color: var(--neon-blue);
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.15);
+        }
+
+        .input-group-premium i {
+            color: rgba(255, 255, 255, 0.3);
+            margin-right: 12px;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+        }
+
+        .input-group-premium:focus-within i {
+            color: var(--neon-blue);
+        }
+
+        .input-premium {
+            background: transparent;
+            border: none;
+            color: #fff;
             width: 100%;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 1rem;
+            outline: none;
+            padding: 8px 0;
+        }
+
+        .input-premium::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-login-premium {
+            background: var(--gradient-neon);
+            border: none;
+            border-radius: 14px;
+            padding: 14px;
+            color: #fff;
+            font-weight: 700;
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 10px 20px -5px rgba(0, 210, 255, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn-login-premium:hover {
+            transform: translateY(-3px);
+            filter: brightness(1.1);
+            box-shadow: 0 15px 30px -5px rgba(0, 210, 255, 0.6);
+        }
+
+        .btn-login-premium:active {
+            transform: translateY(0);
+        }
+
+        .auth-footer {
+            margin-top: 2rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.85rem;
+        }
+
+        .alert-premium {
+            background: rgba(255, 77, 109, 0.1);
+            border: 1px solid rgba(255, 77, 109, 0.2);
+            color: var(--punch-red);
+            border-radius: 12px;
+            font-size: 0.85rem;
+            padding: 12px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Float Anim */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .float-anim {
+            animation: float 6s ease-in-out infinite;
         }
     </style>
 </head>
 
-<body>
+<body class="noise-overlay">
+    <div class="ambient-light light-1"></div>
+    <div class="ambient-light light-2"></div>
 
-    <div class="card login-card bg-white">
-        <div class="text-center mb-4">
-            <h3 class="fw-bold text-primary">SysAdmin Suite</h3>
-            <p class="text-muted">Ingresa tus credenciales</p>
+    <div class="login-container">
+        <div class="text-center mb-5 float-anim">
+            <div class="brand-logo">
+                <i class="fa-solid fa-bolt-lightning me-2"></i>SYS<span>ADMIN</span>
+            </div>
+            <div class="text-white-50 small text-uppercase ls-2 fw-bold" style="letter-spacing: 0.2em; font-size: 0.65rem;">
+                Management Infrastructure Suite
+            </div>
         </div>
 
-        <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
+        <div class="login-card shadow-2xl">
+            <div class="mb-4">
+                <h4 class="text-white fw-bold mb-1">Bienvenido</h4>
+                <p class="text-white-50 small">Identifíquese para continuar al panel.</p>
+            </div>
 
-        <form id="loginForm">
-            <div class="mb-3">
-                <label for="username" class="form-label">Usuario</label>
-                <input type="text" class="form-control" id="username" name="username" required autofocus>
+            <div id="loginError" class="alert-premium d-none" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <span></span>
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Contraseña</label>
-                <input type="password" class="form-control" id="password" name="password" required>
-            </div>
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary" id="btnLogin">
-                    Entrar
+
+            <form id="loginForm">
+                <div>
+                    <label for="username" class="form-label-premium">
+                        <i class="bi bi-person me-2"></i>Nombre de Usuario
+                    </label>
+                    <div class="input-group-premium">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <input type="text" class="input-premium" id="username" name="username" placeholder="admin_root" required autofocus>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="form-label-premium">
+                        <i class="bi bi-lock me-2"></i>Contraseña de Acceso
+                    </label>
+                    <div class="input-group-premium">
+                        <i class="fa-solid fa-key"></i>
+                        <input type="password" class="input-premium" id="password" name="password" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login-premium" id="btnLogin">
+                    Acceder al Sistema <i class="fa-solid fa-arrow-right-to-bracket ms-2"></i>
                 </button>
-            </div>
-        </form>
+            </form>
 
-        <div class="text-center mt-3">
-            <small class="text-muted">¿Olvidaste tu contraseña? Contacta a soporte.</small>
+            <div class="auth-footer">
+                ¿Problemas de acceso? <br>
+                <a href="#" class="text-info text-decoration-none">Contactar al Administrador</a>
+            </div>
+        </div>
+
+        <div class="text-center mt-5 text-white-50" style="font-size: 0.7rem; opacity: 0.3;">
+            &copy; 2025 SysAdmin Tool Suite • Versión 2.4.0-DEEP-SPACE
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="/js/lib/sweetalert2@11.js"></script>
     <script src="/js/auth.client.js"></script>
+    <script>
+        // Animación suave de entrada para los inputs
+        document.querySelectorAll('.input-group-premium').forEach((group, index) => {
+            group.style.opacity = '0';
+            group.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                group.style.transition = 'all 0.5s ease';
+                group.style.opacity = '1';
+                group.style.transform = 'translateY(0)';
+            }, 300 + (index * 100));
+        });
+    </script>
 </body>
 
-</html>
+</html>
