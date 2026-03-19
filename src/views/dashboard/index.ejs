@@ -13,7 +13,8 @@
 
         /* Tarjeta POS Premium */
         .pos-card {
-            min-height: 220px; /* Reducido para ser más dinámico */
+            min-height: 220px;
+            /* Reducido para ser más dinámico */
             padding: 20px;
             border-radius: 24px;
             background: var(--glass-bg);
@@ -35,21 +36,44 @@
         }
 
         /* Resplandor de Estados (Glow States) */
-        .status-success { border-bottom: 4px solid var(--success-mint); }
-        .status-success .pos-icon { color: var(--success-mint); filter: drop-shadow(0 0 8px var(--success-mint)); }
+        .status-success {
+            border-bottom: 4px solid var(--success-mint);
+        }
+
+        .status-success .pos-icon {
+            color: var(--success-mint);
+            filter: drop-shadow(0 0 8px var(--success-mint));
+        }
 
         .status-error {
             border-bottom: 4px solid var(--punch-red);
             animation: glow-error 2s infinite ease-in-out;
         }
-        .status-error .pos-icon { color: var(--punch-red); filter: drop-shadow(0 0 10px var(--punch-red)); }
 
-        .status-warning { border-bottom: 4px solid var(--warning-amber); }
-        .status-warning .pos-icon { color: var(--warning-amber); filter: drop-shadow(0 0 8px var(--warning-amber)); }
+        .status-error .pos-icon {
+            color: var(--punch-red);
+            filter: drop-shadow(0 0 10px var(--punch-red));
+        }
+
+        .status-warning {
+            border-bottom: 4px solid var(--warning-amber);
+        }
+
+        .status-warning .pos-icon {
+            color: var(--warning-amber);
+            filter: drop-shadow(0 0 8px var(--warning-amber));
+        }
 
         @keyframes glow-error {
-            0%, 100% { box-shadow: 0 0 20px rgba(255, 77, 109, 0.2); }
-            50% { box-shadow: 0 0 40px rgba(255, 77, 109, 0.4); }
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(255, 77, 109, 0.2);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(255, 77, 109, 0.4);
+            }
         }
 
         .pos-icon {
@@ -63,7 +87,8 @@
             width: 100%;
             display: flex;
             justify-content: center;
-            margin-top: auto; /* Empuja el botón al fondo del contenedor flex */
+            margin-top: auto;
+            /* Empuja el botón al fondo del contenedor flex */
             padding-top: 15px;
             transition: all 0.3s ease;
             z-index: 5;
@@ -90,7 +115,8 @@
         }
 
         /* Densidad de Tablas */
-        .mini-job-table td, .mini-job-table th {
+        .mini-job-table td,
+        .mini-job-table th {
             padding: 4px 6px !important;
             line-height: 1.2 !important;
             vertical-align: middle;
@@ -136,13 +162,17 @@
             font-size: 0.75rem;
             padding: 5px 10px;
             border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .ls-1 { letter-spacing: 0.1em; }
-        
+        .ls-1 {
+            letter-spacing: 0.1em;
+        }
+
         /* Contraste Global de Textos */
-        .text-muted { color: rgba(255, 255, 255, 0.5) !important; }
+        .text-muted {
+            color: rgba(255, 255, 255, 0.5) !important;
+        }
     </style>
 
 
@@ -170,12 +200,13 @@
         <div class="d-flex align-items-center gap-2 gap-md-3 flex-wrap justify-content-end">
             <div class="text-end">
                 <small class="text-muted d-block" style="font-size: 0.7rem;">AUTO-REFRESH</small>
-                <span class="badge btn-frosted border border-white border-opacity-10 text-neon-blue timer-badge" id="countdownTimer"
-                    title="Click para pausar/reanudar">
+                <span class="badge btn-frosted border border-white border-opacity-10 text-neon-blue timer-badge"
+                    id="countdownTimer" title="Click para pausar/reanudar">
                     05:00
                 </span>
             </div>
-            <button class="btn btn-frosted border border-white border-opacity-10 text-white" id="btnScreenshot" title="Capturar vista actual como imagen">
+            <button class="btn btn-frosted border border-white border-opacity-10 text-white" id="btnScreenshot"
+                title="Capturar vista actual como imagen">
                 <i class="fa-solid fa-camera me-1"></i> <span class="d-none d-md-inline">Capturar</span>
             </button>
             <button class="btn btn-primary" id="btnGlobalRefresh">
@@ -184,16 +215,17 @@
         </div>
     </div>
 
-    <ul class="nav nav-tabs mb-4 border-0 glass-effect p-1 rounded-pill" id="viewTabs" role="tablist" style="width: fit-content;">
+    <ul class="nav nav-tabs mb-4 border-0 glass-effect p-1 rounded-pill" id="viewTabs" role="tablist"
+        style="width: fit-content;">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active border-0 rounded-pill px-4 py-2" id="grid-tab" data-bs-toggle="tab" data-bs-target="#grid-view" type="button"
-                role="tab">
+            <button class="nav-link active border-0 rounded-pill px-4 py-2" id="grid-tab" data-bs-toggle="tab"
+                data-bs-target="#grid-view" type="button" role="tab">
                 <i class="fa-solid fa-border-all me-2"></i>Vista General (Cajas)
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link border-0 rounded-pill px-4 py-2" id="matrix-tab" data-bs-toggle="tab" data-bs-target="#matrix-view" type="button"
-                role="tab">
+            <button class="nav-link border-0 rounded-pill px-4 py-2" id="matrix-tab" data-bs-toggle="tab"
+                data-bs-target="#matrix-view" type="button" role="tab">
                 <i class="fa-solid fa-list-check me-2" aria-hidden="true"></i>Vista Detallada (Jobs)
             </button>
         </li>
@@ -224,33 +256,36 @@
         </div>
 
         <div class="tab-pane fade" id="matrix-view" role="tabpanel">
-            <div class="mb-4">
-                <h6 class="text-uppercase text-muted fw-bold small ls-1">Servidor Principal</h6>
-                <div class="row g-4" id="server-matrix"></div>
-            </div>
+            <div class="row">
+                <div class="mb-4 col-xl-6">
+                    <h6 class="text-uppercase text-muted fw-bold small ls-1">Servidor Principal</h6>
+                    <div class="row g-4" id="server-matrix"></div>
+                </div>
 
-            <div>
-                <h6 class="text-uppercase text-muted fw-bold small ls-1">Detalle POS</h6>
-                <div class="card glass-effect border-opacity-10 rounded-4 overflow-hidden border border-white border-opacity-5">
-                    <div class="card-body p-0">
-                        <table class="table table-sm mb-0 mini-job-table table-frosted align-middle" style="table-layout: fixed; width: 100%;">
-                            <thead class="text-center sticky-top">
-                                <tr>
-                                    <th style="width: 9%;">Terminal</th>
-                                    <th style="width: 18%;">Nombre</th>
-                                    <th style="width: 9%;">Estado</th>
-                                    <th style="width: 11%;">Ejecución</th>
-                                    <th style="width: 18%;">Última ejecución</th>
-                                    <th style="width: 17%;">Duración</th>
-                                    <th style="width: 18%;">Inicio</th>
-                                </tr>
-                            </thead>
-                            <tbody id="matrix-grid">
-                                <tr>
-                                    <td colspan="7" class="text-center py-3 text-muted">Cargando…</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <div class="col-xl-6">
+                    <h6 class="text-uppercase text-muted fw-bold small ls-1">Detalle POS</h6>
+                    <div
+                        class="card glass-effect border-opacity-10 rounded-4 overflow-hidden border border-white border-opacity-5">
+                        <div class="card-body p-0">
+                            <table class="table table-sm mb-0 mini-job-table table-frosted align-middle"
+                                style="table-layout: fixed; width: 100%;">
+                                <thead class="text-center sticky-top">
+                                    <tr>
+                                        <th style="width: 12%;">Terminal</th>
+                                        <th style="width: 22%;">Nombre</th>
+                                        <th style="width: 12%;">Estado</th>
+                                        <th style="width: 14%;">Ejecución</th>
+                                        <th style="width: 22%;">Última ejecución</th>
+                                        <th style="width: 18%;">Duración</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="matrix-grid">
+                                    <tr>
+                                        <td colspan="6" class="text-center py-3 text-muted">Cargando…</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -280,7 +315,8 @@
             <div class="modal-content">
                 <div class="modal-header glass-effect border-bottom-0 p-4" id="modalHeader">
                     <h5 class="modal-title font-display fw-bold" id="modalTitle">Cargando…</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
                     <div class="d-flex justify-content-between mb-3 border-bottom border-white border-opacity-5 pb-2">
@@ -337,7 +373,9 @@
                     </div>
                 </div>
                 <div class="modal-footer border-top-0 p-4">
-                    <button type="button" class="btn btn-frosted border border-white border-opacity-10 text-white" data-bs-dismiss="modal" style="width: auto; padding-left: 30px; padding-right: 30px;">Cerrar</button>
+                    <button type="button" class="btn btn-frosted border border-white border-opacity-10 text-white"
+                        data-bs-dismiss="modal"
+                        style="width: auto; padding-left: 30px; padding-right: 30px;">Cerrar</button>
                 </div>
             </div>
         </div>

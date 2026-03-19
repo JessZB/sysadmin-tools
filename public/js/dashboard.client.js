@@ -228,7 +228,7 @@ async function cargarDatos() {
 
         serverGrid.innerHTML = ''; posGrid.innerHTML = '';
         serverMatrix.innerHTML = ''; 
-        posMatrix.innerHTML = '<tr><td colspan="7" class="text-center py-3 text-muted">Cargando...</td></tr>';
+        posMatrix.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted">Cargando...</td></tr>';
 
         if (servers.length === 0) serverGrid.innerHTML = '<div class="col-12 text-muted small fst-italic">No hay servidores configurados.</div>';
         
@@ -384,16 +384,15 @@ function crearTablaMatrizHTML(term, colClass = 'col-12 col-md-6', cardClass = ''
                 <table class="table table-sm mb-0 mini-job-table table-frosted" style="table-layout: fixed; width: 100%;">
                     <thead class="small text-muted text-center">
                         <tr>
-                            <th style="width: 25%;">Nombre</th>
-                            <th style="width: 12%;">Estado</th>
-                            <th style="width: 13%;">Ejecución</th>
-                            <th style="width: 20%;">Última ejecución</th>
-                            <th style="width: 15%;">Duración</th>
-                            <th style="width: 15%;">Inicio</th>
+                            <th style="width: 30%;">Nombre</th>
+                            <th style="width: 15%;">Estado</th>
+                            <th style="width: 15%;">Ejecución</th>
+                            <th style="width: 22%;">Última ejecución</th>
+                            <th style="width: 18%;">Duración</th>
                         </tr>
                     </thead>
                     <tbody id="matrix-tbody-${term.id}">
-                        <tr><td colspan="6" class="text-center py-3 text-muted">Cargando...</td></tr>
+                        <tr><td colspan="5" class="text-center py-3 text-muted">Cargando...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -427,7 +426,7 @@ function renderizarFilasMatriz(id, jobs, serverTime) {
     if(!matrixGrid) return;
     
     const terminalName = terminal.name;
-    const loadingRow = matrixGrid.querySelector('td[colspan="7"]');
+    const loadingRow = matrixGrid.querySelector('td[colspan="6"]');
     if (loadingRow) loadingRow.parentElement.remove();
     
     const existingRows = matrixGrid.querySelectorAll(`tr[data-terminal-id="${id}"]`);
@@ -479,9 +478,9 @@ function crearFilaJob(job, serverTime, terminalCellHTML = '', isServer = false) 
     if (job.ExecutionStatus === 'Running') { execBadge = 'bg-warning text-dark'; execText = 'En ejecución'; }
     else if (job.ExecutionStatus === 'Idle') { execBadge = 'bg-light text-dark border'; execText = 'Detenido'; }
 
+    const isRunning = job.ExecutionStatus === 'Running';
+
     // --- SELECCIÓN DE FORMATEO DE FECHA ---
-    // Si es Servidor -> formatDateToLocal (ajustar zona horaria)
-    // Si es Caja -> formatDateRaw (mantener números originales)
     let lastRunDateFmt = '||';
     if (job.LastRunDate) {
         const fmtFunc = isServer ? window.formatDateToLocal : window.formatDateRaw;
@@ -497,17 +496,18 @@ function crearFilaJob(job, serverTime, terminalCellHTML = '', isServer = false) 
     
     const duration = calcularDuracion(job.LastRunDate, serverTime, job.ExecutionStatus, job.LastDuration, isServer);
 
-    let startTime = '-';
-    if (job.ExecutionStatus === 'Running' && job.LastRunDate) {
-         const fmtFunc = isServer ? window.formatDateToLocal : window.formatDateRaw;
-         const parts = fmtFunc(job.LastRunDate).split(',');
-         if(parts.length >= 2) startTime = parts[1].trim();
-    }
-
     const isOld = esFechaAntigua(job.LastRunDate, serverTime, isServer);
     const rowClass = (isOld && job.ExecutionStatus !== 'Running') ? 'row-warning-premium' : '';
     const dateWarningIcon = (isOld && job.ExecutionStatus !== 'Running') 
         ? '<i class="fa-solid fa-calendar-xmark text-danger me-1" title="Ejecutado en día distinto al actual"></i>' 
+        : '';
+
+    // Highlight de "Última ejecución" cuando el job está corriendo
+    const runningDateClass = isRunning 
+        ? 'fw-bold' 
+        : (isOld ? 'fw-bold text-dark' : 'text-muted');
+    const runningDateStyle = isRunning 
+        ? 'color: var(--warning-amber); text-shadow: 0 0 6px rgba(255, 183, 3, 0.4);' 
         : '';
 
     const row = d.createElement('tr');
@@ -523,14 +523,11 @@ function crearFilaJob(job, serverTime, terminalCellHTML = '', isServer = false) 
         <td class="text-center">
             <span class="badge ${execBadge} w-100">${execText}</span>
         </td>
-        <td class="text-center small ${isOld ? 'fw-bold text-dark' : 'text-muted'}">
-            ${dateWarningIcon} ${lastRunDateFmt}
+        <td class="text-center small ${runningDateClass}" style="${runningDateStyle}">
+            ${isRunning ? '<i class="fa-solid fa-circle-play me-1" title="En ejecución"></i>' : ''}${dateWarningIcon} ${lastRunDateFmt}
         </td>
         <td class="text-center font-monospace small">
             ${duration}
-        </td>
-        <td class="text-center text-muted small">
-            ${startTime}
         </td>
     `;
     return row;
@@ -548,7 +545,7 @@ function marcarCargaVisual(id) {
 
     const tbody = d.getElementById(`matrix-tbody-${id}`);
     if (tbody) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-3 text-muted"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-3 text-muted"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr>`;
     }
 }
 
@@ -666,7 +663,7 @@ function esFechaAntigua(jobDateStr, serverTimeStr, isServer = false) {
 function marcarErrorVisual(id) {
     actualizarTarjetaVisual(id, 'error');
     const tbody = d.getElementById(`matrix-tbody-${id}`);
-    if(tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-danger text-center"><small>Error de conexión</small></td></tr>';
+    if(tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-danger text-center"><small>Error de conexión</small></td></tr>';
 }
 
 function calcularDuracion(startDateStr, serverDateStr, executionStatus, lastDurationStr, isServer = false) {
