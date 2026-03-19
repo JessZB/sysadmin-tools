@@ -930,23 +930,52 @@ async function loadCurrencyDetails(terminalId) {
         if (!detailsContainer) {
             detailsContainer = d.createElement('div');
             detailsContainer.id = 'currencyDetailsContainer';
-            detailsContainer.className = 'mt-3 pt-3 border-top';
+            detailsContainer.className = 'mt-3 pt-3 border-top border-white border-opacity-5';
             modalBody.appendChild(detailsContainer);
         }
-        
-        let html = '<h6 class="mb-2"><i class="fa-solid fa-money-bill-transfer me-2"></i>Tasas de Cambio</h6><div class="d-flex gap-3 flex-wrap">';
-        
+
+        // Color accent per currency code
+        const currencyColors = {
+            '0000000003': { accent: '#00d2ff', icon: 'bi-currency-euro',   label: 'Euro'          },
+            '0000000002': { accent: '#39d353', icon: 'bi-currency-dollar',  label: 'Dólar USD'     },
+            'TFSM':       { accent: '#a78bfa', icon: 'bi-credit-card',      label: 'Tarjeta Forum' },
+            'CXC':        { accent: '#fbbf24', icon: 'bi-receipt',          label: 'Cuentas x Cobrar' },
+            'REF':        { accent: '#fb923c', icon: 'bi-arrow-left-right', label: 'Referencia'    },
+        };
+
+        let cards = '';
         rates.forEach(rate => {
-            html += `
-                <div class="border rounded p-2 bg-light">
-                    <div class="fw-bold small text-muted">${rate.c_descripcion} (${rate.c_codmoneda})</div>
-                    <div class="fs-5 fw-bold text-dark">${rate.c_simbolo || ''} ${formatCurrencyRate(rate.n_factor)}</div>
+            const code = rate.c_codmoneda?.trim();
+            const cfg = currencyColors[code] || { accent: '#94a3b8', icon: 'bi-cash', label: rate.c_descripcion || code };
+            const name = rate.c_descripcion?.trim() || cfg.label;
+            cards += `
+                <div style="
+                    background: rgba(255,255,255,0.04);
+                    border: 1px solid ${cfg.accent}44;
+                    border-left: 3px solid ${cfg.accent};
+                    border-radius: 12px;
+                    padding: 10px 14px;
+                    min-width: 130px;
+                    flex: 1 1 120px;
+                ">
+                    <div style="color: ${cfg.accent}; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 2px;">
+                        <i class="bi ${cfg.icon} me-1"></i>${name}
+                    </div>
+                    <div style="color: rgba(255,255,255,0.5); font-size: 0.6rem; margin-bottom: 4px;">${code}</div>
+                    <div style="color: #fff; font-size: 1.1rem; font-weight: 800; font-family: var(--font-display);">
+                        ${rate.c_simbolo || ''}&nbsp;${formatCurrencyRate(rate.n_factor)}
+                    </div>
                 </div>
             `;
         });
-        
-        html += '</div>';
-        detailsContainer.innerHTML = html;
+
+        detailsContainer.innerHTML = `
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="fa-solid fa-money-bill-transfer" style="color: var(--neon-blue);"></i>
+                <span class="text-white-50 small fw-bold text-uppercase" style="letter-spacing: 0.08em;">Tasas de Cambio</span>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">${cards}</div>
+        `;
         
     } catch (error) {
         console.error('Error loading currency details:', error);
