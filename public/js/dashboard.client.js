@@ -380,16 +380,16 @@ function crearTablaMatrizHTML(term, colClass = 'col-12 col-md-6', cardClass = ''
                     <i class="fa-solid fa-rotate-right"></i>
                 </button>
             </div>
-            <div class="card-body p-0 table-responsive">
-                <table class="table table-sm mb-0 mini-job-table table-frosted">
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0 mini-job-table table-frosted" style="table-layout: fixed; width: 100%;">
                     <thead class="small text-muted text-center">
                         <tr>
-                            <th>Nombre</th>
-                            <th>Estado</th>
-                            <th>Ejecución</th>
-                            <th>Última ejecución</th>
-                            <th>Duración</th>
-                            <th>Inicio</th>
+                            <th style="width: 25%;">Nombre</th>
+                            <th style="width: 12%;">Estado</th>
+                            <th style="width: 13%;">Ejecución</th>
+                            <th style="width: 20%;">Última ejecución</th>
+                            <th style="width: 15%;">Duración</th>
+                            <th style="width: 15%;">Inicio</th>
                         </tr>
                     </thead>
                     <tbody id="matrix-tbody-${term.id}">
