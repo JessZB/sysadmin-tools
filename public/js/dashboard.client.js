@@ -381,7 +381,7 @@ function crearTablaMatrizHTML(term, colClass = 'col-12 col-md-6', cardClass = ''
                 </button>
             </div>
             <div class="card-body p-0">
-                <table class="table table-sm mb-0 mini-job-table table-frosted" style="table-layout: fixed; width: 100%;">
+                <table class="table table-sm mb-0 mini-job-table ultra-dense table-frosted" style="table-layout: fixed; width: 100%;">
                     <thead class="small text-muted text-center">
                         <tr>
                             <th style="width: 30%;">Nombre</th>

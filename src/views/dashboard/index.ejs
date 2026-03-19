@@ -126,6 +126,13 @@
             font-size: 0.75rem;
         }
 
+        /* Sin padding — máxima densidad para vista detallada */
+        .ultra-dense td,
+        .ultra-dense th {
+            padding: 2px 4px !important;
+            line-height: 1.1 !important;
+        }
+
         .mini-job-table .badge {
             font-size: 0.7rem;
             padding: 3px 6px;
@@ -267,7 +274,7 @@
                     <div
                         class="card glass-effect border-opacity-10 rounded-4 overflow-hidden border border-white border-opacity-5">
                         <div class="card-body p-0">
-                            <table class="table table-sm mb-0 mini-job-table table-frosted align-middle"
+                            <table class="table table-sm mb-0 mini-job-table ultra-dense table-frosted align-middle"
                                 style="table-layout: fixed; width: 100%;">
                                 <thead class="text-center sticky-top">
                                     <tr>
