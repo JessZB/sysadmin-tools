@@ -163,7 +163,7 @@
                     <% } %>
         </div>
 
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-2 gap-md-3 flex-wrap justify-content-end">
             <div class="text-end">
                 <small class="text-muted d-block" style="font-size: 0.7rem;">AUTO-REFRESH</small>
                 <span class="badge btn-frosted border border-white border-opacity-10 text-neon-blue timer-badge" id="countdownTimer"
@@ -171,8 +171,11 @@
                     05:00
                 </span>
             </div>
+            <button class="btn btn-frosted border border-white border-opacity-10 text-white" id="btnScreenshot" title="Capturar vista actual como imagen">
+                <i class="fa-solid fa-camera me-1"></i> <span class="d-none d-md-inline">Capturar</span>
+            </button>
             <button class="btn btn-primary" id="btnGlobalRefresh">
-                <i class="fa-solid fa-arrows-rotate me-1"></i> Refrescar
+                <i class="fa-solid fa-arrows-rotate me-1"></i> <span class="d-none d-md-inline">Refrescar</span>
             </button>
         </div>
     </div>
@@ -340,4 +343,5 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <%- include('../layout/footer') %>

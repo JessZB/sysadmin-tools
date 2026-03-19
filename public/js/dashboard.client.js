@@ -34,6 +34,11 @@ d.addEventListener('DOMContentLoaded', () => {
         btnRefresh.addEventListener('click', forzarRefrescoTotal);
     }
 
+    const btnScreenshot = d.getElementById('btnScreenshot');
+    if (btnScreenshot) {
+        btnScreenshot.addEventListener('click', captureSnapshot);
+    }
+
     const modalEl = d.getElementById('detailsModal');
     if (modalEl) {
         modalEl.addEventListener('show.bs.modal', () => { isPaused = true; });
@@ -948,6 +953,57 @@ async function loadCurrencyDetails(terminalId) {
         
     } catch (error) {
         console.error('Error loading currency details:', error);
+    }
+}
+
+/* =========================================
+   CAPTURA DE PANTALLA (SCREENSHOT)
+   ========================================= */
+async function captureSnapshot() {
+    const btn = d.getElementById('btnScreenshot');
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Capturando...';
+
+    try {
+        // Determinar qué tab está activo
+        const activeTab = d.querySelector('#dashboardContent .tab-pane.show.active');
+        if (!activeTab) {
+            showErrorToast('No hay una vista activa para capturar');
+            return;
+        }
+
+        // Obtener nombre de sucursal para el archivo
+        const selector = d.getElementById('branchSelector');
+        let branchName = 'sin-sucursal';
+        if (selector && selector.selectedIndex >= 0) {
+            branchName = selector.options[selector.selectedIndex].text.replace(/[^a-zA-Z0-9]/g, '_');
+        }
+
+        const tabName = activeTab.id === 'grid-view' ? 'general' : 'detallada';
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+
+        const canvas = await html2canvas(activeTab, {
+            backgroundColor: '#0b0e14',
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            windowWidth: activeTab.scrollWidth,
+            windowHeight: activeTab.scrollHeight
+        });
+
+        const link = document.createElement('a');
+        link.download = `dashboard_${tabName}_${branchName}_${timestamp}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        showSuccessToast('Captura descargada exitosamente');
+    } catch (error) {
+        console.error('Error al capturar:', error);
+        showErrorToast('Error al generar la captura');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
     }
 }
 })();

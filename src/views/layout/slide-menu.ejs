@@ -42,116 +42,85 @@
 
             <!-- Menu Grid -->
             <div class="menu-grid-slide">
-                <!-- Dashboard -->
                 <% if (user.modules && user.modules.includes('dashboard')) { %>
-                    <a href="/dashboard" class="menu-card">
-                        <div class="menu-icon">
-                            <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
-                        </div>
-                        <div class="menu-content-text">
-                            <h4 class="menu-title">Monitor Jobs</h4>
-                            <p class="menu-description">Monitoreo de trabajos y terminales</p>
-                        </div>
-                    </a>
-                    <% } %>
+                <a href="/dashboard" class="menu-card">
+                    <div class="menu-icon"><i class="fa-solid fa-chart-line" aria-hidden="true"></i></div>
+                    <div class="menu-content-text">
+                        <h4 class="menu-title">Monitor Jobs</h4>
+                        <p class="menu-description">Monitoreo de trabajos y terminales</p>
+                    </div>
+                </a>
+                <% } %>
 
-                        <!-- Terminales -->
-                        <% if (user.modules && user.modules.includes('terminals')) { %>
-                            <a href="/terminals" class="menu-card">
-                                <div class="menu-icon">
-                                    <i class="fa-solid fa-desktop"></i>
-                                </div>
-                                <div class="menu-content-text">
-                                    <h4 class="menu-title">Terminales</h4>
-                                    <p class="menu-description">Gestión de terminales POS</p>
-                                </div>
-                            </a>
-                            <% } %>
+                <% if (user.modules && user.modules.includes('terminals')) { %>
+                <a href="/terminals" class="menu-card">
+                    <div class="menu-icon"><i class="fa-solid fa-desktop"></i></div>
+                    <div class="menu-content-text">
+                        <h4 class="menu-title">Terminales</h4>
+                        <p class="menu-description">Gestión de terminales POS</p>
+                    </div>
+                </a>
+                <% } %>
 
-                                <!-- Sucursales -->
-                                <% if (user.modules && user.modules.includes('branches')) { %>
-                                    <a href="/branches" class="menu-card">
-                                        <div class="menu-icon">
-                                            <i class="fa-solid fa-building"></i>
-                                        </div>
-                                        <div class="menu-content-text">
-                                            <h4 class="menu-title">Sucursales</h4>
-                                            <p class="menu-description">Administrar sucursales</p>
-                                        </div>
-                                    </a>
-                                    <% } %>
+                <% if (user.modules && user.modules.includes('branches')) { %>
+                <a href="/branches" class="menu-card">
+                    <div class="menu-icon"><i class="fa-solid fa-building"></i></div>
+                    <div class="menu-content-text">
+                        <h4 class="menu-title">Sucursales</h4>
+                        <p class="menu-description">Administrar sucursales</p>
+                    </div>
+                </a>
+                <% } %>
 
-                                        <!-- Usuarios -->
-                                        <% if (user.modules && user.modules.includes('users')) { %>
-                                            <a href="/users" class="menu-card">
-                                                <div class="menu-icon">
-                                                    <i class="fa-solid fa-users"></i>
-                                                </div>
-                                                <div class="menu-content-text">
-                                                    <h4 class="menu-title">Usuarios</h4>
-                                                    <p class="menu-description">Gestión de usuarios</p>
-                                                </div>
-                                            </a>
-                                            <% } %>
+                <% if (user.modules && user.modules.includes('users')) { %>
+                <a href="/users" class="menu-card">
+                    <div class="menu-icon"><i class="fa-solid fa-users"></i></div>
+                    <div class="menu-content-text">
+                        <h4 class="menu-title">Usuarios</h4>
+                        <p class="menu-description">Gestión de usuarios</p>
+                    </div>
+                </a>
+                <% } %>
 
-                                                <!-- Códigos de Barra -->
-                                                <% if (user.modules && user.modules.includes('barcode')) { %>
-                                                    <a href="/barcode" class="menu-card">
-                                                        <div class="menu-icon">
-                                                            <i class="fa-solid fa-barcode"></i>
-                                                        </div>
-                                                        <div class="menu-content-text">
-                                                            <h4 class="menu-title">Códigos de Barra</h4>
-                                                            <p class="menu-description">Generador PLU Dibal</p>
-                                                        </div>
-                                                    </a>
-                                                    <% } %>
+                <% if (user.modules && user.modules.includes('barcode')) { %>
+                <a href="/barcode" class="menu-card">
+                    <div class="menu-icon"><i class="fa-solid fa-barcode"></i></div>
+                    <div class="menu-content-text">
+                        <h4 class="menu-title">Códigos de Barra</h4>
+                        <p class="menu-description">Generador PLU Dibal</p>
+                    </div>
+                </a>
+                <% } %>
 
-                                                        <!-- Monitoreo de Servicios -->
-                                                        <% if (user.modules && user.modules.includes('services')) { %>
-                                                            <a href="/services" class="menu-card">
-                                                                <div class="menu-icon">
-                                                                    <i class="fa-solid fa-heartbeat"></i>
-                                                                </div>
-                                                                <div class="menu-content-text">
-                                                                    <h4 class="menu-title">Monitoreo Servicios</h4>
-                                                                    <p class="menu-description">Verificar disponibilidad
-                                                                    </p>
-                                                                </div>
-                                                            </a>
-                                                            <% } %>
+                <% if (user.modules && user.modules.includes('services')) { %>
+                <a href="/services" class="menu-card">
+                    <div class="menu-icon"><i class="fa-solid fa-heartbeat"></i></div>
+                    <div class="menu-content-text">
+                        <h4 class="menu-title">Monitoreo Servicios</h4>
+                        <p class="menu-description">Verificar disponibilidad</p>
+                    </div>
+                </a>
+                <% } %>
 
-                                                                <!-- Auditoría -->
-                                                                <% if (user.modules && user.modules.includes('audit')) {
-                                                                    %>
-                                                                    <a href="/audit" class="menu-card accent">
-                                                                        <div class="menu-icon">
-                                                                            <i
-                                                                                class="fa-solid fa-clock-rotate-left"></i>
-                                                                        </div>
-                                                                        <div class="menu-content-text">
-                                                                            <h4 class="menu-title">Auditoría</h4>
-                                                                            <p class="menu-description">Registro de
-                                                                                actividades</p>
-                                                                        </div>
-                                                                    </a>
-                                                                    <% } %>
+                <% if (user.modules && user.modules.includes('audit')) { %>
+                <a href="/audit" class="menu-card accent">
+                    <div class="menu-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    <div class="menu-content-text">
+                        <h4 class="menu-title">Auditoría</h4>
+                        <p class="menu-description">Registro de actividades</p>
+                    </div>
+                </a>
+                <% } %>
 
-                                                                        <!-- Pantallas -->
-                                                                        <% if (user.modules &&
-                                                                            user.modules.includes('screens')) { %>
-                                                                            <a href="/screens" class="menu-card">
-                                                                                <div class="menu-icon">
-                                                                                    <i class="fa-solid fa-tv"></i>
-                                                                                </div>
-                                                                                <div class="menu-content-text">
-                                                                                    <h4 class="menu-title">Pantallas
-                                                                                    </h4>
-                                                                                    <p class="menu-description">Gestión
-                                                                                        de TV y DLNA</p>
-                                                                                </div>
-                                                                            </a>
-                                                                            <% } %>
+                <% if (user.modules && user.modules.includes('screens')) { %>
+                <a href="/screens" class="menu-card">
+                    <div class="menu-icon"><i class="fa-solid fa-tv"></i></div>
+                    <div class="menu-content-text">
+                        <h4 class="menu-title">Pantallas</h4>
+                        <p class="menu-description">Gestión de TV y DLNA</p>
+                    </div>
+                </a>
+                <% } %>
             </div>
 
             <!-- Logout Button -->
