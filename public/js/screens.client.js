@@ -23,11 +23,8 @@ d.addEventListener('DOMContentLoaded', () => {
     btnSave.addEventListener('click', saveScreen)
   }
 
-  // 3. Delegación de eventos para las cards (en todas las filas)
-  const rows = d.querySelectorAll('.row')
-  rows.forEach((row) => {
-    row.addEventListener('click', handleCardActions)
-  })
+  // 3. Delegación de eventos centralizada para todo el módulo (cards y modales)
+  d.body.addEventListener('click', handleCardActions)
 
   // 4. Cambio de tipo de dispositivo
   const deviceTypeSelect = d.getElementById('deviceType')
@@ -44,13 +41,16 @@ d.addEventListener('DOMContentLoaded', () => {
    * Maneja todos los clicks en las cards de pantallas
    */
   function handleCardActions(e) {
-    const target = e.target.closest('button')
+    const target = e.target.closest('button') || e.target.closest('a[data-action]');
     if (!target) return
 
     const action = target.dataset.action
+    if (!action) return;
+    
     const screenId = target.dataset.id
 
     switch (action) {
+      // Samsung / General Actions
       case 'edit':
         editScreen(screenId)
         break
@@ -88,6 +88,105 @@ d.addEventListener('DOMContentLoaded', () => {
       case 'open-browser':
         openBrowser(screenId)
         break
+      case 'startup-routine':
+        startupRoutine(screenId)
+        break
+      
+      // LG TV Actions
+      case 'validate-lg':
+        validateLGConnection(screenId)
+        break
+      case 'info-lg':
+        getLGSystemInfo(screenId)
+        break
+      case 'send-lg-key':
+        sendLGKey(screenId, target.dataset.key)
+        break
+      case 'mute-lg':
+        toggleLGMute(screenId)
+        break
+      case 'open-browser-lg':
+        openLGBrowser(screenId)
+        break
+      case 'startup-lg':
+        startupRoutineLG(screenId)
+        break
+      case 'play-all-lg':
+        playAllLG(screenId)
+        break
+      case 'cast-lg':
+        castLGPlaylist(screenId)
+        break
+      case 'upload-video-lg':
+        uploadVideo(screenId)
+        break
+      case 'toast-lg':
+        sendLGToast(screenId)
+        break
+      case 'wake-lg':
+        wakeLGTV(screenId)
+        break
+      case 'turn-off-lg':
+        turnOffLGTV(screenId)
+        break
+        
+      // DLNA Actions
+      case 'uploadMedia':
+        uploadMedia(screenId)
+        break
+      case 'playCustomUrl':
+        playCustomUrl(screenId)
+        break
+      case 'openPlayerOnTV':
+        openPlayerOnTV(screenId, target.dataset.ip)
+        break
+      case 'stopDLNA':
+        stopDLNA(screenId, target.dataset.ip)
+        break
+      case 'playDLNAMedia':
+        playDLNAMedia(screenId, target.dataset.ip, target.dataset.file)
+        break
+      case 'deleteMedia':
+        deleteMedia(target.dataset.file)
+        break
+    }
+  }
+
+  /**
+   * Rutina de Encendido Automático para Samsung
+   */
+  async function startupRoutine(id) {
+    try {
+      Swal.fire({
+        title: '🚀 Iniciando rutina...',
+        html: 'Enviando señal Wake-on-LAN y esperando al TV (hasta 30s).<br>El navegador se abrirá automáticamente.',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      })
+
+      const response = await fetch('/screens/startup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+
+      const result = await response.json()
+      
+      // La respuesta del backend es inmediata, la rutina sigue en segundo plano
+      if (result.success) {
+        Swal.fire({
+          icon: 'success',
+          title: '✅ Rutina iniciada',
+          text: result.message || 'El TV encenderá y abrirá el navegador automáticamente.',
+          timer: 5000
+        })
+      } else {
+        showErrorToast(result.message || 'Error al iniciar rutina')
+      }
+    } catch (error) {
+      Swal.close()
+      console.error(error)
+      showErrorToast('Error de conexión al iniciar rutina')
     }
   }
 
@@ -1497,12 +1596,12 @@ async function uploadMedia(screenId) {
                     <small class="media-name" title="${filename}">${filename}</small>
                     <div class="media-actions">
                         <button class="btn btn-xs btn-success" 
-                            onclick="playDLNAMedia('${screenId}', '', '${filename}')" 
+                            data-action="playDLNAMedia('${screenId}', '', '${filename}')" 
                             title="Reproducir">
                             <i class="bi bi-play-fill"></i>
                         </button>
                         <button class="btn btn-xs btn-danger" 
-                            onclick="deleteMedia('${filename}')" title="Eliminar">
+                            data-action="deleteMedia('${filename}')" title="Eliminar">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>

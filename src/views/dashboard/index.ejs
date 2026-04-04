@@ -100,7 +100,7 @@
             border: none;
             padding: 8px 18px;
             border-radius: 12px;
-            font-family: var(--font-display);
+            font-family: var(--font-tech);
             font-weight: 600;
             font-size: 0.85rem;
             letter-spacing: 0.5px;
@@ -171,7 +171,7 @@
         }
 
         .currency-badges .badge {
-            font-family: var(--font-display);
+            font-family: var(--font-tech);
             font-weight: 500;
             font-size: 0.75rem;
             padding: 5px 10px;
@@ -184,7 +184,7 @@
         }
 
         /* Contraste Global de Textos */
-        .text-muted {
+        .text-lavender {
             color: rgba(255, 255, 255, 0.5) !important;
         }
     </style>
@@ -197,7 +197,7 @@
 
             <% if (user.role==='admin' ) { %>
                 <div class="mt-2 d-flex align-items-center">
-                    <label class="small text-muted me-2">Viendo:</label>
+                    <label class="small text-lavender me-2">Viendo:</label>
                     <select class="form-select form-select-sm" id="branchSelector" style="width: 250px;"
                         onchange="cambiarSucursal()">
                         <option value="" selected>-- No seleccionado --</option>
@@ -205,7 +205,7 @@
                     </select>
                 </div>
                 <% } else { %>
-                    <small class="text-muted">Sucursal Actual: <strong>
+                    <small class="text-lavender">Sucursal Actual: <strong>
                             <%= user.branch_name || 'Mi Sucursal' %>
                         </strong></small>
                     <% } %>
@@ -213,7 +213,7 @@
 
         <div class="d-flex align-items-center gap-2 gap-md-3 flex-wrap justify-content-end">
             <div class="text-end">
-                <small class="text-muted d-block" style="font-size: 0.7rem;">AUTO-REFRESH</small>
+                <small class="text-lavender d-block" style="font-size: 0.7rem;">AUTO-REFRESH</small>
                 <span class="badge btn-frosted border border-white border-opacity-10 text-neon-blue timer-badge"
                     id="countdownTimer" title="Click para pausar/reanudar">
                     05:00
@@ -250,7 +250,7 @@
         <div class="tab-pane fade show active" id="grid-view" role="tabpanel">
 
             <div class="mb-4">
-                <h6 class="text-uppercase text-muted fw-bold small ls-1"><i
+                <h6 class="text-uppercase text-lavender fw-bold small ls-1"><i
                         class="fa-solid fa-server me-2"></i>Infraestructura Core</h6>
                 <div class="row g-4" id="server-grid">
                 </div>
@@ -259,7 +259,7 @@
             <hr class="my-4 opacity-25">
 
             <div>
-                <h6 class="text-uppercase text-muted fw-bold small ls-1"><i
+                <h6 class="text-uppercase text-lavender fw-bold small ls-1"><i
                         class="fa-solid fa-cash-register me-2"></i>Terminales POS</h6>
                 <div class="row g-4" id="pos-grid">
                     <div class="col-12 text-center py-5">
@@ -272,12 +272,12 @@
         <div class="tab-pane fade" id="matrix-view" role="tabpanel">
             <div class="row">
                 <div class="mb-4 col-xl-6">
-                    <h6 class="text-uppercase text-muted fw-bold small ls-1">Servidor Principal</h6>
+                    <h6 class="text-uppercase text-lavender fw-bold small ls-1">Servidor Principal</h6>
                     <div class="row g-4" id="server-matrix"></div>
                 </div>
 
                 <div class="col-xl-6">
-                    <h6 class="text-uppercase text-muted fw-bold small ls-1">Detalle POS</h6>
+                    <h6 class="text-uppercase text-lavender fw-bold small ls-1">Detalle POS</h6>
                     <div
                         class="card glass-effect border-opacity-10 rounded-4 overflow-hidden border border-white border-opacity-5">
                         <div class="card-body p-0">
@@ -295,7 +295,7 @@
                                 </thead>
                                 <tbody id="matrix-grid">
                                     <tr>
-                                        <td colspan="6" class="text-center py-3 text-muted">Cargando…</td>
+                                        <td colspan="6" class="text-center py-3 text-lavender">Cargando…</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -310,8 +310,8 @@
     <!-- <div class="container-fluid px-0">
         <div class="row mb-3">
             <div class="col-12 text-end">
-                <span class="text-muted me-2" id="last-updated">Actualizando...</span>
-                <button class="btn btn-sm btn-outline-primary" onclick="cargarGridTerminales()">
+                <span class="text-lavender me-2" id="last-updated">Actualizando...</span>
+                <button class="btn btn-sm btn-outline-primary" data-action="cargarGridTerminales()">
                     <i class="fa-solid fa-arrows-rotate me-1"></i>Refrescar Todo
                 </button>
             </div>
@@ -320,7 +320,7 @@
         <div class="row g-4" id="pos-grid">
             <div class="col-12 text-center py-5">
                 <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Cargando terminales...</p>
+                <p class="mt-2 text-lavender">Cargando terminales...</p>
             </div>
         </div>
     </div> -->

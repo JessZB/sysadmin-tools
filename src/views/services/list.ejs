@@ -25,7 +25,7 @@
             font-weight: 700;
             color: #fff;
             margin: 0;
-            font-family: var(--font-display);
+            font-family: var(--font-tech);
         }
 
         .title-section p {
@@ -50,7 +50,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-family: var(--font-display);
+            font-family: var(--font-tech);
         }
 
         .btn-primary-custom {
@@ -116,7 +116,7 @@
         }
 
         .stat-value {
-            font-family: var(--font-display);
+            font-family: var(--font-tech);
             font-size: 2.5rem;
             font-weight: 700;
             color: #fff;
@@ -173,7 +173,7 @@
         }
 
         .service-name {
-            font-family: var(--font-display);
+            font-family: var(--font-tech);
             font-size: 1.25rem;
             color: #fff;
             font-weight: 600;
@@ -234,7 +234,7 @@
             padding: 8px 12px;
             border-radius: 12px;
             font-weight: 600;
-            font-family: var(--font-display);
+            font-family: var(--font-tech);
             font-size: 0.8rem;
             text-align: center;
             text-decoration: none;
@@ -366,7 +366,7 @@
             padding: 10px 20px;
             border-radius: 12px;
             font-weight: 600;
-            font-family: var(--font-display);
+            font-family: var(--font-tech);
             font-size: 0.9rem;
             transition: all 0.3s ease;
             display: inline-flex;
@@ -445,7 +445,7 @@
             color: rgba(255, 255, 255, 0.5);
             border-radius: 14px;
             padding: 12px 20px;
-            font-family: var(--font-display);
+            font-family: var(--font-tech);
             font-weight: 600;
             transition: all 0.3s ease;
         }
@@ -634,7 +634,7 @@
             font-weight: 600;
             color: #fff;
             margin-bottom: 0.5rem;
-            font-family: var(--font-display);
+            font-family: var(--font-tech);
         }
 
         .branch-selector .form-select {
@@ -678,7 +678,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-family: var(--font-display);
+            font-family: var(--font-tech);
         }
 
         .section-actions {
@@ -698,7 +698,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-family: var(--font-display);
+            font-family: var(--font-tech);
             box-shadow: 0 4px 10px rgba(255, 77, 109, 0.3);
         }
 
@@ -781,7 +781,7 @@
                 <div class="stat-label">Offline</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value text-muted" id="statUnknown">0</div>
+                <div class="stat-value text-lavender" id="statUnknown">0</div>
                 <div class="stat-label">Pendiente</div>
             </div>
         </section>
@@ -929,23 +929,23 @@
                     <form id="formServicio">
                         <input type="hidden" id="servicioId">
                         <div class="mb-3">
-                            <label class="form-label small text-muted text-uppercase fw-bold">Nombre</label>
+                            <label class="form-label small text-lavender text-uppercase fw-bold">Nombre</label>
                             <input type="text" class="form-control form-control-premium" id="nombre" placeholder="Ej: Servidor Web" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small text-muted text-uppercase fw-bold">Host / IP</label>
+                            <label class="form-label small text-lavender text-uppercase fw-bold">Host / IP</label>
                             <input type="text" class="form-control form-control-premium" id="host" placeholder="Ej: 192.168.1.1" required>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label small text-muted text-uppercase fw-bold">Tipo</label>
+                                <label class="form-label small text-lavender text-uppercase fw-bold">Tipo</label>
                                 <select class="form-select form-control-premium" id="tipo" required>
                                     <option value="ip">Dirección IP</option>
                                     <option value="url">URL/Dominio</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label small text-muted text-uppercase fw-bold">Categoría</label>
+                                <label class="form-label small text-lavender text-uppercase fw-bold">Categoría</label>
                                 <select class="form-select form-control-premium" id="categoria" required>
                                     <option value="servicios">Servicios</option>
                                     <option value="balanzas">Balanzas</option>
@@ -954,7 +954,7 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small text-muted text-uppercase fw-bold">Descripción</label>
+                            <label class="form-label small text-lavender text-uppercase fw-bold">Descripción</label>
                             <textarea class="form-control form-control-premium" id="descripcion" rows="2"></textarea>
                         </div>
                         <div class="form-check form-switch mt-3">

@@ -125,7 +125,7 @@
                         <h3 class="mb-0"><i class="bi bi-tv"></i>
                             <%= screen.name %>
                         </h3>
-                        <small class="text-muted">Player Viewer - Monitoreo en Tiempo Real</small>
+                        <small class="text-lavender">Player Viewer - Monitoreo en Tiempo Real</small>
                     </div>
                     <div>
                         <span id="connectionStatus" class="badge bg-secondary">
@@ -152,14 +152,14 @@
                         <h5>Información de Reproducción</h5>
                         <div class="mb-3">
                             <strong>Video Actual:</strong>
-                            <p id="currentVideo" class="text-muted">-</p>
+                            <p id="currentVideo" class="text-lavender">-</p>
                         </div>
                         <div class="mb-3">
                             <strong>Progreso:</strong>
                             <div class="progress-bar-custom" id="progressBar">
                                 <div class="progress-fill" id="progressFill" style="width: 0%"></div>
                             </div>
-                            <small class="text-muted">
+                            <small class="text-lavender">
                                 <span id="currentTime">0:00</span> / <span id="duration">0:00</span>
                             </small>
                         </div>
@@ -170,7 +170,7 @@
                         <div class="mb-3">
                             <strong>Volumen:</strong>
                             <input type="range" class="form-range" id="volumeControl" min="0" max="100" value="100">
-                            <small class="text-muted"><span id="volumeValue">100</span>%</small>
+                            <small class="text-lavender"><span id="volumeValue">100</span>%</small>
                         </div>
                     </div>
                 </div>
@@ -182,13 +182,13 @@
             <div class="card-body">
                 <h5>Controles de Reproducción</h5>
                 <div class="d-flex justify-content-center gap-3 mt-3">
-                    <button class="control-btn" onclick="sendCommand('previous')" title="Anterior">
+                    <button class="control-btn" data-action="sendCommand('previous')" title="Anterior">
                         <i class="bi bi-skip-start-fill"></i>
                     </button>
-                    <button class="control-btn" id="playPauseBtn" onclick="togglePlayPause()" title="Play/Pause">
+                    <button class="control-btn" id="playPauseBtn" data-action="togglePlayPause()" title="Play/Pause">
                         <i class="bi bi-play-fill"></i>
                     </button>
-                    <button class="control-btn" onclick="sendCommand('next')" title="Siguiente">
+                    <button class="control-btn" data-action="sendCommand('next')" title="Siguiente">
                         <i class="bi bi-skip-end-fill"></i>
                     </button>
                 </div>
@@ -200,7 +200,7 @@
             <div class="card-body">
                 <h5>Playlist</h5>
                 <div id="playlistContainer" class="mt-3">
-                    <p class="text-muted">No hay videos en la playlist</p>
+                    <p class="text-lavender">No hay videos en la playlist</p>
                 </div>
             </div>
         </div>
@@ -211,11 +211,11 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5><i class="bi bi-info-circle"></i> Videos Disponibles en Servidor</h5>
-                        <button class="btn btn-success btn-sm" onclick="playAllOnTV()">
+                        <button class="btn btn-success btn-sm" data-action="playAllOnTV()">
                             <i class="bi bi-collection-play me-1"></i> Reproducir Todos
                         </button>
                     </div>
-                    <small class="text-muted d-block mb-2">Lista de archivos detectados en /public/media/videos</small>
+                    <small class="text-lavender d-block mb-2">Lista de archivos detectados en /public/media/videos</small>
                     <div class="list-group">
                         <% mediaFiles.forEach(function(file) { %>
                             <div
@@ -223,7 +223,7 @@
                                 <span><i class="bi bi-file-earmark-play me-2"></i>
                                     <%= file %>
                                 </span>
-                                <button class="btn btn-sm btn-primary me-2" onclick="playOnTV('<%= file %>')">
+                                <button class="btn btn-sm btn-primary me-2" data-action="playOnTV('<%= file %>')">
                                     <i class="bi bi-play-fill"></i> Reproducir en TV
                                 </button>
                                 <a href="/media/videos/<%= encodeURIComponent(file) %>" target="_blank"
@@ -378,12 +378,12 @@
         function updatePlaylist(playlist, currentIndex) {
             const container = document.getElementById('playlistContainer');
             if (!playlist || playlist.length === 0) {
-                container.innerHTML = '<p class="text-muted">No hay videos en la playlist</p>';
+                container.innerHTML = '<p class="text-lavender">No hay videos en la playlist</p>';
                 return;
             }
 
             container.innerHTML = playlist.map((video, index) => `
-                <div class="playlist-item ${index === currentIndex ? 'active' : ''}" onclick="playVideo(${index})">
+                <div class="playlist-item ${index === currentIndex ? 'active' : ''}" data-action="playVideo(${index})">
                     <i class="bi bi-${index === currentIndex ? 'play-circle-fill' : 'file-play'}"></i>
                     ${video}
                 </div>

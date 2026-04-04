@@ -19,7 +19,7 @@
         }
         .error-code {
             font-size: 8rem;
-            font-family: var(--font-display);
+            font-family: var(--font-tech);
             font-weight: 800;
             background: linear-gradient(135deg, var(--neon-blue), var(--neon-indigo));
             -webkit-background-clip: text;
@@ -43,7 +43,7 @@
                 <a href="/dashboard" class="btn btn-action-premium btn-ping-premium py-3">
                     <i class="fa-solid fa-house me-2"></i>Volver al Inicio
                 </a>
-                <button onclick="history.back()" class="btn btn-frosted border border-white border-opacity-10 text-white py-2">
+                <button data-action="history.back()" class="btn btn-frosted border border-white border-opacity-10 text-white py-2">
                     <i class="fa-solid fa-arrow-left me-2"></i>Atrás
                 </button>
             </div>

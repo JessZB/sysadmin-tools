@@ -38,42 +38,42 @@
 ### Backend
 
 #### 1. `screens.service.ts`
-- [ ] Eliminar dependencia de `samsung-tv-control`
-- [ ] Crear función `connectWebSocket(ip, token?)` → retorna token
-- [ ] Crear función `sendCommand(ip, token, key)`
-- [ ] Crear función `openBrowser(ip)` → POST a puerto 8001
-- [ ] Actualizar `startRoutine` para usar nuevas funciones
+- [x] Eliminar dependencia de `samsung-tv-control`
+- [x] Crear función `connectWebSocket(ip, token?)` → retorna token
+- [x] Crear función `sendCommand(ip, token, key)`
+- [x] Crear función `openBrowser(ip)` → POST a puerto 8001
+- [x] Actualizar `startRoutine` para usar nuevas funciones
 
 #### 2. `screens.controller.ts`
-- [ ] Nuevo endpoint `POST /screens/validate` → conectar y obtener token
-- [ ] Actualizar `controlPower`, `controlMute` para usar WebSocket
-- [ ] Nuevo endpoint `POST /screens/send-key` → enviar tecla específica
-- [ ] Nuevo endpoint `POST /screens/open-browser` → abrir navegador
-- [ ] Actualizar `startupRoutine` → WoL + 15s + openBrowser
+- [x] Nuevo endpoint `POST /screens/validate` → conectar y obtener token
+- [x] Actualizar `controlPower`, `controlMute` para usar WebSocket
+- [x] Nuevo endpoint `POST /screens/send-key` → enviar tecla específica
+- [x] Nuevo endpoint `POST /screens/open-browser` → abrir navegador
+- [x] Actualizar `startupRoutine` → WoL + 15s + openBrowser
 
 #### 3. `screens.routes.ts`
-- [ ] Agregar ruta `/validate`
-- [ ] Agregar ruta `/send-key`
-- [ ] Agregar ruta `/open-browser`
+- [x] Agregar ruta `/validate`
+- [x] Agregar ruta `/send-key`
+- [x] Agregar ruta `/open-browser`
 
 ### Frontend
 
 #### 1. `screens.client.js`
-- [ ] Función `validateConnection(id)` → muestra token capturado
-- [ ] Función `sendKey(id, key)` → enviar comando específico
-- [ ] Función `openBrowser(id)` → solo abrir navegador
-- [ ] Actualizar `startupRoutine` → WoL + 15s + openBrowser
+- [x] Función `validateConnection(id)` → muestra token capturado
+- [x] Función `sendKey(id, key)` → enviar comando específico
+- [x] Función `openBrowser(id)` → solo abrir navegador
+- [x] Actualizar `startupRoutine` → WoL + 15s + openBrowser
 
 #### 2. `list.ejs`
-- [ ] Indicador de estado de token (✅ Validado / ❌ Sin validar)
-- [ ] Botón "Validar Conexión" / "Re-validar"
-- [ ] Panel de control con botones:
+- [x] Indicador de estado de token (✅ Validado / ❌ Sin validar)
+- [x] Botón "Validar Conexión" / "Re-validar"
+- [x] Panel de control con botones:
   - Mute, Vol+, Vol-, Power
   - Home, Return, Menu
   - Flechas (Up, Down, Left, Right)
   - Enter
-- [ ] Botón "Abrir Navegador"
-- [ ] Botón "Encender y Abrir Navegador"
+- [x] Botón "Abrir Navegador"
+- [x] Botón "Encender y Abrir Navegador"
 
 ### Base de Datos
 - Campo `samsung_token` ya existe ✅

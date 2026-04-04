@@ -65,7 +65,7 @@
                         <div class="card glass-effect border-opacity-10 border-white">
                             <div class="card-body">
                                 <button class="btn btn-primary w-100 mb-3"
-                                    onclick="validateLGConnection('<%= screen.id %>')">
+                                    data-action="validate-lg" data-id="<%= screen.id %>">
                                     <i
                                         class="bi bi-<%= screen.client_token ? 'arrow-repeat' : 'check-circle' %> me-2"></i>
                                     <%= screen.client_token ? 'Re-validar Conexión' : 'Validar y Emparejar' %>
@@ -75,7 +75,7 @@
                                     Acepta el emparejamiento en la pantalla del TV
                                 </small>
                                 <hr>
-                                <button class="btn btn-frosted border border-white border-opacity-10 text-white w-100" onclick="getLGSystemInfo('<%= screen.id %>')"
+                                <button class="btn btn-frosted border border-white border-opacity-10 text-white w-100" data-action="info-lg" data-id="<%= screen.id %>"
                                     <%=!screen.client_token ? 'disabled' : '' %>>
                                     <i class="bi bi-info-circle me-2 text-info"></i>
                                     Ver Información del Sistema
@@ -93,31 +93,31 @@
                                     <div class="text-center mb-4">
                                         <div class="d-flex justify-content-center align-items-center mb-2">
                                             <button class="btn btn-outline-primary remote-btn"
-                                                onclick="sendLGKey('<%= screen.id %>', 'UP')" <%=!screen.client_token
+                                                data-action="send-lg-key" data-id="<%= screen.id %>" data-key="UP" <%=!screen.client_token
                                                 ? 'disabled' : '' %>>
                                                 <i class="bi bi-arrow-up"></i>
                                             </button>
                                         </div>
                                         <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
                                             <button class="btn btn-outline-primary remote-btn"
-                                                onclick="sendLGKey('<%= screen.id %>', 'LEFT')" <%=!screen.client_token
+                                                data-action="send-lg-key" data-id="<%= screen.id %>" data-key="LEFT" <%=!screen.client_token
                                                 ? 'disabled' : '' %>>
                                                 <i class="bi bi-arrow-left"></i>
                                             </button>
                                             <button class="btn btn-primary remote-btn-ok"
-                                                onclick="sendLGKey('<%= screen.id %>', 'ENTER')" <%=!screen.client_token
+                                                data-action="send-lg-key" data-id="<%= screen.id %>" data-key="ENTER" <%=!screen.client_token
                                                 ? 'disabled' : '' %>>
                                                 OK
                                             </button>
                                             <button class="btn btn-outline-primary remote-btn"
-                                                onclick="sendLGKey('<%= screen.id %>', 'RIGHT')" <%=!screen.client_token
+                                                data-action="send-lg-key" data-id="<%= screen.id %>" data-key="RIGHT" <%=!screen.client_token
                                                 ? 'disabled' : '' %>>
                                                 <i class="bi bi-arrow-right"></i>
                                             </button>
                                         </div>
                                         <div class="d-flex justify-content-center align-items-center">
                                             <button class="btn btn-outline-primary remote-btn"
-                                                onclick="sendLGKey('<%= screen.id %>', 'DOWN')" <%=!screen.client_token
+                                                data-action="send-lg-key" data-id="<%= screen.id %>" data-key="DOWN" <%=!screen.client_token
                                                 ? 'disabled' : '' %>>
                                                 <i class="bi bi-arrow-down"></i>
                                             </button>
@@ -128,7 +128,7 @@
                                     <div class="row g-2 mb-3">
                                         <div class="col-4">
                                             <button class="btn btn-outline-secondary w-100"
-                                                onclick="sendLGKey('<%= screen.id %>', 'BACK')" <%=!screen.client_token
+                                                data-action="send-lg-key" data-id="<%= screen.id %>" data-key="BACK" <%=!screen.client_token
                                                 ? 'disabled' : '' %>>
                                                 <i class="bi bi-arrow-left-circle"></i><br>
                                                 <small>Atrás</small>
@@ -136,7 +136,7 @@
                                         </div>
                                         <div class="col-4">
                                             <button class="btn btn-outline-secondary w-100"
-                                                onclick="sendLGKey('<%= screen.id %>', 'HOME')" <%=!screen.client_token
+                                                data-action="send-lg-key" data-id="<%= screen.id %>" data-key="HOME" <%=!screen.client_token
                                                 ? 'disabled' : '' %>>
                                                 <i class="bi bi-house"></i><br>
                                                 <small>Home</small>
@@ -144,7 +144,7 @@
                                         </div>
                                         <div class="col-4">
                                             <button class="btn btn-frosted border border-white border-opacity-10 text-white w-100"
-                                                onclick="sendLGKey('<%= screen.id %>', 'MENU')" <%=!screen.client_token
+                                                data-action="send-lg-key" data-id="<%= screen.id %>" data-key="MENU" <%=!screen.client_token
                                                 ? 'disabled' : '' %>>
                                                 <i class="bi bi-list text-info"></i><br>
                                                 <small class="x-small">Menú</small>
@@ -159,21 +159,21 @@
                                             <div class="row g-2">
                                                 <div class="col-4">
                                                     <button class="btn btn-outline-primary w-100"
-                                                        onclick="sendLGKey('<%= screen.id %>', 'VOLUMEUP')"
+                                                        data-action="send-lg-key" data-id="<%= screen.id %>" data-key="VOLUMEUP"
                                                         <%=!screen.client_token ? 'disabled' : '' %>>
                                                         <i class="bi bi-plus-lg"></i>
                                                     </button>
                                                 </div>
                                                 <div class="col-4">
                                                     <button class="btn btn-outline-primary w-100"
-                                                        onclick="sendLGKey('<%= screen.id %>', 'VOLUMEDOWN')"
+                                                        data-action="send-lg-key" data-id="<%= screen.id %>" data-key="VOLUMEDOWN"
                                                         <%=!screen.client_token ? 'disabled' : '' %>>
                                                         <i class="bi bi-dash-lg"></i>
                                                     </button>
                                                 </div>
                                                 <div class="col-4">
                                                     <button class="btn btn-outline-danger w-100"
-                                                        onclick="toggleLGMute('<%= screen.id %>')" <%=!screen.client_token
+                                                        data-action="mute-lg" data-id="<%= screen.id %>" <%=!screen.client_token
                                                         ? 'disabled' : '' %>>
                                                         <i class="bi bi-volume-mute"></i>
                                                     </button>
@@ -186,14 +186,14 @@
                                     <div class="row g-2 mb-3">
                                         <div class="col-6">
                                             <button class="btn btn-outline-info w-100"
-                                                onclick="sendLGKey('<%= screen.id %>', 'CHANNELUP')"
+                                                data-action="send-lg-key" data-id="<%= screen.id %>" data-key="CHANNELUP"
                                                 <%=!screen.client_token ? 'disabled' : '' %>>
                                                 <i class="bi bi-chevron-up"></i> Canal +
                                             </button>
                                         </div>
                                         <div class="col-6">
                                             <button class="btn btn-outline-info w-100"
-                                                onclick="sendLGKey('<%= screen.id %>', 'CHANNELDOWN')"
+                                                data-action="send-lg-key" data-id="<%= screen.id %>" data-key="CHANNELDOWN"
                                                 <%=!screen.client_token ? 'disabled' : '' %>>
                                                 <i class="bi bi-chevron-down"></i> Canal -
                                             </button>
@@ -204,28 +204,28 @@
                                     <div class="row g-2">
                                         <div class="col-3">
                                             <button class="btn btn-danger w-100"
-                                                onclick="sendLGKey('<%= screen.id %>', 'RED')" <%=!screen.client_token
+                                                data-action="send-lg-key" data-id="<%= screen.id %>" data-key="RED" <%=!screen.client_token
                                                 ? 'disabled' : '' %>>
                                                 ●
                                             </button>
                                         </div>
                                         <div class="col-3">
                                             <button class="btn btn-success w-100"
-                                                onclick="sendLGKey('<%= screen.id %>', 'GREEN')" <%=!screen.client_token
+                                                data-action="send-lg-key" data-id="<%= screen.id %>" data-key="GREEN" <%=!screen.client_token
                                                 ? 'disabled' : '' %>>
                                                 ●
                                             </button>
                                         </div>
                                         <div class="col-3">
                                             <button class="btn btn-warning w-100"
-                                                onclick="sendLGKey('<%= screen.id %>', 'YELLOW')" <%=!screen.client_token
+                                                data-action="send-lg-key" data-id="<%= screen.id %>" data-key="YELLOW" <%=!screen.client_token
                                                 ? 'disabled' : '' %>>
                                                 ●
                                             </button>
                                         </div>
                                         <div class="col-3">
                                             <button class="btn btn-primary w-100"
-                                                onclick="sendLGKey('<%= screen.id %>', 'BLUE')" <%=!screen.client_token
+                                                data-action="send-lg-key" data-id="<%= screen.id %>" data-key="BLUE" <%=!screen.client_token
                                                 ? 'disabled' : '' %>>
                                                 ●
                                             </button>
@@ -244,14 +244,14 @@
                                     <input type="url" class="form-control" id="lgBrowserUrl<%= screen.id %>"
                                         placeholder="https://ejemplo.com"
                                         value="/proxy/">
-                                    <button class="btn btn-primary" onclick="openLGBrowser('<%= screen.id %>')"
+                                    <button class="btn btn-primary" data-action="open-browser-lg" data-id="<%= screen.id %>"
                                         <%=!screen.client_token ? 'disabled' : '' %>>
                                         <i class="bi bi-box-arrow-up-right me-1"></i>
                                         Abrir
                                     </button>
                                 </div>
                                 <% if (screen.mac_address) { %>
-                                    <button class="btn btn-success w-100" onclick="startupRoutineLG('<%= screen.id %>')">
+                                    <button class="btn btn-success w-100" data-action="startup-lg" data-id="<%= screen.id %>">
                                         <i class="bi bi-rocket-takeoff me-2"></i>
                                         Rutina de Encendido (WoL + Navegador)
                                     </button>
@@ -270,14 +270,14 @@
                                     <select class="form-select" id="lgVideoSelect<%= screen.id %>" multiple size="4">
                                         <!-- Videos will be loaded dynamically -->
                                     </select>
-                                    <small class="text-muted">
+                                    <small class="text-lavender">
                                         <i class="bi bi-info-circle me-1"></i>
                                         Mantén Ctrl/Cmd para seleccionar múltiples videos
                                     </small>
                                 </div>
 
                                 <div class="d-grid gap-2 mb-3">
-                                    <button class="btn btn-success" onclick="playAllLG('<%= screen.id %>')">
+                                    <button class="btn btn-success" data-action="play-all-lg" data-id="<%= screen.id %>">
                                         <i class="bi bi-collection-play me-2"></i>
                                         Reproducir TODOS (Playlist en Bucle)
                                     </button>
@@ -293,7 +293,7 @@
                                 </div>
 
                                 <!-- Cast Button -->
-                                <button class="btn btn-info w-100 mb-2" onclick="castLGPlaylist('<%= screen.id %>')"
+                                <button class="btn btn-info w-100 mb-2" data-action="cast-lg" data-id="<%= screen.id %>"
                                     <%=!screen.client_token ? 'disabled' : '' %>>
                                     <i class="bi bi-play-circle me-2"></i>
                                     Reproducir en TV
@@ -305,7 +305,7 @@
                                     <input type="file" class="form-control" id="lgVideoUpload<%= screen.id %>"
                                         accept="video/mp4,video/webm,video/quicktime">
                                     <button class="btn btn-outline-primary w-100 mt-2"
-                                        onclick="uploadVideo('<%= screen.id %>')">
+                                        data-action="upload-video-lg" data-id="<%= screen.id %>">
                                         <i class="bi bi-cloud-upload me-2"></i>
                                         Subir Video
                                     </button>
@@ -318,7 +318,7 @@
                                         <input type="text" class="form-control" id="lgToastMessage<%= screen.id %>"
                                             placeholder="Mensaje de notificación">
                                         <button class="btn btn-outline-secondary"
-                                            onclick="sendLGToast('<%= screen.id %>')" <%=!screen.client_token ? 'disabled'
+                                            data-action="toast-lg" data-id="<%= screen.id %>" <%=!screen.client_token ? 'disabled'
                                             : '' %>>
                                             <i class="bi bi-chat-dots me-1"></i>
                                             Enviar
@@ -336,7 +336,7 @@
                                 <div class="row g-2">
                                     <% if (screen.mac_address) { %>
                                         <div class="col-6">
-                                            <button class="btn btn-success w-100" onclick="wakeLGTV('<%= screen.id %>')">
+                                            <button class="btn btn-success w-100" data-action="wake-lg" data-id="<%= screen.id %>">
                                                 <i class="bi bi-lightning-charge me-2"></i>
                                                 Encender (WoL)
                                             </button>
@@ -344,7 +344,7 @@
                                         <% } %>
                                             <div class="col-<%= screen.mac_address ? '6' : '12' %>">
                                                 <button class="btn btn-danger w-100"
-                                                    onclick="turnOffLGTV('<%= screen.id %>')" <%=!screen.client_token
+                                                    data-action="turn-off-lg" data-id="<%= screen.id %>" <%=!screen.client_token
                                                     ? 'disabled' : '' %>>
                                                     <i class="bi bi-power me-2"></i>
                                                     Apagar TV

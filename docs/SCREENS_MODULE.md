@@ -10,17 +10,15 @@
   1. El TV abre `http://tu-servidor:4000/screens/viewer/1` en su navegador
   2. Se conecta automáticamente vía Socket.io
   3. Carga la URL configurada en `SCREEN_TARGET_URL`
-  4. Desde el panel admin puedes recargar remotamente
+  4. Desde el panel admin puedes recargar remotamente, controlar el volumen y enviar comandos mediante WebSockets (Tizen API).
 
-### **2. Televisores LG (DLNA)**
-- **Tipo**: `dlna`
-- **IP**: ✅ **OBLIGATORIO** (para enviar comandos UPnP)
-- **Socket ID**: ❌ **NO SE USA**
+### **2. Televisores LG (WebOS & DLNA)**
+- **Tipo**: `dlna` (Actualmente soporta conexiones híbridas DLNA/WebOS)
+- **IP**: ✅ **OBLIGATORIO** (para conectarse vía WebSocket y enviar comandos UPnP)
 - **Funcionamiento**:
   1. El TV debe estar en la misma red que el servidor
-  2. Coloca videos en `public/media`
-  3. Desde el panel admin selecciona el video
-  4. El servidor envía comando DLNA a la IP del TV
+  2. Control total: A través de WebOS WebSockets es posible mutear, cambiar volumen, apagar, enviar notificaciones (Toast) y abrir el navegador nativo remotamente.
+  3. Reproducción (DLNA): Coloca videos en `public/media` y selecciona "Reproducir". El servidor enviará el stream a la pantalla LG.
 
 ## 🔧 Variables de Entorno
 
