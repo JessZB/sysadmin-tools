@@ -12,224 +12,273 @@
     <link href="/css/custom-theme.css" rel="stylesheet">
     <style>
         body {
-            background-color: var(--space-dark);
+            background-color: var(--space-indigo);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             overflow-x: hidden;
         }
 
-        .menu-container {
-            max-width: 1200px;
-            width: 100%;
-            padding: 40px 20px;
-            position: relative;
-            z-index: 1;
+        /* ---- Main Container ---- */
+        .home-layout {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px 60px;
         }
 
-        /* Fondo Decorativo (Mesh Gradient) */
-        .mesh-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(at 0% 0%, rgba(0, 210, 255, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(110, 64, 255, 0.15) 0px, transparent 50%);
-            z-index: -1;
+        /* ---- Header ---- */
+        .home-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed var(--glass-border);
+            flex-wrap: wrap;
+            gap: 16px;
         }
 
-        .header-section {
-            text-align: center;
-            margin-bottom: 60px;
+        .home-brand {
+            font-family: var(--font-tech);
+            font-size: 1.4rem;
+            color: var(--platinum);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -1px;
         }
 
-        .header-section h1 {
-            font-size: 4.5rem;
-            background: linear-gradient(to bottom, #fff 30%, rgba(255, 255, 255, 0.5));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 15px;
-            letter-spacing: -0.04em;
+        .home-brand i { color: var(--flag-red); }
+
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 4px;
+            padding: 8px 16px;
         }
 
-        .header-section p {
-            font-size: 1.25rem;
-            color: rgba(255, 255, 255, 0.5);
+        .user-pill .role-badge {
+            font-family: var(--font-tech);
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--lavender-grey);
+            border: 1px solid var(--glass-border);
+            padding: 2px 8px;
+            border-radius: 2px;
+        }
+
+        .user-pill .role-badge.role-admin  { color: var(--punch-red); border-color: rgba(239,35,60,0.3); }
+
+        .user-pill .username {
             font-family: var(--font-body);
+            font-size: 0.9rem;
+            color: var(--platinum);
+            font-weight: 600;
         }
 
+        /* ---- Category Section ---- */
+        .category-group {
+            margin-bottom: 28px;
+        }
+
+        .category-label {
+            font-family: var(--font-tech);
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--lavender-grey);
+            opacity: 0.7;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-label::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--glass-border);
+        }
+
+        /* ---- Menu Grid — Compact ---- */
         .menu-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 8px;
         }
 
+        /* ---- Menu Card — Horizontal Compact ---- */
         .menu-card {
             background: var(--glass-bg);
             backdrop-filter: blur(12px);
             border: 1px solid var(--glass-border);
-            border-radius: 32px;
-            padding: 40px 30px;
-            text-align: center;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 4px;
+            padding: 12px 14px;
             text-decoration: none;
-            display: block;
-            box-shadow: var(--glass-shadow);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            animation: reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .menu-card::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            background: var(--flag-red);
+            transition: width 0.25s ease;
         }
 
         .menu-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            border-color: var(--neon-blue);
-            background: rgba(255, 255, 255, 0.05);
-            box-shadow: 0 20px 40px rgba(0, 210, 255, 0.1);
+            background: rgba(141, 153, 174, 0.08);
+            border-color: rgba(141, 153, 174, 0.4);
+            transform: translateX(2px);
         }
+
+        .menu-card:hover::before { width: 3px; }
 
         .menu-icon {
-            font-size: 3.5rem;
-            margin-bottom: 25px;
-            color: var(--neon-blue);
-            transition: transform 0.5s ease;
+            font-size: 1.2rem;
+            color: var(--lavender-grey);
+            transition: color 0.2s ease;
+            flex-shrink: 0;
+            width: 24px;
+            text-align: center;
         }
 
-        .menu-card:hover .menu-icon {
-            transform: scale(1.1);
-        }
+        .menu-card:hover .menu-icon { color: var(--platinum); }
+
+        .menu-text { overflow: hidden; }
 
         .menu-title {
-            font-size: 1.4rem;
-            color: #fff;
-            margin-bottom: 12px;
+            font-family: var(--font-tech);
+            font-size: 0.72rem;
+            color: var(--platinum);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .menu-description {
-            font-size: 0.95rem;
-            color: rgba(255, 255, 255, 0.5);
-            line-height: 1.5;
+            font-family: var(--font-body);
+            font-size: 0.62rem;
+            color: var(--lavender-grey);
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .user-info-section {
-            position: fixed;
-            top: 30px;
-            right: 30px;
+        /* ---- Logout ---- */
+        .logout-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid rgba(217, 4, 41, 0.4);
+            border-radius: 4px;
+            color: var(--punch-red);
+            font-family: var(--font-tech);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            transition: all 0.2s ease;
         }
 
-        /* Animación Staggered */
+        .logout-btn:hover {
+            background: var(--flag-red);
+            border-color: var(--flag-red);
+            color: var(--platinum);
+        }
+
         @keyframes reveal {
-            from { opacity: 0; transform: translateY(20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
-        .menu-card {
-            opacity: 0;
-            animation: reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        @media (max-width: 576px) {
+            .menu-grid { grid-template-columns: 1fr 1fr; }
+            .home-header { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
 
 <body class="noise-overlay">
-    <div class="menu-container">
-        <!-- Header -->
-        <div class="header-section">
-            <h1><i class="fa-solid fa-server me-3"></i>SysAdmin Suite</h1>
-            <p>Panel de Control y Gestión</p>
-        </div>
+    <div class="home-layout">
 
-        <!-- User Info -->
-        <div class="user-info">
-            <h5>Bienvenido, <%= user.username %>
-            </h5>
-            <span class="role-badge <%= user.role === 'admin' ? 'role-admin' : 'role-analista' %>">
-                <%= user.role==='admin' ? 'Administrador' : 'Analista' %>
-            </span>
-            <% if (user.branch_name) { %>
-                <div class="mt-2">
-                    <small><i class="fa-solid fa-building me-1"></i>
-                        <%= user.branch_name %>
-                    </small>
-                </div>
+        <!-- ===== HEADER ===== -->
+        <div class="home-header">
+            <div class="home-brand">
+                <i class="fa-solid fa-bolt-lightning"></i>
+                SYS<span style="color: var(--lavender-grey); font-weight: 300;">ADMIN</span>
+                <span style="font-size: 0.55rem; color: var(--lavender-grey); letter-spacing: 3px; opacity: 0.6;">SUITE</span>
+            </div>
+
+            <div class="user-pill">
+                <i class="fa-solid fa-circle" style="font-size: 0.45rem; color: #4caf50;"></i>
+                <span class="username"><%= user.username %></span>
+                <span class="role-badge <%= user.role === 'admin' ? 'role-admin' : '' %>">
+                    <%= user.role === 'admin' ? 'Admin' : 'Analista' %>
+                </span>
+                <% if (user.branch_name) { %>
+                    <span style="font-size: 0.75rem; color: var(--lavender-grey);"><i class="fa-solid fa-building"></i> <%= user.branch_name %></span>
                 <% } %>
+            </div>
         </div>
 
-        <!-- Menu Grid -->
-        <div class="menu-grid">
-            <% if (user.modules && user.modules.includes('dashboard')) { %>
-            <a href="/dashboard" class="menu-card">
-                <div class="menu-icon"><i class="fa-solid fa-chart-line"></i></div>
-                <h3 class="menu-title">Monitor Jobs</h3>
-                <p class="menu-description">Monitoreo de trabajos y terminales POS</p>
-            </a>
-            <% } %>
+        <!-- ===== MENU: Dynamic Categories ===== -->
+        <% menuCategories.forEach(function(cat, catIdx) { %>
+            <%
+               const hasAccess = cat.modules.some(mod =>
+                   mod.is_configured && (user.role === 'admin' || (user.modules && user.modules.includes(mod.code)))
+               );
+               if (!hasAccess) return;
+            %>
+            <div class="category-group">
+                <div class="category-label">
+                    <i class="bi <%= cat.icon %>"></i>
+                    <%= cat.name %>
+                </div>
+                <div class="menu-grid">
+                    <% cat.modules.forEach(function(mod, modIdx) { %>
+                        <% if (!mod.is_configured || !(user.role === 'admin' || (user.modules && user.modules.includes(mod.code)))) return; %>
+                        <a href="/<%= mod.code %>" class="menu-card" style="animation-delay: <%= (catIdx * 3 + modIdx) * 40 %>ms;">
+                            <div class="menu-icon"><i class="bi <%= mod.icon || 'bi-box' %>"></i></div>
+                            <div class="menu-text">
+                                <p class="menu-title"><%= mod.name %></p>
+                                <p class="menu-description">/<%= mod.code %></p>
+                            </div>
+                        </a>
+                    <% }); %>
+                </div>
+            </div>
+        <% }); %>
 
-            <% if (user.modules && user.modules.includes('terminals')) { %>
-            <a href="/terminals" class="menu-card">
-                <div class="menu-icon"><i class="fa-solid fa-desktop"></i></div>
-                <h3 class="menu-title">Terminales</h3>
-                <p class="menu-description">Gestión de terminales POS</p>
-            </a>
-            <% } %>
-
-            <% if (user.modules && user.modules.includes('branches')) { %>
-            <a href="/branches" class="menu-card">
-                <div class="menu-icon"><i class="fa-solid fa-building"></i></div>
-                <h3 class="menu-title">Sucursales</h3>
-                <p class="menu-description">Administrar sucursales</p>
-            </a>
-            <% } %>
-
-            <% if (user.modules && user.modules.includes('users')) { %>
-            <a href="/users" class="menu-card">
-                <div class="menu-icon"><i class="fa-solid fa-users"></i></div>
-                <h3 class="menu-title">Usuarios</h3>
-                <p class="menu-description">Gestión de usuarios del sistema</p>
-            </a>
-            <% } %>
-
-            <% if (user.modules && user.modules.includes('barcode')) { %>
-            <a href="/barcode" class="menu-card">
-                <div class="menu-icon"><i class="fa-solid fa-barcode"></i></div>
-                <h3 class="menu-title">Códigos de Barra</h3>
-                <p class="menu-description">Generador PLU Dibal</p>
-            </a>
-            <% } %>
-
-            <% if (user.modules && user.modules.includes('services')) { %>
-            <a href="/services" class="menu-card">
-                <div class="menu-icon"><i class="fa-solid fa-heartbeat"></i></div>
-                <h3 class="menu-title">Monitoreo Servicios</h3>
-                <p class="menu-description">Verificar disponibilidad mediante ping</p>
-            </a>
-            <% } %>
-
-            <% if (user.modules && user.modules.includes('audit')) { %>
-            <a href="/audit" class="menu-card accent">
-                <div class="menu-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
-                <h3 class="menu-title">Auditoría</h3>
-                <p class="menu-description">Registro de actividades</p>
-            </a>
-            <% } %>
-
-            <% if (user.modules && user.modules.includes('screens')) { %>
-            <a href="/screens" class="menu-card">
-                <div class="menu-icon"><i class="fa-solid fa-tv"></i></div>
-                <h3 class="menu-title">Pantallas</h3>
-                <p class="menu-description">Gestión de TV y DLNA</p>
-            </a>
-            <% } %>
-        </div>
-
-        <!-- Logout Button -->
-        <div class="text-center">
+        <!-- ===== LOGOUT ===== -->
+        <div class="mt-4">
             <a href="/logout" class="logout-btn">
-                <i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar Sesión
+                <i class="fa-solid fa-right-from-bracket"></i>Cerrar Sesión
             </a>
         </div>
+
     </div>
 
     <script src="/js/lib/bootstrap.bundle.min.js"></script>
 </body>
 
-</html>
+</html>

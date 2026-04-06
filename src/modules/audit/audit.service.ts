@@ -6,7 +6,7 @@ export const logAction = async (
     userId: number,
     branchId: number,
     action: 'CREATE' | 'UPDATE' | 'DELETE' | 'LOGIN' | 'EXECUTE' | 'STOP',
-    entity: 'TERMINAL' | 'USER' | 'BRANCH' | 'JOB',
+    entity: 'TERMINAL' | 'USER' | 'BRANCH' | 'JOB' | 'MODULE' | 'CATEGORY',
     entityId: number | null,
     details: string,
     ip: string = '::1'

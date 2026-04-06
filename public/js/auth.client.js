@@ -38,12 +38,14 @@ d.addEventListener('DOMContentLoaded', () => {
 
             } catch (error) {
                 // 4. Manejo de Errores Visual
-                errorAlert.innerText = error.message;
+                const span = errorAlert.querySelector('span');
+                if (span) span.textContent = error.message;
+                else errorAlert.textContent = error.message;
                 errorAlert.classList.remove('d-none');
                 
                 // Resetear botón
                 btnLogin.disabled = false;
-                btnLogin.innerText = 'Entrar';
+                btnLogin.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> Ingresar al Sistema';
             }
         });
     }

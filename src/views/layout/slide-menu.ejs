@@ -41,86 +41,35 @@
             </div>
 
             <!-- Menu Grid -->
-            <div class="menu-grid-slide">
-                <% if (user.modules && user.modules.includes('dashboard')) { %>
-                <a href="/dashboard" class="menu-card">
-                    <div class="menu-icon"><i class="fa-solid fa-chart-line" aria-hidden="true"></i></div>
-                    <div class="menu-content-text">
-                        <h4 class="menu-title">Monitor Jobs</h4>
-                        <p class="menu-description">Monitoreo de trabajos y terminales</p>
+            <!-- Menu Grid Dynamic -->
+            <div class="menu-container-slide">
+                <% menuCategories.forEach(function(cat) { %>
+                    <% 
+                       const hasAccessToCategory = cat.modules.some(mod => 
+                           mod.is_configured && (user.role === 'admin' || (user.modules && user.modules.includes(mod.code)))
+                       );
+                       if (hasAccessToCategory) { 
+                    %>
+                    <div class="category-group-slide mb-4">
+                        <h6 class="text-white-50 font-tech text-uppercase border-bottom border-white border-opacity-10 pb-2 mb-3" style="letter-spacing: 1px; font-size: 0.85rem;">
+                            <i class="bi <%= cat.icon %> me-2"></i><%= cat.name %>
+                        </h6>
+                        <div class="menu-grid-slide">
+                            <% cat.modules.forEach(function(mod) { %>
+                                <% if (mod.is_configured && (user.role === 'admin' || (user.modules && user.modules.includes(mod.code)))) { %>
+                                <a href="/<%= mod.code %>" class="menu-card">
+                                    <div class="menu-icon"><i class="bi <%= mod.icon || 'bi-box' %>"></i></div>
+                                    <div class="menu-content-text">
+                                        <h4 class="menu-title"><%= mod.name %></h4>
+                                        <p class="menu-description text-uppercase ls-1" style="font-size: 0.65rem;"><%= mod.code %></p>
+                                    </div>
+                                </a>
+                                <% } %>
+                            <% }); %>
+                        </div>
                     </div>
-                </a>
-                <% } %>
-
-                <% if (user.modules && user.modules.includes('terminals')) { %>
-                <a href="/terminals" class="menu-card">
-                    <div class="menu-icon"><i class="fa-solid fa-desktop"></i></div>
-                    <div class="menu-content-text">
-                        <h4 class="menu-title">Terminales</h4>
-                        <p class="menu-description">Gestión de terminales POS</p>
-                    </div>
-                </a>
-                <% } %>
-
-                <% if (user.modules && user.modules.includes('branches')) { %>
-                <a href="/branches" class="menu-card">
-                    <div class="menu-icon"><i class="fa-solid fa-building"></i></div>
-                    <div class="menu-content-text">
-                        <h4 class="menu-title">Sucursales</h4>
-                        <p class="menu-description">Administrar sucursales</p>
-                    </div>
-                </a>
-                <% } %>
-
-                <% if (user.modules && user.modules.includes('users')) { %>
-                <a href="/users" class="menu-card">
-                    <div class="menu-icon"><i class="fa-solid fa-users"></i></div>
-                    <div class="menu-content-text">
-                        <h4 class="menu-title">Usuarios</h4>
-                        <p class="menu-description">Gestión de usuarios</p>
-                    </div>
-                </a>
-                <% } %>
-
-                <% if (user.modules && user.modules.includes('barcode')) { %>
-                <a href="/barcode" class="menu-card">
-                    <div class="menu-icon"><i class="fa-solid fa-barcode"></i></div>
-                    <div class="menu-content-text">
-                        <h4 class="menu-title">Códigos de Barra</h4>
-                        <p class="menu-description">Generador PLU Dibal</p>
-                    </div>
-                </a>
-                <% } %>
-
-                <% if (user.modules && user.modules.includes('services')) { %>
-                <a href="/services" class="menu-card">
-                    <div class="menu-icon"><i class="fa-solid fa-heartbeat"></i></div>
-                    <div class="menu-content-text">
-                        <h4 class="menu-title">Monitoreo Servicios</h4>
-                        <p class="menu-description">Verificar disponibilidad</p>
-                    </div>
-                </a>
-                <% } %>
-
-                <% if (user.modules && user.modules.includes('audit')) { %>
-                <a href="/audit" class="menu-card accent">
-                    <div class="menu-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
-                    <div class="menu-content-text">
-                        <h4 class="menu-title">Auditoría</h4>
-                        <p class="menu-description">Registro de actividades</p>
-                    </div>
-                </a>
-                <% } %>
-
-                <% if (user.modules && user.modules.includes('screens')) { %>
-                <a href="/screens" class="menu-card">
-                    <div class="menu-icon"><i class="fa-solid fa-tv"></i></div>
-                    <div class="menu-content-text">
-                        <h4 class="menu-title">Pantallas</h4>
-                        <p class="menu-description">Gestión de TV y DLNA</p>
-                    </div>
-                </a>
-                <% } %>
+                    <% } %>
+                <% }); %>
             </div>
 
             <!-- Logout Button -->
@@ -133,177 +82,217 @@
     </div>
 </div>
 <style>
-        /* ============================================
-        SLIDE MENU PREMIUM (GLASSMORPHISM)
-        ============================================ */
+    /* ============================================
+    SLIDE MENU NOTHING STYLE (ORTHOGONAL & GLASS)
+    ============================================ */
 
-        .slide-menu-overlay {
+    .slide-menu-overlay {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: radial-gradient(circle at center, rgba(11, 14, 20, 0.8), rgba(11, 14, 20, 0.98));
+        background: radial-gradient(circle at center, rgba(43, 45, 66, 0.92), rgba(43, 45, 66, 0.99));
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         z-index: 9999;
         opacity: 0;
         visibility: hidden;
-        transition: opacity 0.5s ease, visibility 0.5s ease;
+        transition: opacity 0.4s ease, visibility 0.4s ease;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
-        }
+    }
 
-        .slide-menu-overlay.active {
+    .slide-menu-overlay.active {
         opacity: 1;
         visibility: visible;
-        }
+    }
 
-        .slide-menu {
+    .slide-menu {
         position: relative;
-        width: 100%;
-        max-width: 1200px;
-        margin: 40px auto;
-        transform: translateY(-50px);
+        width: calc(100% - 40px);
+        max-width: 1100px;
+        margin: 30px auto;
+        transform: translateY(-16px);
         opacity: 0;
-        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
-        padding: 20px;
-        }
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+        padding: 0;
+    }
 
-        .slide-menu.active {
+    .slide-menu.active {
         transform: translateY(0);
         opacity: 1;
-        }
+    }
 
-        .slide-menu-header {
-        background: var(--gradient-neon);
-        padding: 30px;
-        border-radius: 24px;
-        margin-bottom: 40px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-        position: relative;
-        overflow: hidden;
-        }
+    /* --- Header Bar --- */
+    .slide-menu-header {
+        background: var(--flag-red);
+        padding: 16px 24px;
+        border-radius: 4px;
+        margin-bottom: 16px;
+        border-bottom: 3px solid var(--punch-red);
+    }
 
-        .slide-menu-header::after {
-        content: "";
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-        transform: rotate(45deg);
-        animation: shine 4s infinite linear;
-        }
+    .slide-menu-header h3 {
+        font-family: var(--font-tech);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 1rem;
+    }
 
-        @keyframes shine {
-        0% { transform: translateX(-100%) rotate(45deg); }
-        100% { transform: translateX(100%) rotate(45deg); }
-        }
-
-        .user-info-slide {
+    /* --- User Info Bar (compact) --- */
+    .user-info-slide {
         background: var(--glass-bg);
         border: 1px solid var(--glass-border);
-        border-radius: 24px;
-        padding: 30px;
-        margin-bottom: 40px;
+        border-radius: 4px;
+        padding: 12px 18px;
+        margin-bottom: 16px;
         display: flex;
         align-items: center;
-        box-shadow: var(--glass-shadow);
-        }
+        gap: 14px;
+        backdrop-filter: blur(12px);
+    }
 
-        .user-avatar {
-        width: 70px;
-        height: 70px;
-        border-radius: 20px;
-        background: var(--gradient-neon);
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 2px;
+        background: var(--lavender-grey);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.8rem;
-        color: white;
-        box-shadow: var(--shadow-neon);
-        transform: rotate(-5deg);
-        }
+        font-size: 1rem;
+        color: var(--space-indigo);
+        flex-shrink: 0;
+    }
 
-        .role-badge {
-        background: rgba(255, 255, 255, 0.1);
-        color: var(--neon-blue);
-        border: 1px solid rgba(0, 210, 255, 0.3);
-        padding: 4px 12px;
-        border-radius: 12px;
+    .role-badge {
+        background: rgba(141, 153, 174, 0.1);
+        color: var(--lavender-grey);
+        border: 1px solid var(--glass-border);
+        padding: 2px 8px;
+        border-radius: 2px;
         font-family: var(--font-tech);
         text-transform: uppercase;
+        font-size: 0.65rem;
         letter-spacing: 0.05em;
-        }
+    }
 
-        .menu-grid-slide {
+    .role-admin { color: var(--punch-red) !important; border-color: rgba(239,35,60,0.35) !important; }
+
+    /* --- Category Label --- */
+    .category-group-slide {
+        margin-bottom: 16px;
+    }
+
+    .category-group-slide > h6 {
+        font-family: var(--font-tech);
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        color: var(--lavender-grey);
+        opacity: 0.65;
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+        border-bottom: 1px dashed var(--glass-border);
+    }
+
+    /* --- Module Grid (compact) --- */
+    .menu-grid-slide {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 20px;
-        }
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 6px;
+        width: 100%;
+    }
 
-        .menu-card {
+    /* --- Module Card (horizontal compact row) --- */
+    .menu-card {
         background: var(--glass-bg);
         border: 1px solid var(--glass-border);
-        border-radius: 24px;
-        padding: 30px;
+        border-radius: 4px;
+        padding: 10px 14px;
         text-decoration: none;
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: all 0.2s ease;
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
-        text-align: center;
+        gap: 10px;
         position: relative;
         overflow: hidden;
-        }
+        backdrop-filter: blur(12px);
+    }
 
-        .menu-card:hover {
-        background: rgba(255, 255, 255, 0.05);
-        border-color: var(--neon-blue);
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px rgba(0, 210, 255, 0.15);
-        }
+    .menu-card::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 0;
+        background: var(--flag-red);
+        transition: width 0.2s ease;
+    }
 
-        .menu-icon {
-        font-size: 2.5rem;
-        margin-bottom: 15px;
-        color: var(--neon-blue);
-        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
+    .menu-card:hover {
+        background: rgba(141, 153, 174, 0.08);
+        border-color: rgba(141, 153, 174, 0.35);
+        transform: translateX(2px);
+    }
 
-        .menu-card:hover .menu-icon {
-        transform: scale(1.1) rotate(5deg);
-        color: #fff;
-        }
+    .menu-card:hover::before { width: 3px; }
 
-        .menu-title {
+    .menu-icon {
+        font-size: 1.1rem;
+        color: var(--lavender-grey);
+        transition: color 0.2s ease;
+        flex-shrink: 0;
+        width: 20px;
+        text-align: center;
+    }
+
+    .menu-card:hover .menu-icon { color: var(--platinum); }
+
+    .menu-content-text { overflow: hidden; }
+
+    .menu-title {
         font-family: var(--font-tech);
-        color: white;
-        font-size: 1.25rem;
-        margin-bottom: 8px;
-        }
+        color: var(--platinum);
+        font-size: 0.7rem;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
-        .menu-description {
-        color: rgba(255, 255, 255, 0.5);
-        font-size: 0.9rem;
-        }
+    .menu-description {
+        color: var(--lavender-grey);
+        font-size: 0.6rem;
+        font-family: var(--font-body);
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        opacity: 0.7;
+    }
 
-        @media (max-width: 768px) {
-        .menu-card {
-        flex-direction: row;
-        text-align: left;
-        padding: 20px;
-        }
-        .menu-icon {
-        margin-bottom: 0;
-        margin-right: 20px;
-        font-size: 2rem;
-        }
-        .slide-menu {
-        margin: 10px;
-        padding-bottom: 80px;
-        }
-        }
-        </style>
+    /* Logout button in menu */
+    .slide-menu-content > div.text-center a {
+        font-family: var(--font-tech);
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    @media (max-width: 768px) {
+        .slide-menu { margin: 16px auto; width: calc(100% - 24px); }
+        .menu-grid-slide { grid-template-columns: 1fr 1fr; }
+        .slide-menu-header { padding: 14px 18px; }
+        .user-info-slide  { padding: 10px 14px; }
+    }
+
+    @media (max-width: 480px) {
+        .menu-grid-slide { grid-template-columns: 1fr; }
+    }
+</style>

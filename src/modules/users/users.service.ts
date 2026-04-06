@@ -23,8 +23,39 @@ export const getAllUsers = async () => {
 
 
 export const getSystemModules = async () => {
-    const [rows] = await mainDbPool.query<RowDataPacket[]>('SELECT code, name, icon FROM sys_modules ORDER BY name ASC');
-    return rows;
+    const query = `
+        SELECT m.code, m.name, m.icon, m.is_configured, 
+               c.name as category_name, c.icon as category_icon, c.id as category_id
+        FROM sys_modules m
+        LEFT JOIN sys_module_categories c ON m.category_id = c.id
+        ORDER BY c.id ASC, m.name ASC
+    `;
+    const [rows] = await mainDbPool.query<RowDataPacket[]>(query);
+    
+    const categories: any[] = [];
+    const catMap = new Map();
+    
+    for (const r of rows) {
+        const catId = r.category_id || 0;
+        if (!catMap.has(catId)) {
+            const newCat = {
+                id: catId,
+                name: r.category_name || 'Sin Categoría',
+                icon: r.category_icon || 'bi-folder',
+                modules: []
+            };
+            catMap.set(catId, newCat);
+            categories.push(newCat);
+        }
+        catMap.get(catId).modules.push({
+            code: r.code,
+            name: r.name,
+            icon: r.icon,
+            is_configured: r.is_configured
+        });
+    }
+    
+    return categories;
 };
 
 // 1. CREATE (LIMPIO: Solo crea usuario)

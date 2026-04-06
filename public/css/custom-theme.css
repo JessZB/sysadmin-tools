@@ -535,39 +535,104 @@ a:hover {
     box-shadow: inset 3px 0 0 var(--punch-red);
 }
 
-/* 7. Action Buttons (Edit / Delete) */
-.btn-edit, .btn-delete {
-    background: transparent !important;
-    font-family: var(--font-tech);
+/* ==================================================
+   7. TABLE ACTION BUTTONS — Nothing Style High Contrast
+   Three semantic variants: Edit / Neutral / Danger
+   All optimized for dark glassmorphism backgrounds.
+   ================================================== */
+
+/* Base shared for ALL table action buttons */
+.btn-edit, .btn-delete, .btn-permissions, .btn-execute, .btn-history,
+.btn-outline-cerulean, .btn-outline-punch, .btn-outline-dark,
+.btn-outline-success, .btn-outline-danger, .btn-outline-primary {
+    background: rgba(43, 45, 66, 0.5) !important;
+    font-family: var(--font-tech) !important;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
     border-radius: 4px !important;
-    padding: 6px 12px !important;
-    font-size: 0.75rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 5px 11px !important;
+    font-size: 0.7rem;
+    font-weight: normal;
+    line-height: 1.4;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
-.btn-edit {
+/* ---- EDIT / NEUTRAL (lavender-grey) ---- */
+.btn-edit,
+.btn-outline-cerulean,
+.btn-outline-primary,
+.btn-outline-dark {
     color: var(--lavender-grey) !important;
-    border: 1px solid var(--glass-border) !important;
+    border: 1px solid rgba(141, 153, 174, 0.5) !important;
 }
 
-.btn-edit:hover {
+.btn-edit:hover,
+.btn-outline-cerulean:hover,
+.btn-outline-primary:hover,
+.btn-outline-dark:hover {
     color: var(--platinum) !important;
     border-color: var(--lavender-grey) !important;
-    background: rgba(141, 153, 174, 0.1) !important;
-    box-shadow: 0 0 10px rgba(141, 153, 174, 0.2);
+    background: rgba(141, 153, 174, 0.15) !important;
+    box-shadow: 0 0 12px rgba(141, 153, 174, 0.2), inset 0 0 0 1px rgba(141, 153, 174, 0.3) !important;
+    transform: translateY(-1px);
 }
 
-.btn-delete {
-    color: var(--punch-red) !important;
-    border: 1px dotted rgba(239, 35, 60, 0.4) !important;
+/* ---- PERMISSIONS / INFO (accent neutral) ---- */
+.btn-permissions,
+.btn-history,
+.btn-execute,
+.btn-outline-success {
+    color: var(--lavender-grey) !important;
+    border: 1px dashed rgba(141, 153, 174, 0.6) !important;
 }
 
-.btn-delete:hover {
+.btn-permissions:hover,
+.btn-history:hover,
+.btn-execute:hover,
+.btn-outline-success:hover {
+    color: var(--platinum) !important;
+    border-style: solid !important;
+    border-color: var(--platinum) !important;
+    background: rgba(237, 242, 244, 0.08) !important;
+    box-shadow: 0 0 12px rgba(237, 242, 244, 0.1) !important;
+    transform: translateY(-1px);
+}
+
+/* ---- DELETE / DANGER (punch-red) ---- */
+.btn-delete,
+.btn-outline-punch,
+.btn-outline-danger {
+    color: rgba(239, 35, 60, 0.85) !important;
+    border: 1px solid rgba(239, 35, 60, 0.35) !important;
+}
+
+.btn-delete:hover,
+.btn-outline-punch:hover,
+.btn-outline-danger:hover {
     color: var(--platinum) !important;
     background: var(--flag-red) !important;
-    border-style: solid !important;
     border-color: var(--punch-red) !important;
-    box-shadow: 0 0 12px rgba(217, 4, 41, 0.5);
-    transform: scale(1.05);
+    border-style: solid !important;
+    box-shadow: 0 0 14px rgba(217, 4, 41, 0.4), inset 0 1px 0 rgba(255,255,255,0.1) !important;
+    transform: translateY(-1px);
+}
+
+/* Scale on click for all table buttons */
+.btn-edit:active, .btn-delete:active, .btn-permissions:active,
+.btn-execute:active, .btn-history:active,
+.btn-outline-cerulean:active, .btn-outline-punch:active,
+.btn-outline-dark:active, .btn-outline-success:active,
+.btn-outline-danger:active, .btn-outline-primary:active {
+    transform: scale(0.96) !important;
+}
+
+/* Action button wrapper for table cells */
+.table-action-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
 }

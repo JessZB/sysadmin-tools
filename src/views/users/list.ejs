@@ -134,25 +134,40 @@
                         </div>
                     </div>
 
-                    <div class="row g-3">
-                        <% systemModules.forEach(function(mod) { %>
-                            <div class="col-md-6 col-lg-4">
-                                <div class="card h-100 glass-effect border-opacity-10 permission-card-premium transition-base">
-                                    <div class="card-body p-3">
-                                        <div class="form-check form-switch d-flex align-items-center gap-3 w-100">
-                                            <input class="form-check-input module-check cursor-pointer" type="checkbox"
-                                                value="<%= mod.code %>" id="mod_<%= mod.code %>" style="width: 2.5em; height: 1.25em;">
-                                            <label class="form-check-label flex-grow-1 cursor-pointer"
-                                                for="mod_<%= mod.code %>">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="bi <%= mod.icon || 'bi-circle' %> text-primary opacity-75 fs-5 me-2"></i>
-                                                    <span class="fw-bold text-white small text-uppercase ls-1">
-                                                        <%= mod.name %>
-                                                    </span>
+                    <div class="row g-4">
+                        <% systemModules.forEach(function(cat) { %>
+                            <div class="col-12">
+                                <h6 class="text-lavender font-tech text-uppercase mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+                                    <i class="bi <%= cat.icon %> me-2"></i><%= cat.name %>
+                                </h6>
+                                <div class="row g-3">
+                                    <% cat.modules.forEach(function(mod) { %>
+                                        <% const cardClass = mod.is_configured ? '' : 'border-danger opacity-50'; %>
+                                        <% const disabledAttr = mod.is_configured ? '' : 'disabled'; %>
+                                        <div class="col-md-6 col-lg-4 mb-2">
+                                            <input class="form-check-input module-check d-none" type="checkbox"
+                                                value="<%= mod.code %>" id="mod_<%= mod.code %>" <%= disabledAttr %>>
+                                            <label class="w-100 h-100 <%= mod.is_configured ? 'cursor-pointer' : '' %>" for="mod_<%= mod.code %>" style="margin: 0;">
+                                                <div class="card h-100 glass-effect border-opacity-10 permission-card-premium transition-base <%= cardClass %> m-0">
+                                                    <div class="card-body p-3">
+                                                        <div class="d-flex align-items-center gap-3 w-100">
+                                                            <i class="bi <%= mod.icon || 'bi-circle' %> <%= mod.is_configured ? 'text-primary' : 'text-danger' %> opacity-75 fs-4"></i>
+                                                            <div class="d-flex flex-column text-start">
+                                                                <span class="fw-bold text-white small text-uppercase ls-1">
+                                                                    <%= mod.name %>
+                                                                </span>
+                                                                <% if (!mod.is_configured) { %>
+                                                                    <div class="mt-1">
+                                                                        <span class="badge bg-danger font-tech"><i class="bi bi-exclamation-triangle-fill me-1"></i>No config</span>
+                                                                    </div>
+                                                                <% } %>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </label>
                                         </div>
-                                    </div>
+                                    <% }); %>
                                 </div>
                             </div>
                         <% }); %>
@@ -177,10 +192,22 @@
         }
         .permission-card-premium:hover {
             background: rgba(255, 255, 255, 0.03);
-            border-color: var(--neon-blue);
+            border-color: rgba(255, 255, 255, 0.2) !important;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
+        
+        /* Nothing Style Checked State */
+        input.module-check:checked + label .permission-card-premium {
+            background: rgba(43, 45, 66, 0.8) !important; /* var(--space-indigo) aproximado */
+            border-color: var(--neon-blue, #ef233c) !important; /* Usa punch-red si no hay neon-blue */
+            box-shadow: 0 0 15px rgba(239, 35, 60, 0.2);
+        }
+        input.module-check:checked + label .permission-card-premium i {
+            color: var(--neon-blue, #ef233c) !important; /* Icono resalta al checkear */
+            opacity: 1 !important;
+        }
+
         .cursor-pointer { cursor: pointer; }
     </style>
 

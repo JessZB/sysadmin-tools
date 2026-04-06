@@ -20,33 +20,32 @@ function typeFormatter(value, row, index) {
 
 // Formateador para Botones de Acción
 function actionFormatter(value, row, index) {
-    // Botón Editar
     const isServer = (row.is_server === 1 || row.is_server === true) ? 1 : 0;
     const isActive = (row.is_active === 1 || row.is_active === true) ? 1 : 0;
     const branchId = row.branch_id || 1;
     
-    let botones = `
-        <button class="btn btn-sm btn-outline-cerulean me-1 btn-edit" 
-            data-id="${row.id}"
-            data-name="${row.name}"
-            data-ip="${row.ip_address}"
-            data-user="${row.db_user}"
-            data-server="${isServer}"
-            data-active="${isActive}"
-            data-branch="${branchId}">
-            <i class="bi bi-pencil"></i>
-        </button>
+    const botones = `
+        <div class="table-action-group">
+            <button class="btn btn-sm btn-edit" 
+                title="Editar Terminal"
+                data-id="${row.id}"
+                data-name="${row.name}"
+                data-ip="${row.ip_address}"
+                data-user="${row.db_user}"
+                data-server="${isServer}"
+                data-active="${isActive}"
+                data-branch="${branchId}">
+                <i class="bi bi-pencil-square"></i>
+            </button>
+            <button class="btn btn-sm btn-delete" 
+                title="Eliminar Terminal"
+                data-id="${row.id}">
+                <i class="bi bi-trash3"></i>
+            </button>
+        </div>
     `;
 
-    // Botón Eliminar
-    botones += `
-        <button class="btn btn-sm btn-outline-punch btn-delete" 
-            data-id="${row.id}">
-            <i class="bi bi-trash"></i>
-        </button>
-    `;
-
-    return '<div class="text-end">' + botones + '</div>';
+    return botones;
 }
 
 // Hacer globales las funciones para que Bootstrap Table las encuentre en el HTML

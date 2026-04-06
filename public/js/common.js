@@ -105,21 +105,32 @@ window.formatDateToLocal = (value) => {
 // DELEGACIÓN DE EVENTOS GLOBAL (Nothing Style)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Escucha todos los clics en el body para optimizar el rendimiento y 
-    // evitar atar listeners individuales a elementos dinámicos
+    // Escucha todos los clics en el body para optimizar el rendimiento
     document.body.addEventListener('click', function(event) {
-        // Find if a clicked element or its parent has a data-action
         const target = event.target.closest('[data-action]');
-        
         if (!target) return;
         
         const actionStr = target.getAttribute('data-action');
         if (actionStr) {
             try {
-                // Execute the string logic, binding 'this' to the element as inline onclick used to do
                 new Function('event', actionStr).call(target, event);
             } catch (error) {
-                console.error('Error executing data-action:', actionStr, error);
+                console.error('Error executing data-action (click):', actionStr, error);
+            }
+        }
+    });
+
+    // Escucha cambios en inputs/selects para centralizar la lógica
+    document.body.addEventListener('change', function(event) {
+        const target = event.target.closest('[data-action]');
+        if (!target) return;
+
+        const actionStr = target.getAttribute('data-action');
+        if (actionStr) {
+            try {
+                new Function('event', actionStr).call(target, event);
+            } catch (error) {
+                console.error('Error executing data-action (change):', actionStr, error);
             }
         }
     });

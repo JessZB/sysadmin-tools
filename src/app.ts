@@ -14,12 +14,13 @@ import homeRoutes from './modules/home/home.routes';
 import usersRoutes from './modules/users/users.routes';
 import terminalsRoutes from './modules/terminals/terminals.routes';
 import dashboardRoutes from './modules/dashboard/dashboard.routes';
-import branchesRoutes from './modules/branches/brances.routes';
+import branchesRoutes from './modules/branches/branches.routes';
 import auditRoutes from './modules/audit/audit.routes';
 import barcodeRoutes from './modules/barcode/barcode.routes';
 import servicesRoutes from './modules/services/services.routes';
 import screensRoutes from './modules/screens/screens.routes';
 import mediaRoutes from './modules/media/media.routes';
+import categoriesRoutes from './modules/categories/categories.routes';
 import { notFoundHandler } from './shared/middlewares/not-found.middleware';
 import { requireAuth } from './shared/middlewares/auth.middleware';
 import { allowRoles } from './shared/middlewares/role.middleware';
@@ -155,6 +156,9 @@ app.use('/users', requireAuth, requireModule('users'), usersRoutes);
 // Sucursales
 app.use('/branches', requireAuth, requireModule('branches'), branchesRoutes);
 
+// Categorías/Mapeo
+app.use('/categories', requireAuth, requireModule('categories'), categoriesRoutes);
+
 // Auditoría
 app.use('/audit', requireAuth, requireModule('audit'), auditRoutes);
 
@@ -179,11 +183,18 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     res.status(500).json({ error: err.message });
 });
 
+import { ModuleScannerService } from './shared/services/module-scanner.service';
+
 const PORT = process.env.PORT || 3435;
 const HOST = '0.0.0.0'; // Escuchar en todas las interfaces de red
 
-httpServer.listen(Number(PORT), HOST, () => {
-    console.log(`🚀 Servidor TS corriendo en puerto ${PORT}`);
+// Inicializar el escáner de módulos antes de levantar el servidor
+import { getSystemModules } from './modules/users/users.service';
+
+ModuleScannerService.scanAndSync().then(async () => {
+    app.locals.menuCategories = await getSystemModules();
+    httpServer.listen(Number(PORT), HOST, () => {
+        console.log(`🚀 Servidor TS corriendo en puerto ${PORT}`);
     console.log(`🌐 Acceso Local: http://localhost:${PORT}`);
     console.log('');
     console.log('📡 Acceso desde Red Local:');
@@ -213,4 +224,5 @@ httpServer.listen(Number(PORT), HOST, () => {
     }, 15 * 60 * 1000); // 15 minutos
 
     console.log('🧹 Limpieza automática de caché iniciada (cada 15 minutos)');
+    });
 });

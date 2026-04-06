@@ -27,19 +27,23 @@ function statusFormatter(value, row) {
 // Formatter para Acciones (Editar/Eliminar)
 function actionFormatter(value, row) {
     return `
-        <button class="btn btn-sm btn-outline-cerulean me-1 btn-edit" 
-            data-id="${row.id}"
-            data-name="${row.name}"
-            data-code="${row.code}"
-            data-address="${escapeHtml(row.address || '')}"
-            data-active="${row.is_active}">
-            <i class="bi bi-pencil"></i>
-        </button>
-        <button class="btn btn-sm btn-outline-punch btn-delete" 
-            data-id="${row.id}"
-            data-name="${row.name}">
-            <i class="bi bi-trash"></i>
-        </button>
+        <div class="table-action-group">
+            <button class="btn btn-sm btn-edit" 
+                title="Editar Sucursal"
+                data-id="${row.id}"
+                data-name="${row.name}"
+                data-code="${row.code}"
+                data-address="${escapeHtml(row.address || '')}"
+                data-active="${row.is_active}">
+                <i class="bi bi-pencil-square"></i>
+            </button>
+            <button class="btn btn-sm btn-delete" 
+                title="Eliminar Sucursal"
+                data-id="${row.id}"
+                data-name="${row.name}">
+                <i class="bi bi-trash3"></i>
+            </button>
+        </div>
     `;
 }
 

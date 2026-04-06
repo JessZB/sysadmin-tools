@@ -4,16 +4,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso Seguro | SysAdmin Tool Suite</title>
-    <!-- Iconos y Fuentes -->
+    <title>Acceso | SysAdmin Suite</title>
     <link rel="icon" type="image/x-icon" href="/favicon.webp">
     <link href="/css/lib/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/lib/bootstrap-icons.css">
     <link href="/css/lib/font-awesome.css" rel="stylesheet">
     <link href="/css/custom-theme.css" rel="stylesheet">
     <style>
+        /* =============================================
+           LOGIN PAGE — Nothing Style
+           Strict palette: space-indigo / lavender-grey
+           / platinum / punch-red / flag-red
+           ============================================= */
+
+        html, body {
+            height: 100%;
+        }
+
         body {
-            background: radial-gradient(circle at center, #1a1f2b 0%, var(--space-dark) 100%);
+            background-color: var(--space-indigo);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -22,247 +31,358 @@
             position: relative;
         }
 
-        /* Luces de fondo ambientales */
-        .ambient-light {
-            position: absolute;
-            width: 500px;
-            height: 500px;
+        /* Dot matrix background (inherited from custom-theme via body::before) */
+
+        /* Subtle red glow in corner — signature accent */
+        body::after {
+            content: "";
+            position: fixed;
+            bottom: -80px;
+            right: -80px;
+            width: 400px;
+            height: 400px;
             border-radius: 50%;
-            background: var(--neon-blue);
-            filter: blur(150px);
-            opacity: 0.05;
-            z-index: 0;
+            background: radial-gradient(circle, rgba(217, 4, 41, 0.12) 0%, transparent 70%);
             pointer-events: none;
+            z-index: 0;
         }
 
-        .light-1 { top: -10%; left: -10%; background: var(--neon-blue); }
-        .light-2 { bottom: -10%; right: -10%; background: var(--neon-indigo); }
-
-        .login-container {
+        /* ---- LAYOUT ---- */
+        .login-wrapper {
             position: relative;
             z-index: 10;
             width: 100%;
-            max-width: 440px;
-            padding: 20px;
+            max-width: 420px;
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 32px;
         }
 
-        .login-card {
-            background: rgba(22, 27, 34, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 28px;
-            padding: 3rem 2.5rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .login-card:hover {
-            border-color: rgba(0, 210, 255, 0.2);
-            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 210, 255, 0.1);
+        /* ---- BRAND HEADER ---- */
+        .brand-block {
+            text-align: center;
         }
 
         .brand-logo {
             font-family: var(--font-tech);
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--neon-blue);
-            letter-spacing: -0.02em;
-            margin-bottom: 0.5rem;
+            font-size: 2.2rem;
+            color: var(--platinum);
+            letter-spacing: -1px;
+            line-height: 1;
+            margin-bottom: 8px;
         }
 
         .brand-logo span {
-            color: #fff;
-            font-weight: 300;
+            color: var(--lavender-grey);
         }
 
-        .form-label-premium {
-            font-size: 0.75rem;
+        .brand-tagline {
+            font-family: var(--font-tech);
+            font-size: 0.6rem;
+            color: var(--lavender-grey);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-weight: 700;
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 0.75rem;
+            letter-spacing: 3px;
+            opacity: 0.7;
+        }
+
+        /* Red accent line under brand */
+        .brand-rule {
+            width: 40px;
+            height: 2px;
+            background: var(--flag-red);
+            margin: 12px auto 0;
+        }
+
+        /* ---- CARD ---- */
+        .login-card {
+            width: 100%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 4px; /* Orthogonal — Nothing Style */
+            border-top: 3px solid var(--flag-red);
+            padding: 2.5rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Corner dot decoration */
+        .login-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at top right, rgba(217, 4, 41, 0.08), transparent 70%);
+        }
+
+        .card-eyebrow {
+            font-family: var(--font-tech);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--lavender-grey);
+            margin-bottom: 6px;
+        }
+
+        .card-title {
+            font-family: var(--font-tech);
+            font-size: 1.4rem;
+            color: var(--platinum);
+            margin-bottom: 28px;
+            line-height: 1.1;
+        }
+
+        /* ---- FORM FIELDS ---- */
+        .field-group {
+            margin-bottom: 24px;
+        }
+
+        .field-label {
             display: flex;
             align-items: center;
+            gap: 8px;
+            font-family: var(--font-tech);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--lavender-grey);
+            margin-bottom: 10px;
         }
 
-        .input-group-premium {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 14px;
-            padding: 0.5rem 1rem;
-            transition: all 0.3s ease;
+        .field-label i {
+            font-size: 0.8rem;
+            color: var(--lavender-grey);
+        }
+
+        .field-input-wrap {
             display: flex;
             align-items: center;
-            margin-bottom: 1.5rem;
+            gap: 12px;
+            border-bottom: 1px solid var(--lavender-grey);
+            padding-bottom: 10px;
+            transition: border-color 0.3s ease;
         }
 
-        .input-group-premium:focus-within {
-            border-color: var(--neon-blue);
-            background: rgba(0, 0, 0, 0.4);
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.15);
+        .field-input-wrap:focus-within {
+            border-color: var(--punch-red);
+            box-shadow: 0 4px 12px rgba(239, 35, 60, 0.1);
         }
 
-        .input-group-premium i {
-            color: rgba(255, 255, 255, 0.3);
-            margin-right: 12px;
-            font-size: 1.1rem;
-            transition: color 0.3s;
+        .field-input-wrap i {
+            color: var(--lavender-grey);
+            font-size: 1rem;
+            flex-shrink: 0;
+            transition: color 0.3s ease;
         }
 
-        .input-group-premium:focus-within i {
-            color: var(--neon-blue);
+        .field-input-wrap:focus-within i {
+            color: var(--punch-red);
         }
 
-        .input-premium {
+        .field-input {
             background: transparent;
             border: none;
-            color: #fff;
-            width: 100%;
-            font-size: 1rem;
             outline: none;
-            padding: 8px 0;
-        }
-
-        .input-premium::placeholder {
-            color: rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-login-premium {
-            background: var(--gradient-neon);
-            border: none;
-            border-radius: 14px;
-            padding: 14px;
-            color: #fff;
-            font-weight: 700;
-            font-family: var(--font-tech);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            box-shadow: 0 10px 20px -5px rgba(0, 210, 255, 0.4);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--platinum);
+            font-family: var(--font-body);
+            font-size: 1rem;
             width: 100%;
-            margin-top: 1rem;
+            padding: 0;
         }
 
-        .btn-login-premium:hover {
-            transform: translateY(-3px);
-            filter: brightness(1.1);
-            box-shadow: 0 15px 30px -5px rgba(0, 210, 255, 0.6);
+        .field-input::placeholder {
+            font-family: var(--font-tech);
+            color: var(--lavender-grey);
+            opacity: 0.5;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
         }
 
-        .btn-login-premium:active {
-            transform: translateY(0);
-        }
-
-        .auth-footer {
-            margin-top: 2rem;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 0.85rem;
-        }
-
-        .alert-premium {
-            background: rgba(255, 77, 109, 0.1);
-            border: 1px solid rgba(255, 77, 109, 0.2);
-            color: var(--punch-red);
-            border-radius: 12px;
-            font-size: 0.85rem;
-            padding: 12px;
-            margin-bottom: 1.5rem;
+        /* ---- ERROR ALERT ---- */
+        .login-error {
             display: flex;
             align-items: center;
+            gap: 10px;
+            background: rgba(217, 4, 41, 0.08);
+            border: 1px solid rgba(217, 4, 41, 0.3);
+            border-left: 3px solid var(--flag-red);
+            border-radius: 2px;
+            padding: 12px 14px;
+            margin-bottom: 20px;
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            color: var(--punch-red);
         }
 
-        /* Float Anim */
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        .login-error i {
+            flex-shrink: 0;
+            font-size: 1rem;
         }
 
-        .float-anim {
-            animation: float 6s ease-in-out infinite;
+        /* ---- SUBMIT BUTTON ---- */
+        .btn-login {
+            width: 100%;
+            padding: 14px 24px;
+            background: var(--flag-red);
+            color: var(--platinum);
+            border: none;
+            border-radius: 2px;
+            font-family: var(--font-tech);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 8px;
+            position: relative;
+            overflow: hidden;
         }
+
+        .btn-login::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.07), transparent);
+        }
+
+        .btn-login:hover {
+            background: var(--punch-red);
+            box-shadow: 0 0 20px rgba(239, 35, 60, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Spinner inside button */
+        .btn-login .spinner-border {
+            width: 1rem;
+            height: 1rem;
+            border-width: 2px;
+        }
+
+        /* ---- FOOTER ---- */
+        .login-footer {
+            text-align: center;
+            font-family: var(--font-tech);
+            font-size: 0.6rem;
+            color: var(--lavender-grey);
+            opacity: 0.5;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* ---- ENTRANCE ANIMATION ---- */
+        @keyframes slide-up {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .brand-block { animation: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .login-card  { animation: slide-up 0.6s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .login-footer{ animation: slide-up 0.6s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both; }
     </style>
 </head>
 
 <body class="noise-overlay">
-    <div class="ambient-light light-1"></div>
-    <div class="ambient-light light-2"></div>
 
-    <div class="login-container">
-        <div class="text-center mb-5 float-anim">
+    <div class="login-wrapper">
+
+        <!-- Brand -->
+        <div class="brand-block">
             <div class="brand-logo">
-                <i class="fa-solid fa-bolt-lightning me-2"></i>SYS<span>ADMIN</span>
+                <i class="fa-solid fa-bolt-lightning me-2" style="color: var(--flag-red);"></i>SYS<span>ADMIN</span>
             </div>
-            <div class="text-white-50 small text-uppercase ls-2 fw-bold" style="letter-spacing: 0.2em; font-size: 0.65rem;">
-                Management Infrastructure Suite
-            </div>
+            <div class="brand-tagline">Infrastructure Management Suite</div>
+            <div class="brand-rule"></div>
         </div>
 
-        <div class="login-card shadow-2xl">
-            <div class="mb-4">
-                <h4 class="text-white fw-bold mb-1">Bienvenido</h4>
-                <p class="text-white-50 small">Identifíquese para continuar al panel.</p>
-            </div>
+        <!-- Login Card -->
+        <div class="login-card">
+            <div class="card-eyebrow">Autenticación de Acceso</div>
+            <h1 class="card-title">Control de Acceso</h1>
 
-            <div id="loginError" class="alert-premium d-none" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <!-- Error Alert (hidden by default) -->
+            <div id="loginError" class="login-error d-none" role="alert">
+                <i class="bi bi-shield-exclamation"></i>
                 <span></span>
             </div>
 
-            <form id="loginForm">
-                <div>
-                    <label for="username" class="form-label-premium">
-                        <i class="bi bi-person me-2"></i>Nombre de Usuario
+            <form id="loginForm" autocomplete="off" novalidate>
+
+                <!-- Username -->
+                <div class="field-group">
+                    <label for="username" class="field-label">
+                        <i class="bi bi-person-badge"></i> Identificador
                     </label>
-                    <div class="input-group-premium">
-                        <i class="fa-solid fa-user-shield"></i>
-                        <input type="text" class="input-premium" id="username" name="username" placeholder="admin_root" required autofocus>
+                    <div class="field-input-wrap">
+                        <i class="bi bi-terminal"></i>
+                        <input
+                            type="text"
+                            class="field-input"
+                            id="username"
+                            name="username"
+                            placeholder="usuario_sys"
+                            required
+                            autofocus
+                            autocomplete="username"
+                        >
                     </div>
                 </div>
 
-                <div>
-                    <label for="password" class="form-label-premium">
-                        <i class="bi bi-lock me-2"></i>Contraseña de Acceso
+                <!-- Password -->
+                <div class="field-group">
+                    <label for="password" class="field-label">
+                        <i class="bi bi-key"></i> Contraseña
                     </label>
-                    <div class="input-group-premium">
-                        <i class="fa-solid fa-key"></i>
-                        <input type="password" class="input-premium" id="password" name="password" placeholder="••••••••" required>
+                    <div class="field-input-wrap">
+                        <i class="bi bi-lock"></i>
+                        <input
+                            type="password"
+                            class="field-input"
+                            id="password"
+                            name="password"
+                            placeholder="••••••••"
+                            required
+                            autocomplete="current-password"
+                        >
                     </div>
                 </div>
 
-                <button type="submit" class="btn-login-premium" id="btnLogin">
-                    Acceder al Sistema <i class="fa-solid fa-arrow-right-to-bracket ms-2"></i>
+                <button type="submit" class="btn-login" id="btnLogin">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    Ingresar al Sistema
                 </button>
+
             </form>
-
-            <div class="auth-footer">
-                ¿Problemas de acceso? <br>
-                <a href="#" class="text-info text-decoration-none">Contactar al Administrador</a>
-            </div>
         </div>
 
-        <div class="text-center mt-5 text-white-50" style="font-size: 0.7rem; opacity: 0.3;">
-            &copy; 2025 SysAdmin Tool Suite • Versión 2.4.0-DEEP-SPACE
+        <!-- Footer -->
+        <div class="login-footer">
+            &copy; 2025 SysAdmin Tool Suite &bull; Acceso Restringido
         </div>
+
     </div>
 
-    <!-- Scripts -->
     <script src="/js/lib/sweetalert2@11.js"></script>
     <script src="/js/auth.client.js"></script>
-    <script>
-        // Animación suave de entrada para los inputs
-        document.querySelectorAll('.input-group-premium').forEach((group, index) => {
-            group.style.opacity = '0';
-            group.style.transform = 'translateY(10px)';
-            setTimeout(() => {
-                group.style.transition = 'all 0.5s ease';
-                group.style.opacity = '1';
-                group.style.transform = 'translateY(0)';
-            }, 300 + (index * 100));
-        });
-    </script>
 </body>
 
-</html>
+</html>
