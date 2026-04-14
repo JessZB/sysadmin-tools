@@ -1,0 +1,170 @@
+<%- include('../layout/header') %>
+
+<style>
+    .glass-panel {
+        background: rgba(43, 45, 66, 0.4);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(141, 153, 174, 0.15);
+        border-radius: 4px;
+    }
+
+    .nothing-input {
+        background: transparent; border: none; border-bottom: 1px solid var(--lavender-grey);
+        color: white; border-radius: 0;
+    }
+    .nothing-input:focus { background: transparent; box-shadow: none; border-color: var(--punch-red); }
+
+    .drop-zone {
+        border: 2px dashed rgba(141, 153, 174, 0.3);
+        border-radius: 4px;
+        padding: 60px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .drop-zone:hover, .drop-zone.active {
+        border-color: var(--flag-red);
+        background: rgba(239, 35, 60, 0.05);
+    }
+
+    .preview-table-container {
+        max-height: 300px;
+        overflow-x: auto;
+        overflow-y: auto;
+    }
+
+    .preview-table {
+        font-family: var(--font-tech);
+        font-size: 0.75rem;
+        color: var(--platinum);
+    }
+
+    .preview-table th { background: rgba(141, 153, 174, 0.1); border-color: rgba(141, 153, 174, 0.2); text-transform: uppercase; }
+    .preview-table td { border-color: rgba(141, 153, 174, 0.1); white-space: nowrap; }
+
+    .mapping-row {
+        background: rgba(141, 153, 174, 0.05);
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <a href="/pmc" class="text-white-50 text-decoration-none small font-tech mb-2 d-inline-block">
+                <i class="bi bi-arrow-left me-1"></i> VOLVER AL DASHBOARD
+            </a>
+            <h2 class="text-white font-tech mb-0 LS-1">
+                <span class="text-danger">EXCEL:</span> IMPORTAR LISTA DE PRECIOS
+            </h2>
+            <p class="text-white-50 small mt-1 font-body">Detecta actualizaciones de precios cruzando archivos del analista con tus pasillos.</p>
+        </div>
+    </div>
+
+    <!-- Fase 1: Subida de Archivo -->
+    <div class="glass-panel p-5 mb-4" id="uploadPhase">
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('excelFile').click()">
+            <i class="bi bi-file-earmark-arrow-up fs-1 text-white-50 mb-3 d-block"></i>
+            <h4 class="text-white font-tech">ARRASTRA O HAZ CLIC PARA SUBIR EL EXCEL</h4>
+            <p class="text-white-50 font-body">Soportado: .xlsx, .xls, .csv</p>
+        </div>
+        <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" class="d-none" onchange="handleExcelPreview(event)">
+    </div>
+
+    <!-- Fase 2: Vista previa y Mapeo -->
+    <div class="row g-4 d-none" id="processingPhase">
+        <div class="col-lg-6">
+            <div class="glass-panel p-4 h-100">
+                <h5 class="text-white font-tech mb-4 ls-1 border-bottom border-secondary border-opacity-25 pb-3">
+                    <i class="bi bi-eye me-2 text-primary"></i>PREVIEW DEL ARCHIVO
+                </h5>
+                <div class="preview-table-container">
+                    <table class="table table-dark preview-table" id="excelPreviewTable">
+                        <thead id="previewHeaders"></thead>
+                        <tbody id="previewRows"></tbody>
+                    </table>
+                </div>
+                <div class="mt-3 fs-tiny font-tech text-white-50 text-center">Mostrando las primeras 5 filas para validación de datos.</div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="glass-panel p-4 h-100">
+                <h5 class="text-white font-tech mb-4 ls-1 border-bottom border-secondary border-opacity-25 pb-3">
+                    <i class="bi bi-shuffle me-2 text-danger"></i>MAPEO DE COLUMNAS
+                </h5>
+                <p class="text-white-50 small mb-4 font-body">Indica en qué columna del Excel se encuentra cada dato requerido.</p>
+
+                <div id="mappingForm">
+                    <div class="mapping-row">
+                        <div>
+                            <h6 class="font-tech text-white mb-0">CÓDIGO PRODUCTO</h6>
+                            <small class="text-white-50 font-body">ID único de vinculación</small>
+                        </div>
+                        <select class="form-select nothing-input font-tech w-50" id="map_code" data-target="code">
+                            <option value="">Selecciona...</option>
+                        </select>
+                    </div>
+
+                    <div class="mapping-row">
+                        <div>
+                            <h6 class="font-tech text-white mb-0">PRECIO ACTUALIZADO</h6>
+                            <small class="text-white-50 font-body">El precio que se debe aplicar</small>
+                        </div>
+                        <select class="form-select nothing-input font-tech w-50" id="map_newPrice" data-target="newPrice">
+                            <option value="">Selecciona...</option>
+                        </select>
+                    </div>
+
+                    <div class="mapping-row">
+                        <div>
+                            <h6 class="font-tech text-white mb-0">PRECIO ANTERIOR</h6>
+                            <small class="text-white-50 font-body">(Opcional) Para modo tachado</small>
+                        </div>
+                        <select class="form-select nothing-input font-tech w-50" id="map_oldPrice" data-target="oldPrice">
+                            <option value="">Selecciona...</option>
+                        </select>
+                    </div>
+
+                    <div class="mapping-row">
+                        <div>
+                            <h6 class="font-tech text-white mb-0">NOMBRE/DESC</h6>
+                            <small class="text-white-50 font-body">(Opcional) Para contrastar</small>
+                        </div>
+                        <select class="form-select nothing-input font-tech w-50" id="map_name" data-target="name">
+                            <option value="">Selecciona...</option>
+                        </select>
+                    </div>
+
+                    <div class="mapping-row">
+                        <div>
+                            <h6 class="font-tech text-white mb-0">FECHA ACTUALIZADO</h6>
+                            <small class="text-white-50 font-body">(Opcional) Fecha cambio</small>
+                        </div>
+                        <select class="form-select nothing-input font-tech w-50" id="map_updatedAt" data-target="updatedAt">
+                            <option value="">Selecciona...</option>
+                        </select>
+                    </div>
+
+                    <div class="mt-5 text-center">
+                        <button class="btn btn-nothing-primary w-100 py-3" data-action="processExcelAction()">
+                            <i class="bi bi-lightning-fill me-2"></i> PROCESAR TODO EL ARCHIVO
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="savedMappingData" data-mapping='<%- JSON.stringify(locals.savedMapping || {}) %>' class="d-none"></div>
+
+<%- include('../layout/footer') %>

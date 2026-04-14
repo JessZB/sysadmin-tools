@@ -1,0 +1,227 @@
+<%- include('../layout/header') %>
+
+    <style>
+        /* Estilos Glassmorphism optimizados para Nothing Style */
+        .glass-panel {
+            background: rgba(43, 45, 66, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(141, 153, 174, 0.15);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-panel:hover {
+            background: rgba(43, 45, 66, 0.5);
+            border-color: rgba(239, 35, 60, 0.35);
+            transform: translateY(-4px);
+        }
+
+        .btn-nothing-primary {
+            background-color: var(--flag-red);
+            color: var(--platinum);
+            border: 1px solid var(--flag-red);
+            border-radius: 2px;
+            font-family: var(--font-tech);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-nothing-secondary {
+            background: rgba(141, 153, 174, 0.1);
+            color: var(--lavender-grey);
+            border: 1px solid rgba(141, 153, 174, 0.3);
+            border-radius: 2px;
+            font-family: var(--font-tech);
+            text-transform: uppercase;
+        }
+
+        .nothing-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--lavender-grey);
+            border-radius: 0;
+            color: var(--platinum);
+        }
+
+        .nothing-input:focus {
+            background: transparent;
+            box-shadow: none;
+            border-color: var(--punch-red);
+        }
+
+        .aisle-number {
+            font-size: 6rem;
+            color: var(--platinum);
+            opacity: 0.05;
+            font-weight: 900;
+            line-height: 0.8;
+        }
+
+        .color-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            display: inline-block;
+        }
+
+        .update-badge {
+            background: rgba(239, 35, 60, 0.15);
+            color: var(--punch-red);
+            border: 1px solid rgba(239, 35, 60, 0.3);
+            font-size: 0.6rem;
+            letter-spacing: 0.05em;
+            font-family: var(--font-tech);
+        }
+
+        .ls-1 {
+            letter-spacing: 1px;
+        }
+    </style>
+
+    <div class="container-fluid py-4 min-vh-100">
+
+        <!-- Header -->
+        <div class="row align-items-center mb-5 mt-4">
+            <div class="col">
+                <h6 class="text-white-50 font-tech mb-1 ls-1" style="font-size: 0.65rem;">CONTROL CENTRAL DE PRECIOS
+                </h6>
+                <h1 class="text-white font-tech mb-0 d-flex align-items-center text-uppercase">
+                    <i class="bi bi-cpu me-3 text-danger"></i>PMC Dashboard
+                </h1>
+                <div class="mt-2 text-white-50 small">Gestión de pasillos y organización de productos.</div>
+            </div>
+
+            <div class="col-auto d-flex gap-3 align-items-center">
+                <% if (locals.branches && branches.length > 0) { %>
+                    <select id="dashboardBranchSelect" class="form-select nothing-input text-white font-tech bg-transparent" onchange="window.location.href='?branch_id='+this.value">
+                        <% branches.forEach(b => { %>
+                            <option value="<%= b.id %>" <%= locals.currentBranch == b.id ? 'selected' : '' %> class="text-dark">
+                                <%= b.name %>
+                            </option>
+                        <% }) %>
+                    </select>
+                <% } %>
+                <button class="btn btn-nothing-secondary px-4 py-3 font-tech" data-action="openImportModal()">
+                    <i class="bi bi-file-earmark-spreadsheet me-2 fs-5"></i> IMPORTAR EXCEL
+                </button>
+                <button class="btn btn-nothing-primary px-4 py-3 font-tech shadow-sm"
+                    data-action="openCreateAisleModal()">
+                    <i class="bi bi-plus-lg me-2 fs-5"></i> NUEVO PASILLO
+                </button>
+            </div>
+        </div>
+
+        <!-- Grid de Pasillos -->
+        <div class="row g-4" id="aislesGrid">
+            <% if (locals.aisles && aisles.length> 0) { %>
+                <% aisles.forEach(function(pasillo) { %>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+                        <div class="glass-panel p-4 h-100 d-flex flex-column position-relative">
+
+                            <!-- Badge de actualización -->
+                            <% if (pasillo.updated_count && pasillo.updated_count> 0) { %>
+                                <span class="position-absolute top-0 end-0 mt-3 me-3 badge update-badge px-2 py-1">
+                                    <i class="bi bi-exclamation-triangle-fill me-1 text-danger"></i>
+                                    <%= pasillo.updated_count %> PENDIENTES
+                                </span>
+                                <% } %>
+
+                                    <!-- Info Pasillo -->
+                                    <div class="d-flex align-items-start justify-content-between mb-3">
+                                        <div class="d-flex align-items-center mt-1">
+                                            <span class="color-indicator me-3" style="--indicator-color: <%= pasillo.color || 'var(--lavender-grey)' %>; background-color: var(--indicator-color);"></span>
+                                            <div>
+                                                <h5 class="font-tech mb-0 text-white text-uppercase text-truncate"
+                                                    style="max-width: 150px;">
+                                                    <%= pasillo.name %>
+                                                </h5>
+                                                <small class="text-white-50">
+                                                    <%= pasillo.product_count || 0 %> Productos
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Background Number -->
+                                    <div class="flex-grow-1 d-flex justify-content-center align-items-center py-4">
+                                        <span class="font-tech aisle-number">
+                                            <%= (pasillo.number < 10 ? '0' + pasillo.number : pasillo.number) %>
+                                        </span>
+                                    </div>
+
+                                    <!-- Footer Actions -->
+                                    <div
+                                        class="d-flex justify-content-between mt-auto pt-3 border-top border-white border-opacity-10">
+                                        <a href="/pmc/aisles/<%= pasillo.id %>"
+                                            class="btn btn-nothing-secondary btn-sm px-3 py-2">
+                                            <i class="bi bi-sliders me-1"></i> GESTIONAR
+                                        </a>
+                                        <button class="btn btn-outline-danger border-0 rounded-0"
+                                            data-action="deleteAisle(<%= pasillo.id %>)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                        </div>
+                    </div>
+                    <% }); %>
+                        <% } else { %>
+                            <div class="col-12">
+                                <div class="glass-panel p-5 text-center">
+                                    <i class="bi bi-inboxes fs-1 text-white-50 mb-3 d-block"></i>
+                                    <h5 class="font-tech text-white">NO HAY PASILLOS REGISTRADOS</h5>
+                                    <p class="text-white-50">Crea un nuevo pasillo para comenzar.</p>
+                                </div>
+                            </div>
+                            <% } %>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="modalAisle" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="glass-panel modal-content border-0 p-2">
+                <div class="modal-header border-bottom border-white border-opacity-10 p-4">
+                    <h5 class="modal-title font-tech text-white d-flex align-items-center shadow-none">
+                        <i class="bi bi-diagram-3 me-2 text-danger"></i><span id="modalAisleTitle">NUEVO PASILLO</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <form id="formAisle">
+                        <input type="hidden" id="aisleId">
+                        <div class="mb-4">
+                            <label class="form-label text-white-50 small font-tech">NÚMERO DE PASILLO</label>
+                            <input type="number" class="form-control nothing-input" id="aisleNumber" required
+                                placeholder="01">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label text-white-50 small font-tech">NOMBRE</label>
+                            <input type="text" class="form-control nothing-input" id="aisleName" required
+                                placeholder="LÁCTEOS">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label text-white-50 small font-tech d-block">COLOR IDENTIFICADOR</label>
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="color" id="aisleColor" value="#ef233c"
+                                    style="width: 40px; height: 40px; border: none; background: none; cursor: pointer;">
+                                <span class="font-tech text-white-50" id="colorHexDisplay">#EF233C</span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer border-top border-white border-opacity-10 p-4">
+                    <button type="button" class="btn btn-nothing-secondary px-4 font-tech"
+                        data-bs-dismiss="modal">CANCELAR</button>
+                    <button type="button" class="btn btn-nothing-primary px-4 font-tech"
+                        data-action="saveAisle()">GUARDAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../layout/footer') %>

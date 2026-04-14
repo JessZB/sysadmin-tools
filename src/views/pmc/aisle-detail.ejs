@@ -1,0 +1,556 @@
+<%- include('../layout/header') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+    <style>
+        /* ─── BASE ───────────────────────────────────────── */
+        .glass-panel {
+            background: rgba(43, 45, 66, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(141, 153, 174, 0.15);
+            border-radius: 4px;
+        }
+
+        .nothing-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--lavender-grey);
+            color: white;
+            border-radius: 0;
+        }
+
+        .nothing-input:focus {
+            background: transparent;
+            box-shadow: none;
+            border-color: var(--punch-red);
+        }
+
+        /* ─── WORKSPACE ── Responsivo y sin scroll-zoom ─ */
+        .workspace-container {
+            position: relative;
+            overflow: auto; /* Allow normal scrolling if content gets too tall */
+            background: #e8eaed;
+        }
+
+        #planogramCanvas {
+            width: 100%;
+            padding: 24px;
+        }
+
+        /* ─── GONDOLA CONTAINER ───────────────────────────── */
+        .gondola-box {
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 32px;
+            width: 100%; /* Match parent width */
+        }
+
+        .gondola-title {
+            font-family: var(--font-tech);
+            font-size: 0.75rem;
+            color: var(--space-indigo);
+            letter-spacing: 3px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--space-indigo);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* ─── SHELF STRUCTURE ─────────────────────────────── */
+        .shelf-wrapper {
+            position: relative;
+            margin-top: 40px;
+        }
+
+        .shelf-label {
+            position: absolute;
+            top: -22px;
+            left: 0;
+            font-family: var(--font-tech);
+            font-size: 0.55rem;
+            letter-spacing: 2px;
+            color: #64748b;
+            background: #e2e8f0;
+            padding: 2px 8px;
+            border-radius: 3px 3px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .shelf-label button {
+            font-family: var(--font-tech);
+            font-size: 0.5rem;
+            color: #94a3b8;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .shelf-label button:hover {
+            color: var(--flag-red);
+        }
+
+        /* The drop zone – products align to the bottom and shrink to fit */
+        .shelf-container {
+            min-height: 180px;
+            width: 100%;
+            display: flex;
+            align-items: flex-end;
+            flex-wrap: nowrap;
+            overflow: hidden; /* No horizontal scroll, items must shrink */
+            padding: 12px 8px 0 8px;
+            gap: 2px;
+            background: rgba(241, 245, 249, 0.8);
+            border: 2px dashed #cbd5e1;
+            border-bottom: none;
+            transition: background 0.2s, border-color 0.2s;
+            position: relative;
+        }
+
+        .shelf-container.sortable-over {
+            background: rgba(239, 35, 60, 0.05);
+            border-color: var(--punch-red);
+        }
+
+        .shelf-container:empty::after,
+        .shelf-container.is-empty::after {
+            content: 'ARRASTRA PRODUCTOS AQUÍ';
+            font-family: var(--font-tech);
+            font-size: 0.55rem;
+            color: #94a3b8;
+            letter-spacing: 2px;
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        /* Physical shelf base + price strip */
+        .shelf-base {
+            height: 10px;
+            background: #94a3b8;
+            border-radius: 0 0 3px 3px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shelf-price-strip {
+            position: absolute;
+            top: 1px;
+            left: 0;
+            right: 0;
+            height: 7px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 4px;
+            overflow: hidden;
+            background: var(--flag-red);
+        }
+
+        .shelf-price-tag {
+            font-family: monospace;
+            font-size: 6px;
+            color: rgba(255, 255, 255, 0.9);
+            white-space: nowrap;
+        }
+
+        /* ─── HABLADOR (Product Card) ── Flex shrink enabled ─ */
+        .hablador-card-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1 1 100px; /* Grow to 100px, shrink as needed */
+            min-width: 30px; /* Minimum visible size */
+            max-width: 120px;
+            cursor: grab;
+            transition: transform 0.15s ease, flex-basis 0.2s;
+        }
+
+        .hablador-card-wrapper:hover { transform: translateY(-8px); z-index: 5; }
+
+        .hablador-card-wrapper:active {
+            cursor: grabbing;
+        }
+
+        .hablador-card {
+            background: white;
+            border: 1.5px solid #000;
+            width: 100%; /* Fill wrapper width */
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            user-select: none;
+            box-shadow: 1px 1px 0 rgba(0,0,0,0.15);
+            transition: box-shadow 0.15s;
+        }
+
+        .hablador-card:hover {
+            box-shadow: 3px 3px 0 var(--space-indigo);
+        }
+
+        .hablador-card.is-selected {
+            border-color: var(--flag-red);
+            box-shadow: 0 0 0 2px var(--flag-red);
+        }
+
+        .hablador-img-container {
+            width: 100%;
+            height: 90px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-bottom: 1px solid #e2e8f0;
+            pointer-events: none;
+            flex-shrink: 0;
+        }
+
+        .hablador-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .hablador-body {
+            padding: 5px 6px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hablador-title {
+            font-family: var(--font-tech);
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1.2;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            pointer-events: none;
+        }
+
+        .hablador-code {
+            font-family: var(--font-tech);
+            font-size: 0.5rem;
+            color: #94a3b8;
+            margin-top: 2px;
+            pointer-events: none;
+        }
+
+        .hablador-price-container {
+            margin-top: auto;
+            border-top: 1.5px solid #000;
+            padding-top: 3px;
+            text-align: right;
+            pointer-events: none;
+        }
+
+        .hablador-price {
+            font-family: var(--font-tech);
+            font-size: 1rem;
+            color: var(--flag-red);
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .hablador-old-price {
+            font-size: 0.55rem;
+            color: #94a3b8;
+            text-decoration: line-through;
+            display: block;
+        }
+
+        .hablador-badge-update {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--punch-red);
+            color: white;
+            font-family: var(--font-tech);
+            font-size: 0.45rem;
+            padding: 2px 5px;
+            transform: rotate(5deg);
+            z-index: 5;
+            letter-spacing: 1px;
+        }
+
+        /* ─── DRAG STATES ─────────────────────────────────── */
+        .sortable-ghost {
+            opacity: 0.15 !important;
+        }
+
+        .sortable-chosen {
+            opacity: 0.9;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4) !important;
+        }
+
+        /* ─── SIDE PANELS ─────────────────────────────────── */
+        .catalog-panel {
+            border-right: 1px solid rgba(141, 153, 174, 0.2);
+        }
+
+        .details-panel {
+            border-left: 1px solid rgba(141, 153, 174, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .details-panel.hidden {
+            transform: translateX(100%);
+            width: 0 !important;
+            padding: 0;
+            overflow: hidden;
+            border: none;
+        }
+
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(141, 153, 174, 0.15);
+            border-radius: 3px;
+            cursor: grab;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .search-result-item:active {
+            cursor: grabbing;
+        }
+
+        .search-result-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(141, 153, 174, 0.3);
+        }
+
+        .trash-zone {
+            border: 2px dashed var(--lavender-grey);
+            border-radius: 4px;
+            color: var(--lavender-grey);
+            transition: all 0.3s ease;
+        }
+
+        .trash-zone.drag-over {
+            border-color: var(--flag-red);
+            background: rgba(239, 35, 60, 0.2);
+            color: white;
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(239, 35, 60, 0.3);
+        }
+
+        /* ─── CANVAS CONTROLS ─────────────────────────────── */
+        .canvas-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 8px;
+        }
+    </style>
+
+    <div class="container-fluid p-0 min-vh-100 d-flex flex-column" style="background: #111;">
+        <!-- Top Header -->
+        <div
+            class="px-4 py-3 d-flex justify-content-between align-items-center border-bottom border-white border-opacity-10 bg-dark bg-opacity-50">
+            <div class="d-flex align-items-center gap-4">
+                <a href="/pmc" class="btn btn-nothing-secondary btn-sm rounded-circle p-2" title="Volver">
+                    <i class="bi bi-arrow-left fs-5"></i>
+                </a>
+                <div>
+                    <h4 class="text-white font-tech mb-0 ls-1">
+                        <span class="text-danger">PLANOGRAMA:</span> PASILLO <%= aisle.number %>
+                    </h4>
+                    <div class="small text-white-50 font-tech" style="font-size: 0.65rem;">
+                        <%= aisle.name.toUpperCase() %> — CAPACIDAD: <span id="shelfCapacity">∞</span> MM
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-nothing-primary font-tech btn-sm px-3 border-white border-opacity-25" data-action="addNewShelf()" style="background: rgba(255,255,255,0.05); color: white !important;">
+                    <i class="bi bi-plus-circle me-2"></i> AÑADIR ESTANTE
+                </button>
+                <div id="saveStatus" class="small font-tech text-white-50 me-3 opacity-0 transition-all">
+                    <i class="bi bi-cloud-check me-1 text-success"></i> CAMBIOS GUARDADOS
+                </div>
+                <button class="btn btn-nothing-primary font-tech px-4 py-2" data-action="savePlanogramLayout()" style="background: var(--flag-red); border-color: var(--punch-red); color: white !important;">
+                    <i class="bi bi-save2-fill me-2"></i> GUARDAR DISEÑO
+                </button>
+                <div class="vr bg-white opacity-25"></div>
+                <button class="btn btn-outline-danger border-0 font-tech small"
+                    data-action="deleteAisleDetail(<%= aisle.id %>)">ELIMINAR</button>
+            </div>
+        </div>
+
+        <!-- Main Workspace -->
+        <div class="flex-grow-1 d-flex overflow-hidden">
+
+            <!-- PANEL IZQUIERDO: CATÁLOGO -->
+            <div class="catalog-panel bg-dark bg-opacity-25 d-flex flex-column" style="width: 280px; flex-shrink: 0; border-right: 1px solid rgba(255,255,255,0.05);">
+                
+                <!-- TRASH ZONE (NUEVA POSICIÓN: ARRIBA) -->
+                <div class="p-3 border-bottom border-white border-opacity-10">
+                    <div id="trashZone"
+                        class="trash-zone p-3 text-center d-flex flex-column align-items-center justify-content-center"
+                        style="min-height: 100px; border-style: dashed; background: rgba(239, 35, 60, 0.03);">
+                        <i class="bi bi-trash3-fill fs-4 mb-2 text-danger"></i>
+                        <span class="font-tech text-white-50" style="font-size: 0.55rem; letter-spacing: 1px;">ARRASTRA AQUÍ PARA QUITAR</span>
+                    </div>
+                </div>
+
+                <div class="p-4 border-bottom border-white border-opacity-10">
+                    <h6 class="font-tech text-white mb-3 ls-1 small opacity-75">CATÁLOGO MAESTRO</h6>
+                    <select class="form-select nothing-input font-tech mb-3 small" id="selectTerminal">
+                        <% terminals.forEach(t=> { %>
+                            <option value="<%= t.id %>" class="bg-dark">
+                                <%= t.name %>
+                            </option>
+                            <% }) %>
+                    </select>
+                    <div class="position-relative">
+                        <i
+                            class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-white-50"></i>
+                        <input type="text" class="form-control nothing-input ps-5 py-2 small" id="productSearchInput"
+                            placeholder="BUSCAR...">
+                    </div>
+                </div>
+
+                <div class="flex-grow-1 overflow-auto p-3" id="searchResultsContainer" style="background: rgba(0,0,0,0.1);">
+                    <!-- Search results clones start here -->
+                    <div class="text-center py-5 text-white-50 opacity-25">
+                        <i class="bi bi-keyboard fs-2 mb-2 d-block"></i>
+                        <p class="font-tech" style="font-size: 0.6rem;">BUSCA PARA EMPEZAR</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL CENTRAL: WORKSPACE (RESPONSIVE) -->
+            <div class="flex-grow-1 workspace-container" id="planogramViewport">
+                <div id="planogramCanvas">
+                    <!-- Gondola framing box -->
+                    <div class="gondola-box">
+                        <div class="gondola-title">
+                            <span><%= aisle.name.toUpperCase() %></span>
+                            <span style="font-size:0.55rem; color:#94a3b8;">PLANOGRAMA INTERACTIVO</span>
+                        </div>
+
+                        <div id="aisleShelvesContainer">
+                            <% 
+                            const shelves = {}; 
+                            (products || []).forEach(p => {
+                                const s = p.shelf_number || 1;
+                                if (!shelves[s]) shelves[s] = [];
+                                shelves[s].push(p);
+                            });
+                            const shelfIds = Object.keys(shelves).length
+                                ? Object.keys(shelves).map(Number).sort((a,b) => a-b)
+                                : [1];
+                            %>
+
+                            <% shelfIds.forEach(sId => {
+                                const shelfProducts = shelves[sId] || [];
+                            %>
+                                <div class="shelf-wrapper" id="shelf-wrapper-<%= sId %>">
+                                    <div class="shelf-label">
+                                        <span>ESTANTE #<%= sId %></span>
+                                        <button data-action="removeShelf(<%= sId %>)">✕ QUITAR</button>
+                                    </div>
+
+                                    <div class="shelf-container <%= shelfProducts.length === 0 ? 'is-empty' : '' %>"
+                                         data-shelf="<%= sId %>">
+                                        <% shelfProducts.forEach((p, idx) => { 
+                                            const instanceId = `init_${p.id}_${sId}_${idx}`;
+                                        %>
+                                            <div class="hablador-card-wrapper"
+                                                 data-id="<%= instanceId %>"
+                                                 data-product-id="<%= p.id %>">
+                                                <div class="hablador-card" data-action="selectProductInstance('<%= instanceId %>')">
+                                                    <% if (p.has_price_update) { %>
+                                                        <div class="hablador-badge-update">ACT.</div>
+                                                    <% } %>
+                                                    <div class="hablador-img-container">
+                                                        <% if (p.image_path) { %>
+                                                            <img src="<%= p.image_path %>" alt="">
+                                                        <% } else { %>
+                                                            <i class="bi bi-box-seam" style="font-size:2rem; color:#cbd5e1;"></i>
+                                                        <% } %>
+                                                    </div>
+                                                    <div class="hablador-body">
+                                                        <div class="hablador-title" title="<%= p.description %>"><%= p.description %></div>
+                                                        <div class="hablador-code"><%= p.product_code %></div>
+                                                        <div class="hablador-price-container">
+                                                            <% if (p.old_price) { %>
+                                                                <span class="hablador-old-price">$<%= Number(p.old_price).toFixed(2) %></span>
+                                                            <% } %>
+                                                            <span class="hablador-price">$<%= Number(p.current_price).toFixed(2) %></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <% }) %>
+                                    </div>
+
+                                    <div class="shelf-base">
+                                        <div class="shelf-price-strip">
+                                            <% shelfProducts.forEach(p => { %>
+                                                <span class="shelf-price-tag">$<%= Number(p.current_price).toFixed(2) %></span>
+                                            <% }) %>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL DERECHO: CONTEXTUAL -->
+            <div id="contextPanel" class="details-panel bg-dark bg-opacity-50 hidden"
+                style="width: 320px; flex-shrink: 0;">
+                <div
+                    class="p-4 d-flex justify-content-between align-items-center border-bottom border-white border-opacity-10">
+                    <h6 class="font-tech text-white mb-0 ls-1 small">DETALLES DEL PRODUCTO</h6>
+                    <button class="btn btn-link text-white-50 p-0" data-action="closeContextPanel()"><i
+                            class="bi bi-x-lg"></i></button>
+                </div>
+
+                <div class="p-4" id="contextContent">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Input de archivo oculto para subir fotos -->
+    <input type="file" id="imageInput" accept="image/*" style="display: none;"
+        data-action="handleImageUploadChange(event)">
+
+    <script>
+        window.CURRENT_AISLE_ID = <%= aisle.id %>;
+        window.INITIAL_PRODUCTS = <%- JSON.stringify(products) %>;
+    </script>
+
+    <!-- Scripts específicos -->
+    <script src="/js/pmc-canvas.js"></script>
+    <script src="/js/pmc.client.js"></script>
+
+    <%- include('../layout/footer') %>

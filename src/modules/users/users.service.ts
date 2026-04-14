@@ -28,13 +28,13 @@ export const getSystemModules = async () => {
                c.name as category_name, c.icon as category_icon, c.id as category_id
         FROM sys_modules m
         LEFT JOIN sys_module_categories c ON m.category_id = c.id
-        ORDER BY c.id ASC, m.name ASC
+        ORDER BY c.name ASC, m.name ASC
     `;
     const [rows] = await mainDbPool.query<RowDataPacket[]>(query);
-    
+
     const categories: any[] = [];
     const catMap = new Map();
-    
+
     for (const r of rows) {
         const catId = r.category_id || 0;
         if (!catMap.has(catId)) {
@@ -51,10 +51,11 @@ export const getSystemModules = async () => {
             code: r.code,
             name: r.name,
             icon: r.icon,
-            is_configured: r.is_configured
+            is_configured: r.is_configured,
+            category_id: r.category_id
         });
     }
-    
+
     return categories;
 };
 

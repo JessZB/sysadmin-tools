@@ -21,6 +21,8 @@ import servicesRoutes from './modules/services/services.routes';
 import screensRoutes from './modules/screens/screens.routes';
 import mediaRoutes from './modules/media/media.routes';
 import categoriesRoutes from './modules/categories/categories.routes';
+import pmcRoutes from './modules/pmc/pmc.routes';
+
 import { notFoundHandler } from './shared/middlewares/not-found.middleware';
 import { requireAuth } from './shared/middlewares/auth.middleware';
 import { allowRoles } from './shared/middlewares/role.middleware';
@@ -158,6 +160,9 @@ app.use('/branches', requireAuth, requireModule('branches'), branchesRoutes);
 
 // Categorías/Mapeo
 app.use('/categories', requireAuth, requireModule('categories'), categoriesRoutes);
+
+// PMC (Price Management Center)
+app.use('/pmc', requireAuth, requireModule('pmc'), pmcRoutes);
 
 // Auditoría
 app.use('/audit', requireAuth, requireModule('audit'), auditRoutes);
