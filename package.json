@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@types/multer": "^2.0.0",
+    "@types/multer": "^2.1.0",
     "@types/node-ssdp": "^4.0.5",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
@@ -21,7 +21,8 @@
     "tsconfig-paths": "^4.2.0",
     "upnp-mediarenderer-client": "^1.4.0",
     "wake_on_lan": "^1.0.0",
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
